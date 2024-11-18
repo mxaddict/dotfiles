@@ -196,6 +196,11 @@ if command -v zoxide >/dev/null
     zoxide init fish --cmd cd | source
 end
 
+# Check for nproc
+if command -v nproc >/dev/null
+    alias nproc "sysctl -n hw.physicalcpu"
+end
+
 # Load starship prompt
 if command -v starship >/dev/null
     starship init fish | source
