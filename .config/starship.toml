@@ -38,7 +38,10 @@ stashed = '[\$${count}](yellow)'
 untracked = '[?${count}](red)'
 up_to_date = ''
 
+[aws]
+disabled = true
+
 [c]
 symbol = ' '
 detect_files = ['autogen.sh', 'configure', 'configure.ac']
-commands = [ [ 'clang', '--version' ], [ 'gcc', '--version' ], [ 'cc', '--version' ] ]
+commands = [['clang', '--version'], ['gcc', '--version']]
