@@ -203,7 +203,6 @@ paru -S \
     ttf-font-awesome \
     ttf-hack \
     ttf-hack-nerd \
-    ttf-noto-emoji-monochrome \
     ttf-noto-nerd \
     ttf-roboto \
     ttf-roboto-mono \
