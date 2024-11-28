@@ -7,7 +7,6 @@
 1. `eza` for `ls`
 1. `fastfetch` for a nice system info command
 1. `fd` for a better `find` alternative
-1. `findex` for my launcher
 1. `fish` for my `shell`
 1. `fisher` for managing fish plugins
 1. `fzf` for fuzzy finder in cli for `history` and files
@@ -57,7 +56,6 @@ paru -S \
     stow \
     tldr \
     tmux \
-    findex \
     zoxide
 ```
 
@@ -248,4 +246,10 @@ rm -rf lavanda
 
 ```sh
 paru -S nwg-displays nwg-look
+```
+
+### File manager, Calc, etc...
+
+```sh
+paru -S nautilus gnome-calculator
 ```
