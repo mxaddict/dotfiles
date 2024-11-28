@@ -204,10 +204,10 @@ systemctl --user enable pipewire-pulse.service
 systemctl --user enable wireplumber.service
 ```
 
-### Notifications / Wallpaper / Waybar / Lockscreen / Color Picker
+### Notifications / Wallpaper / Waybar / Lockscreen / Brightness / Idle / Color Picker
 
 ```sh
-paru -S hyprpaper waybar swaync hyprlock
+paru -S hyprpaper waybar swaync hyprlock hypridle brightnessctl
 ```
 
 ### Fonts
