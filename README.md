@@ -189,6 +189,8 @@ paru -S bind
 
 ```sh
 paru -S pipewire pipewire-alsa pipewire-pulse pavucontrol wireplumber xdg-desktop-portal-hyprland
+systemctl --user enable pipewire.service
+systemctl --user enable pipewire-pulse.service
 ```
 
 ### Notifications / Wallpaper / Waybar / Lockscreen / Color Picker
