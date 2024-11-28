@@ -15,7 +15,6 @@
 1. `kweri` a simple cli tool for using search engines via default browser
 1. `neovim` for my `$EDITOR`
 1. `quoty` for random programmer quotes to use with commit messages
-1. `rink` for our calculator support
 1. `ripgrep` for a better `grep` alternative
 1. `starship` for my prompt
 1. `tldr` for a nice short alternative to man pages
@@ -57,9 +56,8 @@ paru -S \
     neovim \
     nodejs \
     npm \
-    rink \
     ripgrep \
-    rust \
+    rustup \
     starship \
     stow \
     tldr \
