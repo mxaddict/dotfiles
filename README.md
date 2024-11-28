@@ -214,6 +214,7 @@ paru -S hyprpaper waybar swaync hyprlock
 ```sh
 paru -S \
     noto-fonts-cjk \
+    noto-fonts-emoji \
     ttf-font-awesome \
     ttf-hack \
     ttf-hack-nerd \
