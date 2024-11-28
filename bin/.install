@@ -2,7 +2,17 @@
 
 # Where is the DIR for dotfiles?
 DOTFILES="${HOME}/.files"
-TPM="${HOME}/.config/tmux/plugins/tpm"
+CONFIG="${HOME}/.config"
+TPM="${CONFIG}/tmux/plugins/tpm"
+
+mkdir "${HOME}/Documents"
+mkdir "${HOME}/Downloads"
+mkdir "${HOME}/Desktop"
+mkdir "${HOME}/Projects"
+mkdir "${HOME}/OSs"
+mkdir -p "${CONFIG}/hypr"
+touch "${CONFIG}/hypr/monitors.conf"
+touch "${CONFIG}/hypr/workspaces.conf"
 
 # Clone dotfiles if we don't have it cloned yet
 # Or update if we have it
