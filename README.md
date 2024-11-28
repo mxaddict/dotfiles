@@ -189,6 +189,7 @@ paru -S bind
 
 ```sh
 paru -S \
+    sof-firmware \
     alsa-firmware \
     alsa-utils \
     pipewire \
