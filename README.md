@@ -7,6 +7,7 @@
 1. `eza` for `ls`
 1. `fastfetch` for a nice system info command
 1. `fd` for a better `find` alternative
+1. `findex` for my launcher
 1. `fish` for my `shell`
 1. `fisher` for managing fish plugins
 1. `fzf` for fuzzy finder in cli for `history` and files
@@ -42,6 +43,7 @@ paru -S \
     eza \
     fastfetch \
     fd \
+    findex \
     fish \
     fzf \
     git \
