@@ -185,10 +185,10 @@ sudo systemctl start bluetooth
 paru -S bind
 ```
 
-### Pipewire (Audio)
+### Pipewire (Audio) and xdg-portal
 
 ```sh
-paru -S pipewire pipewire-alsa pipewire-pulse pavucontrol wireplumber
+paru -S pipewire pipewire-alsa pipewire-pulse pavucontrol wireplumber xdg-desktop-portal-hyprland
 ```
 
 ### Notifications / Wallpaper / Waybar / Lockscreen / Color Picker
