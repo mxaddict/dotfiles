@@ -39,7 +39,9 @@ cd paru
 makepkg -si
 cd ..
 rm -rf paru
+```
 
+```sh
 paru -S \
     alacritty \
     bat \
