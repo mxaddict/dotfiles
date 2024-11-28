@@ -23,13 +23,6 @@
 
 ## Requirements
 
-### via Cargo
-
-```sh
-cargo install quoty
-cargo install kweri
-```
-
 ### Arch
 
 ```sh
@@ -146,6 +139,8 @@ sudo apt install \
 
 ```sh
 rustup install stable
+cargo install quoty
+cargo install kweri
 ```
 
 ## Installation
