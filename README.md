@@ -188,7 +188,16 @@ paru -S bind
 ### Pipewire (Audio) and xdg-portal
 
 ```sh
-paru -S pipewire pipewire-alsa pipewire-pulse pavucontrol wireplumber xdg-desktop-portal-hyprland
+paru -S \
+    alsa-firmware \
+    alsa-utils \
+    pipewire \
+    pipewire-alsa \
+    pipewire-pulse \
+    pavucontrol \
+    wireplumber \
+    xdg-desktop-portal-hyprland
+
 systemctl --user enable pipewire.service
 systemctl --user enable pipewire-pulse.service
 systemctl --user enable wireplumber.service
