@@ -137,6 +137,14 @@ alias vim nvim
 alias vd "nvim -d"
 alias vimdiff "nvim -d"
 
+# Trolling starts here 
+alias code    nvim
+alias emacs   nvim
+alias hx      nvim
+alias nano    nvim
+alias subl    nvim
+alias zeditor nvim
+
 # TokyoNight Color Palette
 set -l foreground c0caf5
 set -l selection 283457
