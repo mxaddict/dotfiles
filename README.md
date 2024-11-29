@@ -15,7 +15,6 @@
 1. `kweri` a simple cli tool for using search engines via default browser
 1. `neovim` for my `$EDITOR`
 1. `quoty` for random programmer quotes to use with commit messages
-1. `rink` for our calculator support
 1. `ripgrep` for a better `grep` alternative
 1. `starship` for my prompt
 1. `tldr` for a nice short alternative to man pages
@@ -24,14 +23,16 @@
 
 ## Requirements
 
-### via Cargo
+### Arch
 
 ```sh
-cargo install quoty
-cargo install kweri
+sudo pacman -S --needed base-devel
+git clone https://aur.archlinux.org/paru.git
+cd paru
+makepkg -si
+cd ..
+rm -rf paru
 ```
-
-### Arch
 
 ```sh
 paru -S \
@@ -42,6 +43,7 @@ paru -S \
     eza \
     fastfetch \
     fd \
+    findex \
     fish \
     fzf \
     git \
@@ -50,14 +52,12 @@ paru -S \
     neovim \
     nodejs \
     npm \
-    rink \
     ripgrep \
-    rust \
+    rustup \
     starship \
     stow \
     tldr \
     tmux \
-    findex \
     zoxide
 ```
 
@@ -139,6 +139,8 @@ sudo apt install \
 
 ```sh
 rustup install stable
+cargo install quoty
+cargo install kweri
 ```
 
 ## Installation
@@ -183,16 +185,29 @@ sudo systemctl start bluetooth
 paru -S bind
 ```
 
-### Pipewire (Audio)
+### Pipewire (Audio) and xdg-portal
 
 ```sh
-paru -S pipewire pipewire-alsa pipewire-pulse pavucontrol wireplumber
+paru -S \
+    sof-firmware \
+    alsa-firmware \
+    alsa-utils \
+    pipewire \
+    pipewire-alsa \
+    pipewire-pulse \
+    pavucontrol \
+    wireplumber \
+    xdg-desktop-portal-hyprland
+
+systemctl --user enable pipewire.service
+systemctl --user enable pipewire-pulse.service
+systemctl --user enable wireplumber.service
 ```
 
-### Notifications / Wallpaper / Waybar / Lockscreen / Color Picker
+### Notifications / Wallpaper / Waybar / Lockscreen / Brightness / Idle / Color Picker
 
 ```sh
-paru -S hyprpaper waybar swaync hyprlock
+paru -S hyprpaper waybar swaync hyprlock hypridle brightnessctl
 ```
 
 ### Fonts
@@ -200,10 +215,10 @@ paru -S hyprpaper waybar swaync hyprlock
 ```sh
 paru -S \
     noto-fonts-cjk \
+    noto-fonts-emoji \
     ttf-font-awesome \
     ttf-hack \
     ttf-hack-nerd \
-    ttf-noto-emoji-monochrome \
     ttf-noto-nerd \
     ttf-roboto \
     ttf-roboto-mono \
@@ -247,4 +262,10 @@ rm -rf lavanda
 
 ```sh
 paru -S nwg-displays nwg-look
+```
+
+### File manager, Calc, etc...
+
+```sh
+paru -S nautilus gnome-calculator
 ```
