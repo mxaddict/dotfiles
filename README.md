@@ -174,7 +174,7 @@ sudo systemctl start NetworkManager
 ### Bluez (Bluetooth)
 
 ```sh
-paru -S blueman bluez
+paru -S bluez bluez-utils blueman
 sudo systemctl enable bluetooth
 sudo systemctl start bluetooth
 ```
