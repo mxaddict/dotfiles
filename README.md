@@ -231,13 +231,23 @@ paru -S \
 paru -S grimblast-git kooha wl-clipboard hyprpicker
 ```
 
-### Cursor / Icon / Gtk
+### Cursor / Icon
 
 ```sh
 paru -S \
     bibata-cursor-theme \
-    papirus-icon-theme \
-    arc-gtk-theme
+    papirus-icon-theme
+```
+
+### Gtk Theme
+
+```sh
+paru -S gnome-themes-extra gtk-engine-murrine sassc qt6ct
+git clone https://github.com/vinceliuice/Lavanda-gtk-theme.git lavanda --depth=1
+cd lavanda
+./install.sh -l
+cd ..
+rm -rf lavanda
 ```
 
 ### Util for displays and gtk settings
