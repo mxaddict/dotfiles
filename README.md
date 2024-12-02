@@ -245,7 +245,7 @@ paru -S \
 paru -S gnome-themes-extra gtk-engine-murrine sassc qt6ct
 git clone https://github.com/vinceliuice/Lavanda-gtk-theme.git lavanda --depth=1
 cd lavanda
-./install.sh -l
+./install.sh -l -t sea -n Lavanda -s standard -i tux -c dark
 cd ..
 rm -rf lavanda
 ```
