@@ -26,7 +26,7 @@
 	},
 
 	"cpu": {
-		"interval": 5,
+		"interval": 10,
 		"format": " {usage}%",
 		"on-click": "alacritty -e btop"
 	},
@@ -44,13 +44,13 @@
     },
 
 	"memory": {
-		"interval": 5,
+		"interval": 10,
 		"format": " {}%",
 		"on-click": "alacritty -e btop"
 	},
 
 	"disk": {
-		"interval": 5,
+		"interval": 10,
 		"format": " {percentage_used}%",
 		"on-click": "alacritty -e btop"
 	},
@@ -61,15 +61,14 @@
 			"ethernet": ""
 		},
 		"format": " YOU IN THE WOODS?",
-		"format-wifi": "{icon} {essid} ({signalStrength}%) {bandwidthUpBytes} {bandwidthDownBytes}",
-		"format-ethernet": "{icon} {ipaddr}/{cidr} {bandwidthUpBytes} {bandwidthDownBytes}",
+		"format-wifi": "{icon} {essid} ({signalStrength}%)",
+		"format-ethernet": "{icon} {ipaddr}/{cidr}",
 		"max-length": 50,
-		"interval": 1
+		"interval": 10
 	},
 
 	"clock": {
-		"format": "{:%A, %B %d, %Y %I:%M %p}",
-		"format-alt": "{:%I:%M %p}",
+		"format": "{:%Y/%m/%d %H:%M}",
 		"tooltip-format": "<tt><small>{calendar}</small></tt>",
 		"calendar": {
 			"mode"          : "year",
@@ -87,8 +86,6 @@
 		},
 		"actions":  {
 			"on-click-right": "mode",
-			"on-click-forward": "tz_up",
-			"on-click-backward": "tz_down",
 			"on-scroll-up": "shift_up",
 			"on-scroll-down": "shift_down"
 		}
