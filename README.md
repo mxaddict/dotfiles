@@ -231,31 +231,13 @@ paru -S \
 paru -S grimblast-git kooha wl-clipboard hyprpicker
 ```
 
-### Cursor
+### Cursor / Icon / Gtk
 
 ```sh
-paru -S bibata-cursor-theme
-```
-
-### Icon Theme
-
-```sh
-git clone https://github.com/vinceliuice/Colloid-icon-theme.git colloid --depth=1
-cd colloid
-./install.sh
-cd ..
-rm -rf colloid
-```
-
-### Gtk Theme
-
-```sh
-paru -S gnome-themes-extra gtk-engine-murrine sassc qt6ct
-git clone https://github.com/vinceliuice/Lavanda-gtk-theme.git lavanda --depth=1
-cd lavanda
-./install.sh
-cd ..
-rm -rf lavanda
+paru -S \
+    bibata-cursor-theme \
+    papirus-icon-theme \
+    libadwaita
 ```
 
 ### Util for displays and gtk settings
@@ -264,7 +246,7 @@ rm -rf lavanda
 paru -S nwg-displays nwg-look
 ```
 
-### File manager, Calc, etc...
+### File manager, Calc, etc
 
 ```sh
 paru -S nautilus gnome-calculator
