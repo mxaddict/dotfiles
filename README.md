@@ -237,7 +237,7 @@ paru -S grimblast-git kooha wl-clipboard hyprpicker
 paru -S \
     bibata-cursor-theme \
     papirus-icon-theme \
-    libadwaita
+    arc-gtk-theme
 ```
 
 ### Util for displays and gtk settings
