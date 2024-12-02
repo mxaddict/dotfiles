@@ -49,6 +49,7 @@ paru -S \
     git \
     go \
     lazygit \
+    mandoc \
     neovim \
     nodejs \
     npm \
