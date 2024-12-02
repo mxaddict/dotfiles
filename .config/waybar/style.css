@@ -30,12 +30,12 @@ tooltip {
 #tray,
 #window,
 #workspaces {
-	background: #1e1e2e;
+	background: #1A1B26;
 	opacity: 0.8;
 	padding: 0px 12px;
 	margin: 2px 0px;
 	margin-top: 10px;
-	border: 0px;
+	border: #2BC5E3 2px solid;
 	border-radius: 8px;
 	margin-left: 10px;
 	margin-right: 0px;
@@ -47,7 +47,7 @@ tooltip {
 
 #workspaces button.active,
 #workspaces button:hover {
-	color: #89b4fa;
+	color: #2BC5E3;
 }
 
 #temperature.critical {
