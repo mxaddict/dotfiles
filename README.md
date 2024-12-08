@@ -7,7 +7,7 @@
 1. `eza` for `ls`
 1. `fastfetch` for a nice system info command
 1. `fd` for a better `find` alternative
-1. `findex` for my launcher
+1. `krunner` for my launcher
 1. `fish` for my `shell`
 1. `fisher` for managing fish plugins
 1. `fzf` for fuzzy finder in cli for `history` and files
@@ -17,7 +17,7 @@
 1. `quoty` for random programmer quotes to use with commit messages
 1. `ripgrep` for a better `grep` alternative
 1. `starship` for my prompt
-1. `tldr` for a nice short alternative to man pages
+1. `tealdeer` for a nice short alternative to man pages
 1. `tmux` for my terminal multiplexer
 1. `zoxide` for navigation (alternative to `cd` command)
 
@@ -26,7 +26,8 @@
 ### Arch
 
 ```sh
-sudo pacman -S --needed base-devel
+sudo pacman -S --needed base-devel rustup
+rustup install stable
 git clone https://aur.archlinux.org/paru.git
 cd paru
 makepkg -si
@@ -43,13 +44,12 @@ paru -S \
     eza \
     fastfetch \
     fd \
-    findex \
     fish \
     fzf \
     git \
-    go \
+    krunner \
     lazygit \
-    mandoc \
+    man-db \
     neovim \
     nodejs \
     npm \
@@ -57,8 +57,9 @@ paru -S \
     rustup \
     starship \
     stow \
-    tldr \
+    tealdeer \
     tmux \
+    wl-clipboard\
     zoxide
 ```
 
@@ -155,7 +156,7 @@ curl -sS https://raw.githubusercontent.com/mxaddict/dotfiles/master/bin/.install
 ### QT support
 
 ```sh
-paru -S qt5-wayland qt6-wayland qt5ct qt6ct
+paru -S qt5-wayland qt6-wayland
 ```
 
 ### Video Codecs
@@ -232,33 +233,23 @@ paru -S \
 paru -S grimblast-git kooha wl-clipboard hyprpicker
 ```
 
-### Cursor / Icon
+### Themeing
 
 ```sh
 paru -S \
-    bibata-cursor-theme \
-    papirus-icon-theme
-```
-
-### Gtk Theme
-
-```sh
-paru -S gnome-themes-extra gtk-engine-murrine sassc qt6ct
-git clone https://github.com/vinceliuice/Lavanda-gtk-theme.git lavanda --depth=1
-cd lavanda
-./install.sh -l -t sea -n Lavanda -s standard -i tux -c dark
-cd ..
-rm -rf lavanda
+    breeze \
+    breeze-gtk \
+    breeze-plymouth
 ```
 
 ### Util for displays and gtk settings
 
 ```sh
-paru -S nwg-displays nwg-look
+paru -S nwg-displays
 ```
 
-### File manager, Calc, etc
+### Browser, Files, Calc, Email, etc
 
 ```sh
-paru -S nautilus gnome-calculator
+paru -S chromium firefox thunderbird dolphin kcalc
 ```
