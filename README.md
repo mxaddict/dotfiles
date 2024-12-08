@@ -75,7 +75,6 @@ brew install \
     fish \
     fzf \
     git \
-    go \
     lazygit \
     fastfetch \
     fd \
@@ -125,7 +124,6 @@ sudo apt install \
     eza \
     fish \
     git \
-    golang \
     fastfetch \
     fd-find \
     neovim \
