@@ -1,21 +1,21 @@
-#!/usr/bin/env bash
+#!/usr/bin/fish
 
 # Where is the DIR for dotfiles?
-DOTFILES="${HOME}/.files"
-CONFIG="${HOME}/.config"
-TPM="${CONFIG}/tmux/plugins/tpm"
+set DOTFILES "$HOME/.files"
+set CONFIG "$HOME/.config"
+set TPM "$CONFIG/tmux/plugins/tpm"
 
-mkdir -p "${HOME}/Captures"
-mkdir -p "${HOME}/Desktop"
-mkdir -p "${HOME}/Documents"
-mkdir -p "${HOME}/Downloads"
-mkdir -p "${HOME}/OSs"
-mkdir -p "${HOME}/Pictures"
-mkdir -p "${HOME}/Projects"
-mkdir -p "${HOME}/Videos"
-mkdir -p "${CONFIG}/hypr"
-touch "${CONFIG}/hypr/monitors.conf"
-touch "${CONFIG}/hypr/workspaces.conf"
+mkdir -p "$HOME/Captures"
+mkdir -p "$HOME/Desktop"
+mkdir -p "$HOME/Documents"
+mkdir -p "$HOME/Downloads"
+mkdir -p "$HOME/OSs"
+mkdir -p "$HOME/Pictures"
+mkdir -p "$HOME/Projects"
+mkdir -p "$HOME/Videos"
+mkdir -p "$CONFIG/hypr"
+touch "$CONFIG/hypr/monitors.conf"
+touch "$CONFIG/hypr/workspaces.conf"
 
 # Clone dotfiles if we don't have it cloned yet
 # Or update if we have it
@@ -25,8 +25,9 @@ git stash
 git pull
 git stash pop
 stow --adopt .
-fish -c "bat cache --build"
-fish -c "curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher update"
+bat cache --build
+tldr --update
+curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher update
 nvim --headless "+Lazy! update" +qa
 popd || exit
 
