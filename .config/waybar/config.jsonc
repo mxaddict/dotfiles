@@ -10,10 +10,6 @@
 	"modules-center": ["hyprland/workspaces"],
 	"modules-right": ["tray", "pulseaudio", "pulseaudio#microphone", "clock", "custom/notification"],
 
-	"hyprland/window": {
-		"format": "{}"
-	},
-
 	"hyprland/workspaces": {
 		"disable-scroll": true,
 		"all-outputs": true,
