@@ -49,6 +49,7 @@ paru -S \
     fish \
     fzf \
     git \
+    kanata \
     lazygit \
     man-db \
     neovim \
