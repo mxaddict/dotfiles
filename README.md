@@ -257,8 +257,8 @@ paru -S chromium firefox thunderbird dolphin kcalc
 ### Kanata setup
 
 ```sh
-systemctl --user daemon-reload
-systemctl --user enable kanata.service
-systemctl --user start kanata.service
-systemctl --user status kanata.service
+sudo cp $HOME/.files/.config/kanata/config.kbd /etc/kanata.kbd
+sudo systemctl enable kanata.service
+sudo systemctl start kanata.service
+sudo systemctl status kanata.service
 ```
