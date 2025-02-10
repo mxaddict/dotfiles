@@ -7,11 +7,12 @@
 1. `eza` for `ls`
 1. `fastfetch` for a nice system info command
 1. `fd` for a better `find` alternative
-1. `krunner` for my launcher
 1. `fish` for my `shell`
 1. `fisher` for managing fish plugins
 1. `fzf` for fuzzy finder in cli for `history` and files
 1. `git` for `git` duh...
+1. `kanata` for keyboard custom bindings
+1. `findex` for my launcher
 1. `kweri` a simple cli tool for using search engines via default browser
 1. `neovim` for my `$EDITOR`
 1. `quoty` for random programmer quotes to use with commit messages
@@ -44,10 +45,10 @@ paru -S \
     eza \
     fastfetch \
     fd \
+    findex \
     fish \
     fzf \
     git \
-    krunner \
     lazygit \
     man-db \
     neovim \
@@ -250,4 +251,13 @@ paru -S nwg-displays
 
 ```sh
 paru -S chromium firefox thunderbird dolphin kcalc
+```
+
+### Kanata setup
+
+```sh
+systemctl --user daemon-reload
+systemctl --user enable kanata.service
+systemctl --user start kanata.service
+systemctl --user status kanata.service
 ```
