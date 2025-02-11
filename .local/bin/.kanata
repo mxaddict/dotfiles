@@ -2,5 +2,6 @@
 
 sudo cp $HOME/.files/.config/kanata/config.kbd /etc/kanata.kbd
 sudo systemctl enable kanata.service
+sudo systemctl stop kanata.service
 sudo systemctl start kanata.service
 sudo systemctl status kanata.service
