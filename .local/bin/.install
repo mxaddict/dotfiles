@@ -1,4 +1,4 @@
-#!/usr/bin/fish
+#!/usr/bin/env fish
 
 # Where is the DIR for dotfiles?
 set DOTFILES "$HOME/.files"
