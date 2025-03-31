@@ -1,9 +1,9 @@
-#!/usr/bin/fish
+#!/usr/bin/env fish
 
 # Where is the DIR for dotfiles?
-set DOTFILES "$HOME/.files"
-set CONFIG "$HOME/.config"
-set TPM "$CONFIG/tmux/plugins/tpm"
+DOTFILES="$HOME/.files"
+CONFIG="$HOME/.config"
+TPM="$CONFIG/tmux/plugins/tpm"
 
 mkdir -p "$HOME/Captures"
 mkdir -p "$HOME/Desktop"
