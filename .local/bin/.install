@@ -17,6 +17,11 @@ mkdir -p "$CONFIG/hypr"
 touch "$CONFIG/hypr/monitors.conf"
 touch "$CONFIG/hypr/workspaces.conf"
 
+# Check for batcat
+if command -v batcat >/dev/null
+    alias bat batcat
+end
+
 # Clone dotfiles if we don't have it cloned yet
 # Or update if we have it
 [ -d "$DOTFILES" ] || git clone https://github.com/mxaddict/dotfiles.git "$DOTFILES"

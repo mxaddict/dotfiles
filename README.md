@@ -102,13 +102,6 @@ sudo add-apt-repository ppa:neovim-ppa/unstable
 sudo add-apt-repository ppa:zhangsongcui3371/fastfetch
 ```
 
-Install newer version of fzf locally
-
-```sh
-git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
-~/.fzf/install
-```
-
 ```sh
 LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')
 curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
@@ -125,6 +118,7 @@ sudo apt install \
     btop \
     eza \
     fish \
+    fzf \
     git \
     fastfetch \
     fd-find \
@@ -139,13 +133,15 @@ sudo apt install \
     zoxide
 ```
 
+## All OSs
+
 ```sh
 rustup install stable
 cargo install quoty
 cargo install kweri
 ```
 
-## Installation
+## Installation of .files
 
 ```sh
 curl -SsL https://raw.github.com/mxaddict/dotfiles/main/.local/bin/.install | fish

@@ -128,11 +128,11 @@ alias vd "nvim -d"
 alias vimdiff "nvim -d"
 
 # Trolling starts here 
-alias code    nvim
-alias emacs   nvim
-alias hx      nvim
-alias nano    nvim
-alias subl    nvim
+alias code nvim
+alias emacs nvim
+alias hx nvim
+alias nano nvim
+alias subl nvim
 alias zeditor nvim
 
 # TokyoNight Color Palette
