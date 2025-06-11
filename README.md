@@ -117,14 +117,18 @@ sudo apt install \
     bear \
     btop \
     eza \
+    fastfetch \
+    fd-find \
     fish \
     fzf \
     git \
-    fastfetch \
-    fd-find \
+    libssl-dev \
     neovim \
     nodejs \
     npm \
+    pkg-config \
+    python3 \
+    python3-venv \
     ripgrep \
     rustup \
     stow \
