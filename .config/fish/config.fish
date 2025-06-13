@@ -24,7 +24,7 @@ set -gx MAKEFLAGS "-j$JOBS"
 
 # Set paru pager
 set -gx PARU_PAGER "bat --color=always"
-set -gx MAN_PAGER "bat --color=always"
+set -gx MANPAGER "sh -c 'sed -u -e \"s/\\x1B\[[0-9;]*m//g; s/.\\x08//g\" | bat -p -lman'"
 
 # FZF theme
 set -gx FZF_CTRL_T_OPTS "--preview 'bat -n --color=always {}'"
@@ -57,22 +57,21 @@ if command -v batcat >/dev/null
     alias bat batcat
 end
 
+# Check for nproc
+if not command -v nproc >/dev/null
+    alias nproc "sysctl -n hw.physicalcpu"
+end
+
 # Check for exa and alias to eza
 if command -v exa >/dev/null
     alias eza exa
 end
 
-# Replace cat with batcat
+# Replace cat with bat
 alias cat "bat --plain"
-alias less cat
 
 # Alias for cmatrix
 alias c cmatrix
-
-# Replace diff command with a more usefull git command
-function diff
-    git diff --name-only --relative --diff-filter=d | xargs bat --diff
-end
 
 # Git typo
 function got
@@ -120,19 +119,12 @@ alias ll "ls -alF"
 alias cl clear
 
 # I want v to open vi and vi to open vim
+alias n nvim
+alias nv nvim
+alias nvi nvim
 alias v nvim
 alias vi nvim
 alias vim nvim
-alias vd "nvim -d"
-alias vimdiff "nvim -d"
-
-# Trolling starts here 
-alias code nvim
-alias emacs nvim
-alias hx nvim
-alias nano nvim
-alias subl nvim
-alias zeditor nvim
 
 # TokyoNight Color Palette
 set -l foreground c0caf5
@@ -176,13 +168,9 @@ fish_vi_key_bindings
 # Load fzf
 type -q fzf_key_bindings && fzf_key_bindings
 
-# Disable ctrl-d for fish quit/exit
-bind --mode insert \cd false
-bind --mode default \cd false
-
 # FZF binds
 type -q fzf_configure_bindings && fzf_configure_bindings \
-    --directory=\cd \
+    --directory=\cf \
     --git_log=\cg \
     --git_status=\cs \
     --variables=\cv \
@@ -193,17 +181,7 @@ if command -v zoxide >/dev/null
     zoxide init fish --cmd cd | source
 end
 
-# Check for nproc
-if command -v nproc >/dev/null
-    alias nproc "sysctl -n hw.physicalcpu"
-end
-
 # Load starship prompt
 if command -v starship >/dev/null
     starship init fish | source
-end
-
-# Load the fuck
-if command -v thefuck >/dev/null
-    thefuck --alias | source
 end
