@@ -33,7 +33,7 @@ stow --adopt .
 bat cache --build
 tldr --update
 curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher update
-nvim --headless "+Lazy! update" +qa
+nvim --headless "+Lazy! update" +TSUpdate +qa
 popd || exit
 
 # Clone tpm if we don't have it cloned yet
@@ -41,4 +41,7 @@ popd || exit
 [ -d "$TPM" ] || git clone https://github.com/tmux-plugins/tpm "$TPM"
 pushd "$TPM" || exit
 git pull
+"$TPM/bin/install_plugins"
+"$TPM/bin/update_plugins" all
+"$TPM/bin/clean_plugins"
 popd || exit
