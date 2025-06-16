@@ -148,7 +148,7 @@ cargo install kweri
 ## Installation of .files
 
 ```sh
-curl -SsL https://raw.github.com/mxaddict/dotfiles/main/.local/bin/.install | fish
+curl -SsL https://raw.github.com/mxaddict/dotfiles/main/.local/bin/.update | fish
 ```
 
 ## Hyprland
