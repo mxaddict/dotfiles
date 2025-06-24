@@ -95,8 +95,8 @@ alias ff fastfetch
 alias lg lazygit
 
 # Alias for quick and dirty git commit
-alias g 'git commit -am "$(quoty)"; git pull; git push'
-alias gg 'git add . && git commit -m "$(quoty)"; git pull; git push'
+alias g 'git commit -am "$(quoty)"; git pull --no-edit; git push'
+alias gg 'git add . && git commit -m "$(quoty)"; git pull --no-edit; git push'
 
 # Alias for kweri
 alias q kweri
