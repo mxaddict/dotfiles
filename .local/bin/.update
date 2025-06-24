@@ -33,7 +33,7 @@ stow --adopt .
 bat cache --build
 tldr --update
 curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher update
-nvim --headless "+Lazy! update" +TSUpdate +qa
+nvim --headless "+Lazy! install all" +TSUpdateSync +qa
 popd || exit
 
 # Clone tpm if we don't have it cloned yet
