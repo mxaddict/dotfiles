@@ -27,7 +27,7 @@ end
 [ -d "$DOTFILES" ] || git clone https://github.com/mxaddict/dotfiles.git "$DOTFILES"
 pushd "$DOTFILES" || exit
 git stash
-git pull
+git pull --no-edit
 git stash pop
 stow --adopt .
 bat cache --build
