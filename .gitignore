@@ -12,4 +12,5 @@
 .config/hypr/workspaces.conf
 .config/nvim/lazy-lock.json
 .config/tmux/plugins
+.config/gtk-3.0/assets
 compile_commands.json
