@@ -133,6 +133,7 @@ ForegroundPositive=39,174,96
 ForegroundVisited=155,89,182
 
 [General]
+ColorScheme=BreezeDark
 ColorSchemeHash=8ff306d9a93379c74540e00506966df24df1798b
 
 [KDE]
