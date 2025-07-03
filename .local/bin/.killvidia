@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+
+sudo cp "$HOME/.files/.root/etc/modprobe.d/blacklist.conf" /etc/modprobe.d/blacklist.conf
+sudo mkinitcpio -P
