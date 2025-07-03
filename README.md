@@ -187,7 +187,7 @@ sudo systemctl start bluetooth
 ### TLP power management
 
 ```sh
-paru -S tlp
+paru -S tlp ethtool
 sudo systemctl enable tlp
 sudo systemctl start tlp
 sudo systemctl mask systemd-rfkill.service
