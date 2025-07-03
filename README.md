@@ -192,6 +192,7 @@ sudo systemctl enable tlp
 sudo systemctl start tlp
 sudo systemctl mask systemd-rfkill.service
 sudo systemctl mask systemd-rfkill.socket
+sudo systemctl mask power-profiles-daemon.service
 ```
 
 ### Pipewire (Audio) and xdg-portal
