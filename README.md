@@ -246,8 +246,7 @@ paru -S grimblast-git kooha wl-clipboard hyprpicker
 ```sh
 paru -S \
     breeze \
-    breeze-gtk \
-    breeze-plymouth
+    breeze-gtk
 ```
 
 ### Util for displays and gtk settings
