@@ -267,3 +267,9 @@ paru -S chromium firefox thunderbird dolphin kcalc
 ```sh
 .kanata
 ```
+
+### Ly setup
+
+```sh
+.ly
+```
