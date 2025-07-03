@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+
+sudo cp "$HOME/.files/.root/etc/systemd/logind.conf" /etc/systemd/logind.conf
+sudo cp "$HOME/.files/.root/etc/systemd/sleep.conf" /etc/systemd/sleep.conf
