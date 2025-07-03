@@ -41,6 +41,7 @@ paru -S \
     alacritty \
     bat \
     bear \
+    bind \
     btop \
     eza \
     fastfetch \
@@ -183,10 +184,14 @@ sudo systemctl enable bluetooth
 sudo systemctl start bluetooth
 ```
 
-### BIND
+### TLP power management
 
 ```sh
-paru -S bind
+paru -S tlp
+sudo systemctl enable tlp
+sudo systemctl start tlp
+sudo systemctl mask systemd-rfkill.service
+sudo systemctl mask systemd-rfkill.socket
 ```
 
 ### Pipewire (Audio) and xdg-portal
