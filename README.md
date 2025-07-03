@@ -170,7 +170,9 @@ paru -S gst-libav gst-plugins-{base,good,bad,ugly}
 ```sh
 paru -S networkmanager network-manager-applet
 sudo systemctl enable NetworkManager
+sudo systemctl enable NetworkManager-dispatcher
 sudo systemctl start NetworkManager
+sudo systemctl start NetworkManager-dispatcher
 ```
 
 ### Bluez (Bluetooth)
