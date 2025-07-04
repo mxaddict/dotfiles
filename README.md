@@ -241,12 +241,6 @@ paru -S nwg-displays
 paru -S chromium firefox thunderbird dolphin kcalc
 ```
 
-### Kanata setup
-
-```sh
-.kanata
-```
-
 ### Ly setup
 
 ```sh
