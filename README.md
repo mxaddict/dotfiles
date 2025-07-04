@@ -40,6 +40,7 @@ paru -S \
     starship \
     stow \
     tealdeer \
+    terminus-font \
     tmux \
     wl-clipboard\
     zoxide
