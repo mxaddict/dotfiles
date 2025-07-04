@@ -1,5 +1,6 @@
 #!/usr/bin/env sh
 
 sudo cp "$HOME/.files/.root/etc/tlp.conf" /etc/tlp.conf
+sudo systemctl mask power-profiles-daemon.service
 sudo systemctl enable tlp
 sudo systemctl restart tlp
