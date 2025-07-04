@@ -1,7 +1,0 @@
-#!/usr/bin/env sh
-# vi: ft=sh
-
-sudo cp "$HOME/.files/.root/etc/kanata.kbd" /etc/kanata.kbd
-sudo systemctl enable kanata.service
-sudo systemctl stop kanata.service
-sudo systemctl start kanata.service
