@@ -6,7 +6,7 @@ Conflicts=getty@tty2.service
 
 [Service]
 Type=idle
-ExecStartPre=/usr/bin/printf '%%b' '\e]P01A1B26\e]P7FFFFFF\ec'
+ExecStartPre=/usr/bin/printf '%%b' '\e]P015161E\e]P1F7768E\e]P29ECE6A\e]P3E0AF68\e]P47AA2F7\e]P5BB9AF7\e]P67DCFFF\e]P7A9B1D6\e]P8414868\e]P9F7768E\ePA9ECE6A\ePBE0AF68\ePC7AA2F7\ePDBB9AF7\ePE7DCFFF\ePFC0CAF5\ec'
 ExecStart=/usr/bin/ly-dm
 StandardInput=tty
 TTYPath=/dev/tty2
