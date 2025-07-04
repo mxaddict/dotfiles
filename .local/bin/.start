@@ -1,4 +1,6 @@
-#!/usr/bin/env fish
+#!/usr/bin/env sh
+# vi: ft=sh
+
 chromium &
 discord &
 teams-for-linux &

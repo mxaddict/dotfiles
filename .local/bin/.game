@@ -1,13 +1,15 @@
 #!/usr/bin/env fish
+# vi: ft=fish
+
 set GAME_RES "$HOME/.config/gameres"
 touch $GAME_RES
 
 set GAME "$(cat $GAME_RES)"
 
-if [ $GAME = "0" ]
-    sed -i 's/2560x1440/1920x1440/g' ~/.config/hypr/monitors.conf
-    echo "1" > $GAME_RES
+if [ $GAME = 0 ]
+    sed -i s/2560x1440/1920x1440/g ~/.config/hypr/monitors.conf
+    echo 1 >$GAME_RES
 else
-    sed -i 's/1920x1440/2560x1440/g' ~/.config/hypr/monitors.conf
-    echo "0" > $GAME_RES
+    sed -i s/1920x1440/2560x1440/g ~/.config/hypr/monitors.conf
+    echo 0 >$GAME_RES
 end

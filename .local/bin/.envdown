@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# vi: ft=bash
 
 bucket=${AWS_BUCKET-"deepci-prod-env"}
 project=$(basename "$(pwd)")

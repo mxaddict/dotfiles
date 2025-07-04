@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
+# vi: ft=sh
 
 mkdir -p ~/.local/log
 sudo cp "$HOME/.files/.root/etc/ly/config.ini" /etc/ly/config.ini

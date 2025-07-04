@@ -1,4 +1,5 @@
 #!/usr/bin/env fish
+# vi: ft=fish
 
 # Where is the DIR for dotfiles?
 set DOTFILES "$HOME/.files"

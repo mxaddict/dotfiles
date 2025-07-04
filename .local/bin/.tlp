@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
+# vi: ft=sh
 
 sudo cp "$HOME/.files/.root/etc/tlp.conf" /etc/tlp.conf
 sudo systemctl mask power-profiles-daemon.service
