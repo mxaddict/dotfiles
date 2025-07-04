@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+# vi: ft=sh
+
+if command -v paru >/dev/null; then
+    if ! command -v ufw >/dev/null; then
+        paru -S ufw
+    fi
+fi
+
+if command -v systemctl >/dev/null; then
+    sudo systemctl enable ufw
+    sudo systemctl start ufw
+fi
+
+if command -v ufw >/dev/null; then
+    sudo ufw allow ssh
+    sudo ufw allow proto udp from any to any port 27031:27036
+    sudo ufw allow proto tcp from any to any port 27040
+
+    sudo ufw enable
+fi
