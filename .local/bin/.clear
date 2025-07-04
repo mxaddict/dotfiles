@@ -2,4 +2,5 @@
 # vi: ft=sh
 
 rm -rf ~/.cache
+rm -rf ~/Pictures/Screenshots/*
 sudo rm -rf /var/cache
