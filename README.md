@@ -1,27 +1,5 @@
 # .files
 
-## Tools
-
-1. `bat` for `cat` replacement
-1. `bear` for creating a `compile_commands.json`
-1. `eza` for `ls`
-1. `fastfetch` for a nice system info command
-1. `fd` for a better `find` alternative
-1. `fish` for my `shell`
-1. `fisher` for managing fish plugins
-1. `fzf` for fuzzy finder in cli for `history` and files
-1. `git` for `git` duh...
-1. `kanata` for keyboard custom bindings
-1. `findex` for my launcher
-1. `kweri` a simple cli tool for using search engines via default browser
-1. `neovim` for my `$EDITOR`
-1. `quoty` for random programmer quotes to use with commit messages
-1. `ripgrep` for a better `grep` alternative
-1. `starship` for my prompt
-1. `tealdeer` for a nice short alternative to man pages
-1. `tmux` for my terminal multiplexer
-1. `zoxide` for navigation (alternative to `cd` command)
-
 ## Requirements
 
 ### Arch
@@ -43,6 +21,7 @@ paru -S \
     bear \
     bind \
     btop \
+    dysk \
     eza \
     fastfetch \
     fd \
