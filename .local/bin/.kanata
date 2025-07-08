@@ -2,6 +2,9 @@
 # vi: ft=sh
 
 sudo cp "$HOME/.files/.root/etc/kanata.kbd" /etc/kanata.kbd
+if ! command -v kanata >/dev/null; then
+    paru -S kanata
+fi
 echo "Let go of the keyboard for 10s..."
 sleep 5
 sudo systemctl enable kanata
