@@ -30,7 +30,16 @@
     "cpu": {
         "interval": 10,
         "format": " {usage}%",
-        "on-click": "alacritty -e btop",
+    },
+
+    "memory": {
+        "interval": 10,
+        "format": " {}%",
+    },
+
+    "disk": {
+        "interval": 10,
+        "format": " {percentage_used}%",
     },
 
     "battery": {
@@ -45,21 +54,9 @@
         "format-critical": " {capacity}%",
     },
 
-    "memory": {
-        "interval": 10,
-        "format": " {}%",
-        "on-click": "alacritty -e btop",
-    },
-
-    "disk": {
-        "interval": 10,
-        "format": " {percentage_used}%",
-        "on-click": "alacritty -e btop",
-    },
-
     "network": {
         "format-icons": {
-            "default": "",
+            "default": "",
             "wifi": "",
         },
         "format": "{icon} {ifname} {ipaddr}/{cidr}",
@@ -99,11 +96,11 @@
         "format-icons": {
             "notification": "",
             "none": "",
-            "dnd-notification": "",
+            "dnd-notification": "",
             "dnd-none": "",
             "inhibited-notification": "",
             "inhibited-none": "",
-            "dnd-inhibited-notification": "",
+            "dnd-inhibited-notification": "",
             "dnd-inhibited-none": "",
         },
         "return-type": "json",

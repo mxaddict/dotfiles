@@ -1,20 +1,20 @@
 * {
-	border: none;
-	border-radius: 0;
-	font-family: "Hack Nerd Font Mono";
-	font-weight: normal;
-	font-size: 16px;
-	min-height: 16px;
+    border: none;
+    border-radius: 0;
+    font-family: "Hack", "Font Awesome 6 Free";
+    font-weight: normal;
+    font-size: 16px;
+    min-height: 16px;
 }
 
 window#waybar {
-	background: transparent;
-	color: #cdd6f4;
+    background: transparent;
+    color: #cdd6f4;
 }
 
 tooltip {
-	background: #1e1e2e;
-	color: #cdd6f4;
+    background: #1e1e2e;
+    color: #cdd6f4;
 }
 
 #battery,
@@ -30,15 +30,15 @@ tooltip {
 #tray,
 #window,
 #workspaces {
-	background: #1A1B26;
-	opacity: 0.8;
-	padding: 0px 12px;
-	margin: 2px 0px;
-	margin-top: 10px;
-	border: #2BC5E3 2px solid;
-	border-radius: 8px;
-	margin-left: 10px;
-	margin-right: 0px;
+    background: #1a1b26;
+    opacity: 0.8;
+    padding: 0px 12px;
+    margin: 2px 0px;
+    margin-top: 10px;
+    border: #2bc5e3 2px solid;
+    border-radius: 8px;
+    margin-left: 10px;
+    margin-right: 0px;
 }
 
 #workspaces button {
@@ -47,21 +47,21 @@ tooltip {
 
 #workspaces button.active,
 #workspaces button:hover {
-	color: #2BC5E3;
+    color: #2bc5e3;
 }
 
 #temperature.critical {
-	color: #e92d4d;
+    color: #e92d4d;
 }
 
 #custom-notification {
-	margin-right: 10px;
+    margin-right: 10px;
 }
 
 #pulseaudio {
-	color: #89b4fa;
+    color: #89b4fa;
 }
 
 #pulseaudio.microphone {
-	color: #cba6f7;
+    color: #cba6f7;
 }
