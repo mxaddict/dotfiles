@@ -164,17 +164,6 @@ sudo systemctl enable bluetooth
 sudo systemctl start bluetooth
 ```
 
-### TLP power management
-
-```sh
-paru -S tlp ethtool
-sudo systemctl enable tlp
-sudo systemctl start tlp
-sudo systemctl mask systemd-rfkill.service
-sudo systemctl mask systemd-rfkill.socket
-sudo systemctl mask power-profiles-daemon.service
-```
-
 ### Pipewire (Audio) and xdg-portal
 
 ```sh
@@ -238,7 +227,7 @@ paru -S nwg-displays
 ### Browser, Files, Calc, Email, etc
 
 ```sh
-paru -S chromium firefox thunderbird dolphin kcalc
+paru -S chromium firefox thunderbird nemo kcalc
 ```
 
 ### Kanata setup
@@ -251,4 +240,22 @@ paru -S chromium firefox thunderbird dolphin kcalc
 
 ```sh
 .ly
+```
+
+### Sleep setup
+
+```sh
+.sleep
+```
+
+### Firewall setup
+
+```sh
+.ufw
+```
+
+### TLP / Power Management
+
+```sh
+.tlp
 ```

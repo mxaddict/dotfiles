@@ -2,6 +2,9 @@
 # vi: ft=sh
 
 sudo cp "$HOME/.files/.root/etc/tlp.conf" /etc/tlp.conf
+paru -S tlp ethtool
+sudo systemctl mask systemd-rfkill.service
+sudo systemctl mask systemd-rfkill.socket
 sudo systemctl mask power-profiles-daemon.service
 sudo systemctl enable tlp
-sudo systemctl restart tlp
+sudo systemctl start tlp
