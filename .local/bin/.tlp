@@ -2,10 +2,10 @@
 # vi: ft=sh
 
 sudo cp "$HOME/.files/.root/etc/tlp.conf" /etc/tlp.conf
-if command -v tlp >/dev/null; then
+if ! command -v tlp >/dev/null; then
     paru -S tlp
 fi
-if command -v ethtool >/dev/null; then
+if ! command -v ethtool >/dev/null; then
     paru -S ethtool
 fi
 sudo systemctl mask systemd-rfkill.socket
