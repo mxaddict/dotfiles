@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# vi: ft=bash
+# TODO: implement this file to use wofi menu to connect to wifi
