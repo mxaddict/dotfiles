@@ -11,13 +11,4 @@ sudo mkswap /swap
 
 # Turn on swap
 sudo swapon -a
-
-# Get the UUID for the /swap file
-sudo findmnt -no UUID -T /swap
-
-# Get the resume_offset value for the /swap file
-sudo filefrag -v /swap | awk '$1=="0:" {print substr($4, 1, length($4)-2)}'
-
-# Add this to your bootloader entry
-resume=UUID=<uuid from findmnt> resume_offset=<offset from filefrag>
 ```
