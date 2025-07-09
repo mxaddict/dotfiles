@@ -43,15 +43,12 @@
     },
 
     "battery": {
+        "format": "{icon} {capacity}%",
+        "format-icons": ["", "", "", "", ""],
         "states": {
-            "half": 50,
-            "warning": 25,
+            "warning": 30,
             "critical": 15,
         },
-        "format": " {capacity}%",
-        "format-half": " {capacity}%",
-        "format-warning": " {capacity}%",
-        "format-critical": " {capacity}%",
     },
 
     "network": {
