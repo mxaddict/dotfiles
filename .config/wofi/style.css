@@ -1,11 +1,10 @@
 #window {
     font-family: "Hack Mono", "Hack Nerd Font Mono", "Font Awesome 6 Free";
     font-size: 20px;
-    background-color: #1a1b26;
-    border: 2px solid #14dbbd;
+    background-color: transparent;
 }
 
-#window,
+#outer-box,
 #input,
 #entry {
     border-radius: 8px;
@@ -41,7 +40,9 @@
 }
 
 #outer-box {
-    margin: 20px;
+    border: 2px solid #14dbbd;
+    background-color: #1a1b26;
+    padding: 20px;
 }
 
 #scroll {

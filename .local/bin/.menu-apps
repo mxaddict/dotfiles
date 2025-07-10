@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# vi: ft=bash
+
+pkill wofi || wofi --allow-images --show drun -i --prompt App

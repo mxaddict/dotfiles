@@ -1,3 +1,32 @@
 #!/usr/bin/env bash
 # vi: ft=bash
-# TODO: implement this file to use wofi menu to connect to wifi
+
+wofi_kill() {
+    pkill -9 wofi
+}
+
+wofi_kill && exit 0
+
+wofi_cmd="wofi --show dmenu -i -p Wifi"
+
+echo "Sniffing Wi-Fi packets..." | $wofi_cmd &
+
+wifi_list=$(
+    nmcli --fields "BSSID,SSID,ACTIVE,BARS,FREQ" --wait 1 device wifi list |
+        sed 's/*/█/g' |
+        sed 's/yes/  /g' |
+        sed 's/no/- /g'
+)
+
+wifi=$(wofi_kill && echo "$wifi_list" | $wofi_cmd)
+bssid=$(echo "$wifi" | awk '{print $1}')
+
+case $bssid in
+BSSID)
+    echo Cancelled
+    ;;
+*)
+    nmcli device wifi connect "$bssid"
+    ;;
+
+esac

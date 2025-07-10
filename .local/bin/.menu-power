@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# vi: ft=bash
+
+actions="Lock
+Sleep
+Hibernate
+Shutdown
+Logout
+Reboot"
+action=$(pkill wofi || echo "$actions" | wofi --show dmenu -i --prompt Action)
+
+cmd="echo Zzz"
+
+case $action in
+Lock)
+    cmd="hyprlock"
+    ;;
+Sleep)
+    cmd="systemctl sleep"
+    ;;
+Hibernate)
+    cmd="systemctl hibernate"
+    ;;
+Shutdown)
+    cmd="poweroff"
+    ;;
+Logout)
+    cmd="hyprctl dispatch exit"
+    ;;
+Reboot)
+    cmd="reboot"
+    ;;
+*) ;;
+esac
+
+eval "$cmd"
