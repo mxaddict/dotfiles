@@ -6,7 +6,7 @@
     "passthrough": false,
     "gtk-layer-shell": true,
     "height": 50,
-    "modules-left": ["battery", "network", "bluetooth"],
+    "modules-left": ["custom/power", "battery", "network", "bluetooth"],
     "modules-center": ["hyprland/workspaces"],
     "modules-right": [
         "tray",
@@ -92,6 +92,12 @@
             "on-scroll-up": "shift_up",
             "on-scroll-down": "shift_down",
         },
+    },
+
+    "custom/power": {
+        "tooltip": false,
+        "format": "",
+        "on-click": ".menu-power",
     },
 
     "custom/notification": {
