@@ -40,6 +40,7 @@ tooltip {
     border-radius: 8px;
     margin-left: 10px;
     margin-right: 0px;
+    min-width: 20px;
 }
 
 #workspaces button {
