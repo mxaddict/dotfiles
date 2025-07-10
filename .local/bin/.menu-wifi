@@ -1,32 +1,67 @@
 #!/usr/bin/env bash
 # vi: ft=bash
 
+pkill -9 nmcli
+
 wofi_kill() {
     pkill -9 wofi
 }
 
 wofi_kill && exit 0
 
-wofi_cmd="wofi --show dmenu -i -p Wifi"
+lock=
 
-echo "Sniffing Wi-Fi packets..." | $wofi_cmd &
+width=450
+height=112
 
-wifi_list=$(
-    nmcli --fields "BSSID,SSID,ACTIVE,BARS,FREQ" --wait 1 device wifi list |
-        sed 's/*/█/g' |
-        sed 's/yes/  /g' |
-        sed 's/no/- /g'
+wofi_cmd="wofi --show dmenu -i -W $width"
+wofi_short="$wofi_cmd -H $height"
+
+echo "Sniffing Wi-Fi packets..." | $wofi_short -p Loading &
+
+ssids=$(nmcli -g ssid device wifi list | sort | uniq)
+ssid_active=$(nmcli -g active,ssid dev wifi | grep '^yes' | cut -d: -f2)
+
+list=$(
+    while IFS= read -r ssid; do
+        ssid=$(echo "$ssid" | xargs)
+        if [[ $ssid == "SSID" || $ssid == "--" || $ssid == "" ]]; then
+            continue
+        fi
+        bars=$(nmcli -g ssid,bars device wifi list | grep -w -F "$ssid" | head -n 1 | cut -d : -f2 | sed 's/*/█/g')
+        signal=$(nmcli -g ssid,signal device wifi list | grep -w -F "$ssid" | head -n 1 | cut -d : -f2)
+        security=$(nmcli -g ssid,security device wifi list | grep -w -F "$ssid" | head -n 1 | cut -d : -f2 | sed 's/WPA[1]//g' | xargs)
+        if [[ $security != "" ]]; then
+            icon=$lock
+        fi
+        echo "$signal:$ssid:$bars ($signal%):$icon"
+    done <<<"$ssids"
 )
 
-wifi=$(wofi_kill && echo "$wifi_list" | $wofi_cmd)
-bssid=$(echo "$wifi" | awk '{print $1}')
+list=$(echo "$list" | sort -k1 -nr | cut -d : -f2- | column -t -s :)
+wifi=$(wofi_kill && echo "$list" | $wofi_cmd -p SSID)
+ssid=$(echo "$wifi" | awk '{print $1}')
+security=$(echo "$wifi" | awk '{print $3}')
 
-case $bssid in
-BSSID)
-    echo Cancelled
-    ;;
-*)
-    nmcli device wifi connect "$bssid"
-    ;;
+if [[ $ssid == "" || $ssid == "$ssid_active" ]]; then
+    exit
+fi
 
-esac
+connection=$(nmcli connection show | grep "wifi" | grep -w -F "$ssid" | awk '{print $1}' | head -n 1)
+if [[ -n "$connection" ]]; then
+    nmcli connection up "$ssid"
+    exit
+fi
+
+if [[ $security == "" ]]; then
+    nmcli device wifi connect "$ssid"
+    exit
+fi
+
+default="Enter password"
+password=$(echo "$default" | $wofi_short -p Password -P -e | xargs | sed "s/$default//g")
+if [[ -z $password ]]; then
+    exit
+fi
+
+nmcli connection add type wifi con-name "$ssid" ssid "$ssid" wifi-sec.key-mgmt wpa-psk wifi-sec.psk "$password"
