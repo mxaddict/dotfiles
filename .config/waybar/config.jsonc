@@ -67,6 +67,7 @@
         "tooltip-format": "{ifname} {ipaddr}/{cidr}",
         "tooltip-format-wifi": "{ifname} {ipaddr}/{cidr} {essid} ({signalStrength}%)",
         "tooltip-format-disconnected": "YOU IN THE WOODS?",
+        "on-click": ".menu-wifi",
     },
 
     "clock": {
