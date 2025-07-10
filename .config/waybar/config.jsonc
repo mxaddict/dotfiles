@@ -41,8 +41,10 @@
     "bluetooth": {
         "format-icons": {
             "default": "",
+            "on": "",
         },
-        "format": "{icon} {status}",
+        "tooltip-format": "Bluetooth {status}",
+        "format": "{icon}",
         "format-on": "{icon}",
         "on-click": "blueman-manager",
     },
@@ -95,7 +97,7 @@
     },
 
     "custom/power": {
-        "tooltip": false,
+        "tooltip-format": "Power Button",
         "format": "",
         "on-click": ".menu-power",
     },
