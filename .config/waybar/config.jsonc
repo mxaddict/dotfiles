@@ -88,7 +88,7 @@
             },
         },
         "actions": {
-            "on-click-right": "mode",
+            "on-click": "mode",
             "on-scroll-up": "shift_up",
             "on-scroll-down": "shift_down",
         },
