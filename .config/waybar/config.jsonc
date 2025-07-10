@@ -51,8 +51,9 @@
 
     "battery": {
         "format": "{icon}",
+        "format-charging": "",
         "format-icons": ["", "", "", "", ""],
-        "tooltip-format": "draw: {power}W cap: {capacity}% {timeTo}",
+        "tooltip-format": "{capacity}% {power}W {timeTo}",
         "states": {
             "warning": 30,
             "critical": 15,
