@@ -21,6 +21,7 @@ paru -S \
     bear \
     bind \
     btop \
+    duf \
     dysk \
     eza \
     fastfetch \
