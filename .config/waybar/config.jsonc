@@ -43,6 +43,7 @@
             "default": "",
         },
         "format": "{icon} {status}",
+        "format-on": "{icon}",
         "on-click": "blueman-manager",
     },
 
