@@ -35,6 +35,8 @@ paru -S \
     neovim \
     nodejs \
     npm \
+    pass \
+    pass-otp \
     ripgrep \
     rustup \
     starship \
