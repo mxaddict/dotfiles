@@ -37,6 +37,7 @@ paru -S \
     npm \
     pass \
     pass-otp \
+    python-tldextract \
     ripgrep \
     rustup \
     starship \
