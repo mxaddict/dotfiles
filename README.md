@@ -43,7 +43,8 @@ paru -S \
     terminus-font \
     tmux \
     unzip \
-    wl-clipboard\
+    wireless-regdb \
+    wl-clipboard \
     zoxide
 ```
 
