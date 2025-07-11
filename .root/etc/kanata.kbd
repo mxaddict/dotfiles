@@ -18,18 +18,18 @@
 )
 
 (defalias
-    a    (multi f24 (tap-hold $tap-time $hold-time a lctl))
-    s    (multi f24 (tap-hold $tap-time $hold-time s lalt))
-    d    (multi f24 (tap-hold $tap-time $hold-time d lsft))
-    f    (multi f24 (tap-hold $tap-time $hold-time f lmet))
-    j    (multi f24 (tap-hold $tap-time $hold-time j rmet))
-    k    (multi f24 (tap-hold $tap-time $hold-time k rsft))
-    l    (multi f24 (tap-hold $tap-time $hold-time l ralt))
-    ;    (multi f24 (tap-hold $tap-time $hold-time ; rctl))
+    a (tap-hold $tap-time $hold-time a lctl)
+    s (tap-hold $tap-time $hold-time s lalt)
+    d (tap-hold $tap-time $hold-time d lsft)
+    f (tap-hold $tap-time $hold-time f lmet)
+    j (tap-hold $tap-time $hold-time j rmet)
+    k (tap-hold $tap-time $hold-time k rsft)
+    l (tap-hold $tap-time $hold-time l ralt)
+    ; (tap-hold $tap-time $hold-time ; rctl)
 
-    t (multi f24 (tap-hold $tap-time $hold-time t (layer-while-held symb)))
-    g (multi f24 (tap-hold $tap-time $hold-time g (layer-while-held numb)))
-    v (multi f24 (tap-hold $tap-time $hold-time v (layer-while-held vnav)))
+    t (tap-hold $tap-time $hold-time t (layer-while-held symb))
+    g (tap-hold $tap-time $hold-time g (layer-while-held numb))
+    v (tap-hold $tap-time $hold-time v (layer-while-held vnav))
 )
 
 (deflayer base

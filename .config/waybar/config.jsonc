@@ -41,16 +41,20 @@
     "bluetooth": {
         "format-icons": {
             "default": "",
+            "on": "",
         },
-        "format": "{icon} {status}",
+        "tooltip-format": "Bluetooth {status}",
+        "format": "{icon}",
         "format-on": "{icon}",
         "on-click": "blueman-manager",
     },
 
     "battery": {
         "format": "{icon}",
+        "format-charging": "",
+        "format-plugged": "",
         "format-icons": ["", "", "", "", ""],
-        "tooltip-format": "draw: {power}W cap: {capacity}% {timeTo}",
+        "tooltip-format": "{capacity}% {power}W {timeTo}",
         "states": {
             "warning": 30,
             "critical": 15,
@@ -95,7 +99,7 @@
     },
 
     "custom/power": {
-        "tooltip": false,
+        "tooltip-format": "Power Button",
         "format": "",
         "on-click": ".menu-power",
     },
