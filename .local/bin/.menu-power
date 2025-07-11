@@ -13,7 +13,7 @@ cmd="echo Zzz"
 
 case $action in
 Lock)
-    cmd="hyprlock"
+    cmd="loginctl lock-session"
     ;;
 Sleep)
     cmd="systemctl sleep"
