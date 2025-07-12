@@ -142,6 +142,7 @@ Theme=breeze-dark
 [KDE]
 AnimationDurationFactor=0.25
 LookAndFeelPackage=org.kde.breezedark.desktop
+widgetStyle=Breeze
 
 [KScreen]
 ScreenScaleFactors=DP-1=1;
