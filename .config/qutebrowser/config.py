@@ -32,6 +32,8 @@ config.set("content.javascript.enabled", True, "chrome://*/*")
 
 config.set("content.javascript.enabled", True, "qute://*/*")
 
+config.set("content.notifications.enabled", False)
+
 config.set(
     "content.local_content_can_access_remote_urls",
     True,
