@@ -26,7 +26,6 @@ paru -S \
     eza \
     fastfetch \
     fd \
-    findex \
     fish \
     fzf \
     git \
@@ -36,6 +35,9 @@ paru -S \
     neovim \
     nodejs \
     npm \
+    pass \
+    pass-otp \
+    python-tldextract \
     ripgrep \
     rustup \
     starship \
@@ -43,7 +45,9 @@ paru -S \
     tealdeer \
     terminus-font \
     tmux \
-    wl-clipboard\
+    unzip \
+    wireless-regdb \
+    wl-clipboard \
     zoxide
 ```
 
@@ -71,6 +75,7 @@ brew install \
     stow \
     tldr \
     tmux \
+    unzip \
     zoxide
 ```
 
@@ -116,6 +121,7 @@ sudo apt install \
     stow \
     tldr \
     tmux \
+    unzip \
     zoxide
 ```
 
