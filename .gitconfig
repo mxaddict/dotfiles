@@ -1,9 +1,12 @@
 [user]
 	name = mxaddict
 	email = mxaddict@kryptic.sh
+	signingkey = mxaddict@kryptic.sh
 [color]
 	ui = true
 [core]
 	excludesfile = ~/.gitignore
 [pull]
 	rebase = false
+[commit]
+	gpgsign = true
