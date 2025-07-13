@@ -2,7 +2,7 @@ import os
 
 user = os.getlogin()
 
-config.load_autoconfig()
+config.load_autoconfig(False)
 
 c.auto_save.session = True
 
