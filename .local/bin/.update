@@ -21,14 +21,14 @@ mkdir -p "$CONFIG/hypr"
 touch "$CONFIG/hypr/monitors.conf"
 touch "$CONFIG/hypr/workspaces.conf"
 
-[ -f "$HOME/.files/.deps.lock" ] || $HOME/.files/.local/bin/.deps
-
 [ -d "$DOTFILES" ] || git clone https://github.com/mxaddict/dotfiles.git "$DOTFILES"
 pushd "$DOTFILES" || exit
 git stash
 git pull --no-edit
 git stash pop
 stow --adopt .
+
+[ -f "$HOME/.files/.deps.lock" ] || $HOME/.files/.local/bin/.deps
 
 if command -v batcat >/dev/null
     alias bat batcat
