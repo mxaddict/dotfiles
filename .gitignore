@@ -13,4 +13,5 @@
 .config/nvim/lazy-lock.json
 .config/tmux/plugins
 .config/gtk-3.0/assets
+.config/qutebrowser/autoconfig.yml
 compile_commands.json
