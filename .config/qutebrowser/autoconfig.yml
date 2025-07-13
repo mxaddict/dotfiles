@@ -6,11 +6,8 @@
 
 config_version: 2
 settings:
-  content.javascript.clipboard:
-    https://drive.google.com: access-paste
-  content.media.audio_capture:
-    https://discord.com: true
-  auto_save.interval:
-    global: 5000
-  auto_save.session:
-    global: true
+  content.notifications.enabled:
+    https://www.bybit.com: false
+    https://www.facebook.com: false
+    https://www.messenger.com: false
+    https://www.mexc.com: false
