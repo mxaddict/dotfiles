@@ -34,6 +34,8 @@ config.set("content.javascript.enabled", True, "qute://*/*")
 
 config.set("content.notifications.enabled", False)
 
+config.set("colors.webpage.preferred_color_scheme", "dark")
+
 config.set(
     "content.local_content_can_access_remote_urls",
     True,
