@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # vi: ft=bash
 
-wofi_kill() {
-    pkill -9 wofi
+rofi_kill() {
+    pkill rofi
 }
 
-wofi_kill && exit 0
+rofi_kill && exit 0
 
 history="$HOME/.local/share/qalc.history"
 if [ ! -f "$history" ]; then
@@ -14,27 +14,26 @@ fi
 
 qalc -e "1 BTC" &
 
-last_wofi=""
+last_rofi=""
 qalc_ret=""
 while :; do
-    qalc_hist=$(tac "$history" | head -5000)
-    wofi_ret=$(wofi --sort-order=default --cache-file=/dev/null -d -p calc <<<"$qalc_hist")
+    rofi_ret=$(tac "$history" | head -5000 | rofi -dmenu)
 
     rtrn=$?
 
     if test "$rtrn" = "0"; then
-        if [[ "$wofi_ret" =~ .*=.* ]]; then
-            result=$(echo "$wofi_ret" | awk "{'print $NF'}")
+        if [[ "$rofi_ret" =~ .*=.* ]]; then
+            result=$(echo "$rofi_ret" | awk "{'print $NF'}")
             wl-copy "$result"
             exit 0
         else
-            qalc_ret=$(qalc "$wofi_ret")
-            last_wofi=$wofi_ret
+            qalc_ret=$(qalc "$rofi_ret")
+            last_rofi=$rofi_ret
             echo "$qalc_ret" >>"$history"
         fi
     else
-        if [ -n "$last_wofi" ]; then
-            result=$(qalc -t "$last_wofi")
+        if [ -n "$last_rofi" ]; then
+            result=$(qalc -t "$last_rofi")
             wl-copy "$result"
         fi
         exit 0
