@@ -3,7 +3,7 @@
 
 if command -v pacman >/dev/null
     if ! command -v paru >/dev/null
-        sudo pacman -S --needed base-devel rustup
+        sudo pacman -S --needed base-devel rustup git
         rustup install stable
         rustup default stable
         git clone https://aur.archlinux.org/paru.git /tmp/paru
@@ -29,6 +29,7 @@ if command -v pacman >/dev/null
         chromium \
         duf \
         dysk \
+        ethtool \
         eza \
         fastfetch \
         fd \
@@ -51,6 +52,7 @@ if command -v pacman >/dev/null
         kooha \
         lazygit \
         libadwaita \
+        ly \
         man-db \
         nautilus \
         neovim \
@@ -80,6 +82,7 @@ if command -v pacman >/dev/null
         tealdeer \
         terminus-font \
         thunderbird \
+        tlp \
         tmux \
         ttf-font-awesome \
         ttf-hack \
@@ -88,18 +91,45 @@ if command -v pacman >/dev/null
         ttf-roboto \
         ttf-roboto-mono \
         ttf-roboto-mono-nerd \
+        ufw \
         unzip \
         waybar \
         wireless-regdb \
         wireplumber \
         wl-clipboard \
-        wl-clipboard \
         xdg-desktop-portal-hyprland \
         zoxide
 
+    sudo cp "$HOME/.files/.root/etc/kanata.kbd" /etc/kanata.kbd
+    sudo cp "$HOME/.files/.root/etc/ly/config.ini" /etc/ly/config.ini
+    sudo cp "$HOME/.files/.root/etc/mkinitcpio.conf" /etc/mkinitcpio.conf
+    sudo cp "$HOME/.files/.root/etc/systemd/logind.conf" /etc/systemd/logind.conf
+    sudo cp "$HOME/.files/.root/etc/systemd/sleep.conf" /etc/systemd/sleep.conf
+    sudo cp "$HOME/.files/.root/etc/tlp.conf" /etc/tlp.conf
+    sudo cp "$HOME/.files/.root/etc/vconsole.conf" /etc/vconsole.conf
+    sudo cp "$HOME/.files/.root/usr/lib/systemd/system/ly.service" /usr/lib/systemd/system/ly.service
+
+    sudo mkinitcpio -P
+
+    sudo systemctl mask systemd-rfkill.socket
+    sudo systemctl mask systemd-rfkill.service
+    sudo systemctl mask power-profiles-daemon.service
+    sudo systemctl disable display-manager.service
+
+    sudo systemctl enable kanata
+    sudo systemctl enable ly.service
     sudo systemctl enable bluetooth
     sudo systemctl enable NetworkManager
     sudo systemctl enable NetworkManager-dispatcher
+    sudo systemctl enable ufw
+    sudo systemctl enable tlp
+
+    sudo ufw allow ssh
+    sudo ufw allow proto udp from any to any port 27031:27036
+    sudo ufw allow proto tcp from any to any port 27040
+
+    sudo ufw enable
+    sudo ufw status
 end
 
 if command -v brew >/dev/null
