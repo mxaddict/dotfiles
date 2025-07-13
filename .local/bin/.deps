@@ -1,0 +1,182 @@
+#!/usr/bin/env fish
+# vi: ft=fish
+
+if command -v pacman >/dev/null
+    if ! command -v paru >/dev/null
+        sudo pacman -S --needed base-devel rustup
+        rustup install stable
+        rustup default stable
+        git clone https://aur.archlinux.org/paru.git /tmp/paru
+        pushd /tmp/paru || exit
+        makepkg -si
+        popd || exit
+        rm -rf /tmp/paru
+    end
+
+    paru -S --needed \
+        alacritty \
+        alsa-firmware \
+        alsa-utils \
+        bat \
+        bear \
+        bind \
+        blueman \
+        bluez \
+        bluez-utils \
+        breeze \
+        brightnessctl \
+        btop \
+        chromium \
+        duf \
+        dysk \
+        eza \
+        fastfetch \
+        fd \
+        firefox \
+        fish \
+        fzf \
+        git \
+        grimblast-git \
+        gst-libav \
+        gst-plugins-bad \
+        gst-plugins-base \
+        gst-plugins-good \
+        gst-plugins-ugly \
+        hypridle \
+        hyprland \
+        hyprlock \
+        hyprpaper \
+        hyprpicker \
+        kanata \
+        kooha \
+        lazygit \
+        man-db \
+        nautilus \
+        neovim \
+        networkmanager \
+        nodejs \
+        noto-fonts-cjk \
+        noto-fonts-emoji \
+        npm \
+        nwg-displays \
+        pass \
+        pass-otp \
+        pavucontrol \
+        pipewire \
+        pipewire-alsa \
+        pipewire-pulse \
+        python-tldextract \
+        qt5-wayland \
+        qt5ct \
+        qt6-wayland \
+        qt6ct \
+        ripgrep \
+        rustup \
+        sof-firmware \
+        starship \
+        stow \
+        swaync \
+        tealdeer \
+        terminus-font \
+        thunderbird \
+        tmux \
+        ttf-font-awesome \
+        ttf-hack \
+        ttf-hack-nerd \
+        ttf-noto-nerd \
+        ttf-roboto \
+        ttf-roboto-mono \
+        ttf-roboto-mono-nerd \
+        unzip \
+        waybar \
+        wireless-regdb \
+        wireplumber \
+        wl-clipboard \
+        wl-clipboard \
+        xdg-desktop-portal-hyprland \
+        zoxide
+
+    sudo systemctl enable bluetooth
+    sudo systemctl enable NetworkManager
+    sudo systemctl enable NetworkManager-dispatcher
+end
+
+if command -v brew >/dev/null
+    brew install \
+        alacritty \
+        bat \
+        bear \
+        btop \
+        eza \
+        fastfetch \
+        fd \
+        fish \
+        fzf \
+        git \
+        lazygit \
+        neovim \
+        nodejs \
+        npm \
+        ripgrep \
+        rust \
+        starship \
+        stow \
+        tldr \
+        tmux \
+        ufw \
+        unzip \
+        zoxide
+
+    rustup install stable
+    rustup default stable
+end
+
+if command -v apt >/dev/null
+    [ -f /etc/apt/sources.list.d/fish-shell-ubuntu-release-3-noble.sources ] || sudo apt-add-repository ppa:fish-shell/release-3
+    [ -f /etc/apt/sources.list.d/neovim-ppa-ubuntu-unstable-noble.sources ] || sudo add-apt-repository ppa:neovim-ppa/unstable
+    [ -f /etc/apt/sources.list.dz/hangsongcui3371-ubuntu-fastfetch-noble.sources ] || sudo add-apt-repository ppa:zhangsongcui3371/fastfetch
+    sudo apt update
+
+    sudo apt install \
+        alacritty \
+        bat \
+        bear \
+        btop \
+        duf \
+        eza \
+        fastfetch \
+        fd-find \
+        fish \
+        fzf \
+        git \
+        libssl-dev \
+        neovim \
+        nodejs \
+        npm \
+        pkg-config \
+        python3 \
+        python3-venv \
+        ripgrep \
+        rustup \
+        stow \
+        tldr \
+        tmux \
+        unzip
+
+    curl -sS https://starship.rs/install.sh | sh
+    curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
+
+    set LAZYGIT_VERSION $(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')
+    curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_"$LAZYGIT_VERSION"_Linux_x86_64.tar.gz"
+    tar xf lazygit.tar.gz lazygit
+    sudo install lazygit /usr/local/bin
+    rm -rf lazygit lazygit.tar.gz
+end
+
+rustup install stable
+rustup default stable
+
+cargo install quoty
+cargo install kweri
+
+touch $HOME/.files/.deps.lock

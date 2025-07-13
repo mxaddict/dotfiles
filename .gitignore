@@ -4,6 +4,7 @@
 *~
 .base16*
 .cache
+*.lock
 .config/fish/completions/
 .config/fish/conf.d/
 .config/fish/fish_variables

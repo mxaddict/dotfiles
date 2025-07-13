@@ -6,7 +6,6 @@ set DOTFILES "$HOME/.files"
 set CONFIG "$HOME/.config"
 set TPM "$CONFIG/tmux/plugins/tpm"
 
-mkdir -p "$CONFIG/hypr"
 mkdir -p "$HOME/Desktop"
 mkdir -p "$HOME/Documents"
 mkdir -p "$HOME/Downloads"
@@ -17,30 +16,30 @@ mkdir -p "$HOME/Projects"
 mkdir -p "$HOME/Public"
 mkdir -p "$HOME/Templates"
 mkdir -p "$HOME/Videos"
+
+mkdir -p "$CONFIG/hypr"
 touch "$CONFIG/hypr/monitors.conf"
 touch "$CONFIG/hypr/workspaces.conf"
 
-# Check for batcat
-if command -v batcat >/dev/null
-    alias bat batcat
-end
+[ -f "$HOME/.files/.deps.lock" ] || $HOME/.files/.local/bin/.deps
 
-# Clone dotfiles if we don't have it cloned yet
-# Or update if we have it
 [ -d "$DOTFILES" ] || git clone https://github.com/mxaddict/dotfiles.git "$DOTFILES"
 pushd "$DOTFILES" || exit
 git stash
 git pull --no-edit
 git stash pop
 stow --adopt .
+
+if command -v batcat >/dev/null
+    alias bat batcat
+end
 bat cache --build
+
 tldr --update
 curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher update
 nvim --headless "+Lazy! install all" +TSUpdateSync +qa
 popd || exit
 
-# Clone tpm if we don't have it cloned yet
-# Or update if we have it
 [ -d "$TPM" ] || git clone https://github.com/tmux-plugins/tpm "$TPM"
 pushd "$TPM" || exit
 git pull
