@@ -73,6 +73,7 @@ if command -v pacman >/dev/null
         qt5ct \
         qt6-wayland \
         qt6ct \
+        qutebrowser \
         ripgrep \
         rustup \
         sof-firmware \
