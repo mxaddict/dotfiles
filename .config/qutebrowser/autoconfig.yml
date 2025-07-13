@@ -10,3 +10,7 @@ settings:
     https://drive.google.com: access-paste
   content.media.audio_capture:
     https://discord.com: true
+  auto_save.interval:
+    global: 5000
+  auto_save.session:
+    global: true
