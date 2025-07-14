@@ -3,7 +3,7 @@
 
 if command -v pacman >/dev/null
     if ! command -v paru >/dev/null
-        sudo pacman -S --needed base-devel rustup git
+        sudo pacman -S base-devel rustup git
         rustup install stable
         rustup default stable
         git clone https://aur.archlinux.org/paru.git /tmp/paru
@@ -13,10 +13,11 @@ if command -v pacman >/dev/null
         rm -rf /tmp/paru
     end
 
-    paru -S --needed \
+    paru -S \
         alacritty \
         alsa-firmware \
         alsa-utils \
+        adw-gtk-theme \
         bat \
         bear \
         bind \
@@ -27,6 +28,7 @@ if command -v pacman >/dev/null
         brightnessctl \
         btop \
         chromium \
+        cronie \
         duf \
         dysk \
         ethtool \
@@ -37,6 +39,7 @@ if command -v pacman >/dev/null
         fish \
         fzf \
         git \
+        gnu-free-fonts \
         grimblast-git \
         gst-libav \
         gst-plugins-bad \
