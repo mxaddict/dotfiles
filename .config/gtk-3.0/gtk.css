@@ -4,8 +4,8 @@
  ******************/
 
 /* الألوان الأساسية */
-@define-color accent_color #b7d07b;
-@define-color accent_bg_color #576c22;
+@define-color accent_color #30C0EE;
+@define-color accent_bg_color #21D1D3;
 @define-color accent_fg_color #ffffff;
 
 /* ألوان نافذة التطبيق */
@@ -46,9 +46,9 @@
 /* ألوان الأزرار */
 @define-color button_bg_color #1f232a;
 @define-color button_fg_color #e4e7f0;
-@define-color button_hover_color #b7d07b;
-@define-color button_active_color #b7d07b;
-@define-color button_checked_bg_color #576c22;
+@define-color button_hover_color #30C0EE;
+@define-color button_active_color #30C0EE;
+@define-color button_checked_bg_color #21D1D3;
 @define-color button_checked_fg_color #ffffff;
 
 /* ألوان الإطارات */
@@ -72,13 +72,13 @@
 @define-color success_fg_color #ffffff;
 
 /* ألوان الحالة النشطة والمحددة */
-@define-color selected_bg_color #576c22;
+@define-color selected_bg_color #21D1D3;
 @define-color selected_fg_color #ffffff;
 @define-color selected_text_color #ffffff;
 
 /* ألوان التفاعلية */
-@define-color hover_color #b7d07b;
-@define-color focus_color #b7d07b;
+@define-color hover_color #30C0EE;
+@define-color focus_color #30C0EE;
 
 /* ألوان وضع الظلام المخصصة */
 @define-color dark_fill_color #353840;
