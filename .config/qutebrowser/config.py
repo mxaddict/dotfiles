@@ -48,6 +48,11 @@ config.set(
     "file:///home/" + user + "/.local/share/qutebrowser/userscripts/*",
 )
 
+config.bind("H", "tab-prev")
+config.bind("J", "back")
+config.bind("K", "forward")
+config.bind("L", "tab-next")
+
 config.bind("<z><l>", "spawn --userscript qute-pass")
 config.bind("<z><u><l>", "spawn --userscript qute-pass --username-only")
 config.bind("<z><p><l>", "spawn --userscript qute-pass --password-only")
