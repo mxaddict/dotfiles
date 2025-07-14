@@ -65,6 +65,7 @@ if command -v pacman >/dev/null
         noto-fonts-emoji \
         npm \
         nwg-displays \
+        papirus-icon-theme \
         pass \
         pass-otp \
         pavucontrol \
@@ -72,12 +73,12 @@ if command -v pacman >/dev/null
         pipewire-alsa \
         pipewire-pulse \
         python-tldextract \
+        qalculate-qt \
         qt5-wayland \
         qt5ct \
         qt6-wayland \
         qt6-webengine-widevine \
         qt6ct \
-        qalculate-qt \
         qutebrowser \
         ripgrep \
         rofi-wayland \
