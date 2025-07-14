@@ -48,7 +48,7 @@ config.set(
     "file:///home/" + user + "/.local/share/qutebrowser/userscripts/*",
 )
 
-config.bind("<z><l>", 'spawn --userscript qute-pass -d "wofi -d"')
-config.bind("<z><u><l>", 'spawn --userscript qute-pass -d "wofi -d" --username-only')
-config.bind("<z><p><l>", 'spawn --userscript qute-pass -d "wofi -d" --password-only')
-config.bind("<z><o><l>", 'spawn --userscript qute-pass -d "wofi -d" --otp-only')
+config.bind("<z><l>", "spawn --userscript qute-pass")
+config.bind("<z><u><l>", "spawn --userscript qute-pass --username-only")
+config.bind("<z><p><l>", "spawn --userscript qute-pass --password-only")
+config.bind("<z><o><l>", "spawn --userscript qute-pass --otp-only")
