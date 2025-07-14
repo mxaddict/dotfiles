@@ -17,7 +17,7 @@ qalc -e "1 BTC" &
 last_rofi=""
 qalc_ret=""
 while :; do
-    rofi_ret=$(tac "$history" | head -5000 | rofi -dmenu)
+    rofi_ret=$(tac "$history" | head -5000 | rofi -case-smart -dmenu -p Calc)
 
     rtrn=$?
 

@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 # vi: ft=bash
 
-pkill rofi || rofi -show-icons -show drun -i
+pkill rofi || rofi -case-smart -show drun -show-icons -display-drun Apps

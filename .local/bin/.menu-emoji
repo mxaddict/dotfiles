@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 # vi: ft=bash
 
-pkill wofi || wofi -p emoji --show dmenu -i <"$HOME/.local/share/emojis" | cut -d ' ' -f 1 | tr -d '\n' | wl-copy
+pkill rofi || rofi -case-smart -dmenu -p Emoji <"$HOME/.local/share/emojis" | cut -d ' ' -f 1 | tr -d '\n' | wl-copy

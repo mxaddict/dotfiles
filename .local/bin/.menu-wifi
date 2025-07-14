@@ -3,21 +3,18 @@
 
 pkill -9 nmcli
 
-wofi_kill() {
-    pkill -9 wofi
+rofi_kill() {
+    pkill -9 rofi
 }
 
-wofi_kill && exit 0
+rofi_kill && exit 0
 
 lock=
 
-width=450
-height=112
+width=380
+rofi_cmd="rofi -case-smart -dmenu -theme-str 'window { width: $width; }'"
 
-wofi_cmd="wofi --show dmenu -i -W $width"
-wofi_short="$wofi_cmd -H $height"
-
-echo "Sniffing Wi-Fi packets..." | $wofi_short -p Loading &
+rofi -e "Sniffing Wi-Fi..." -theme-str "window { width: $width; }" &
 
 ssids=$(nmcli -g ssid device wifi list | sort | uniq)
 ssid_active=$(nmcli -g active,ssid dev wifi | grep '^yes' | cut -d: -f2)
@@ -39,7 +36,7 @@ list=$(
 )
 
 list=$(echo "$list" | sort -k1 -nr | cut -d : -f2- | column -t -s :)
-wifi=$(wofi_kill && echo "$list" | $wofi_cmd -p SSID)
+wifi=$(rofi_kill && echo "$list" | eval "$rofi_cmd -p Wi-Fi")
 ssid=$(echo "$wifi" | awk '{print $1}')
 security=$(echo "$wifi" | awk '{print $3}')
 
@@ -58,8 +55,7 @@ if [[ $security == "" ]]; then
     exit
 fi
 
-default="Enter password"
-password=$(echo "$default" | $wofi_short -p Password -P -e | xargs | sed "s/$default//g")
+password=$(echo "" | eval "$rofi_cmd -p Password -password -l 0 -theme-str 'window { width: $width; children: [inputbar]; }'" | xargs)
 if [[ -z $password ]]; then
     exit
 fi
