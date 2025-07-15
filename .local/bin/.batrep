@@ -1,0 +1,53 @@
+#!/usr/bin/env sh
+# vi: ft=sh
+
+LOG_FILE="$HOME/.local/log/bathist.log"
+
+awk -F', ' '
+BEGIN {
+    total_change = 0
+    total_time_seconds = 0
+    prev_epoch = 0
+    prev_percent = 0
+    prev_status = ""
+}
+{
+    current_epoch = $2
+    current_percent = substr($3, 1, length($3)-1)
+    current_status = $4
+
+    if (prev_epoch == 0 || prev_percent == 0) {
+        prev_epoch = current_epoch
+        prev_percent = current_percent
+        prev_status = current_status
+        next
+    }
+
+    time_diff_s = current_epoch - prev_epoch
+    percent_diff = current_percent - prev_percent
+
+    if (prev_status == "Discharging" || current_status == "Discharging") {
+        if (time_diff_s > 0) {
+            total_change += percent_diff
+            total_time_seconds += time_diff_s
+        }
+    }
+
+    prev_epoch = current_epoch
+    prev_percent = current_percent
+    prev_status = current_status
+}
+END {
+    if (total_time_seconds > 0) {
+        avg_change_per_second = total_change / total_time_seconds
+        avg_change_per_hour = avg_change_per_second * 3600
+        avg_battery_life = "inf"
+        if (avg_change_per_hour != 0) {
+            avg_battery_life = 100 / -avg_change_per_hour
+        }
+        printf "Average change: %.2f%% per hour\n", avg_change_per_hour
+        printf "Average battery life: %.2f hours\n", avg_battery_life
+    } else {
+        print "Not enough data or no valid discharge periods to calculate average change." > "/dev/stderr"
+    }
+}' "$LOG_FILE"
