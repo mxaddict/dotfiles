@@ -5,5 +5,5 @@ count=$(himalaya account list | wc -l)
 account=$(himalaya account list | cut -d '|' -f2 | tail -n "$((count - 3))" | rofi -dmenu)
 
 if [ -n "$account" ]; then
-    nvim "+Himalaya $account"
+    alacritty -e nvim "+Himalaya $account"
 fi
