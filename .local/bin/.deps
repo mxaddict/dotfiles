@@ -1,8 +1,8 @@
-#!/usr/bin/env fish
-# vi: ft=fish
+#!/usr/bin/env bash
+# vi: ft=bash
 
-if command -v pacman >/dev/null
-    if ! command -v paru >/dev/null
+if command -v pacman >/dev/null; then
+    if ! command -v paru >/dev/null; then
         sudo pacman -S base-devel rustup git
         rustup install stable
         rustup default stable
@@ -11,9 +11,9 @@ if command -v pacman >/dev/null
         makepkg -si
         popd || exit
         rm -rf /tmp/paru
-    end
+    fi
 
-    paru -S \
+    paru -S --needed \
         alacritty \
         alsa-firmware \
         alsa-utils \
@@ -138,9 +138,9 @@ if command -v pacman >/dev/null
 
     sudo ufw enable
     sudo ufw status
-end
+fi
 
-if command -v brew >/dev/null
+if command -v brew >/dev/null; then
     brew install \
         alacritty \
         bat \
@@ -168,9 +168,9 @@ if command -v brew >/dev/null
 
     rustup install stable
     rustup default stable
-end
+fi
 
-if command -v apt >/dev/null
+if command -v apt >/dev/null; then
     [ -f /etc/apt/sources.list.d/fish-shell-ubuntu-release-3-noble.sources ] || sudo apt-add-repository ppa:fish-shell/release-3
     [ -f /etc/apt/sources.list.d/neovim-ppa-ubuntu-unstable-noble.sources ] || sudo add-apt-repository ppa:neovim-ppa/unstable
     [ -f /etc/apt/sources.list.d/zhangsongcui3371-ubuntu-fastfetch-noble.sources ] || sudo add-apt-repository ppa:zhangsongcui3371/fastfetch
@@ -205,12 +205,12 @@ if command -v apt >/dev/null
     curl -sS https://starship.rs/install.sh | sh
     curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
 
-    set LAZYGIT_VERSION $(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')
-    curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_"$LAZYGIT_VERSION"_Linux_x86_64.tar.gz"
+    LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')
+    curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
     tar xf lazygit.tar.gz lazygit
     sudo install lazygit /usr/local/bin
     rm -rf lazygit lazygit.tar.gz
-end
+fi
 
 rustup install stable
 rustup default stable
@@ -218,4 +218,4 @@ rustup default stable
 cargo install quoty
 cargo install kweri
 
-touch $HOME/.files/.deps.lock
+touch "$HOME/.files/.deps.lock"
