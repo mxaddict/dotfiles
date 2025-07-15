@@ -1,10 +1,10 @@
-#!/usr/bin/env fish
-# vi: ft=fish
+#!/usr/bin/env bash
+# vi: ft=bash
 
 # Where is the DIR for dotfiles?
-set DOTFILES "$HOME/.files"
-set CONFIG "$HOME/.config"
-set TPM "$CONFIG/tmux/plugins/tpm"
+dotfiles="$HOME/.files"
+config="$HOME/.config"
+tpm="$config/tmux/plugins/tpm"
 
 mkdir -p "$HOME/Desktop"
 mkdir -p "$HOME/Documents"
@@ -18,33 +18,34 @@ mkdir -p "$HOME/Templates"
 mkdir -p "$HOME/Videos"
 mkdir -p "$HOME/.local/log"
 
-mkdir -p "$CONFIG/hypr"
-touch "$CONFIG/hypr/monitors.conf"
-touch "$CONFIG/hypr/workspaces.conf"
+mkdir -p "$config/hypr"
+touch "$config/hypr/monitors.conf"
+touch "$config/hypr/workspaces.conf"
 
-[ -d "$DOTFILES" ] || git clone https://github.com/mxaddict/dotfiles.git "$DOTFILES"
-pushd "$DOTFILES" || exit
+[ -d "$dotfiles" ] || git clone https://github.com/mxaddict/dotfiles.git "$dotfiles"
+pushd "$dotfiles" || exit
 git stash
 git pull --no-edit
 git stash pop
+
+[ -f "$HOME/.files/.deps.lock" ] || "$HOME/.files/.local/bin/.deps"
+
 stow --adopt .
 
-[ -f "$HOME/.files/.deps.lock" ] || $HOME/.files/.local/bin/.deps
-
-if command -v batcat >/dev/null
+if command -v batcat >/dev/null; then
     alias bat batcat
-end
+fi
 bat cache --build
 
 tldr --update
-curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher update
+curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | fish && fisher update
 nvim --headless "+Lazy! install all" +TSUpdateSync +qa
 popd || exit
 
-[ -d "$TPM" ] || git clone https://github.com/tmux-plugins/tpm "$TPM"
-pushd "$TPM" || exit
+[ -d "$tpm" ] || git clone https://github.com/tmux-plugins/tpm "$tpm"
+pushd "$tpm" || exit
 git pull
-"$TPM/bin/install_plugins"
-"$TPM/bin/update_plugins" all
-"$TPM/bin/clean_plugins"
+"$tpm/bin/install_plugins"
+"$tpm/bin/update_plugins" all
+"$tpm/bin/clean_plugins"
 popd || exit
