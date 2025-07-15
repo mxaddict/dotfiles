@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+# vi: ft=sh
+
+count=$(himalaya account list | wc -l)
+account=$(himalaya account list | cut -d '|' -f2 | tail -n "$((count - 3))" | rofi -dmenu)
+
+if [ -n "$account" ]; then
+    nvim "+Himalaya $account"
+fi

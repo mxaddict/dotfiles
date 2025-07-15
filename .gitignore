@@ -15,4 +15,5 @@
 .config/tmux/plugins
 .config/gtk-3.0/assets
 .config/qutebrowser/autoconfig.yml
+.config/qutebrowser/qsettings/QtProject.conf
 compile_commands.json
