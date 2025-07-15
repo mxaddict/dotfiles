@@ -2,13 +2,13 @@
 # vi: ft=sh
 
 LOG_FILE="$HOME/.local/log/bathist.log"
-DATE=$(date +"%Y-%m-%d %H:%M:%S")
-TIMESTAMP=$(date +%s)
-
-BATTERY_CAPACITY=$(cat /sys/class/power_supply/BAT0/capacity 2>/dev/null)
-BATTERY_STATUS=$(cat /sys/class/power_supply/BAT0/status 2>/dev/null)
 
 while true; do
+    DATE=$(date +"%Y-%m-%d %H:%M:%S")
+    TIMESTAMP=$(date +%s)
+    BATTERY_CAPACITY=$(cat /sys/class/power_supply/BAT0/capacity 2>/dev/null)
+    BATTERY_STATUS=$(cat /sys/class/power_supply/BAT0/status 2>/dev/null)
+
     if [ -n "$BATTERY_CAPACITY" ]; then
         echo "$DATE, $TIMESTAMP, $BATTERY_CAPACITY%, $BATTERY_STATUS" >>"$LOG_FILE"
     else
