@@ -1,5 +1,5 @@
-#!/usr/bin/env bash
-# vi: ft=bash
+#!/usr/bin/env sh
+# vi: ft=sh
 
 if command -v pacman >/dev/null; then
     if ! command -v paru >/dev/null; then
@@ -7,9 +7,10 @@ if command -v pacman >/dev/null; then
         rustup install stable
         rustup default stable
         git clone https://aur.archlinux.org/paru.git /tmp/paru
-        pushd /tmp/paru || exit
+        pwd=$(pwd)
+        cd /tmp/paru || exit
         makepkg -si
-        popd || exit
+        cd "$pwd" || exit
         rm -rf /tmp/paru
     fi
 

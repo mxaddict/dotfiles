@@ -1,5 +1,5 @@
-#!/usr/bin/env bash
-# vi: ft=bash
+#!/usr/bin/env sh
+# vi: ft=sh
 
 # Where is the DIR for dotfiles?
 dotfiles="$HOME/.files"
@@ -23,7 +23,8 @@ touch "$config/hypr/monitors.conf"
 touch "$config/hypr/workspaces.conf"
 
 [ -d "$dotfiles" ] || git clone https://github.com/mxaddict/dotfiles.git "$dotfiles"
-pushd "$dotfiles" || exit
+pwd=$(pwd)
+cd "$dotfiles" || exit
 git stash
 git pull --no-edit
 git stash pop
@@ -31,6 +32,7 @@ git stash pop
 [ -f "$HOME/.files/.deps.lock" ] || "$HOME/.files/.local/bin/.deps"
 
 stow --adopt .
+cd "$pwd" || exit
 
 if command -v batcat >/dev/null; then
     alias bat batcat
@@ -40,12 +42,11 @@ bat cache --build
 tldr --update
 curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | fish && fisher update
 nvim --headless "+Lazy! install all" +TSUpdateSync +qa
-popd || exit
 
 [ -d "$tpm" ] || git clone https://github.com/tmux-plugins/tpm "$tpm"
-pushd "$tpm" || exit
+cd "$tpm" || exit
 git pull
 "$tpm/bin/install_plugins"
 "$tpm/bin/update_plugins" all
 "$tpm/bin/clean_plugins"
-popd || exit
+cd "$pwd" || exit
