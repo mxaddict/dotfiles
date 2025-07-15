@@ -1,8 +1,8 @@
 # .files
 
-## Require packages
+## Required packages
 
-Required packages are installed on first run of .update script but if you want
+Required packages are installed on first run of `.update` script but if you want
 to run it manually you can just run the following:
 
 ### Short URL (.deps)
