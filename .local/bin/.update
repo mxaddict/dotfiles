@@ -35,7 +35,7 @@ stow --adopt .
 cd "$pwd" || exit
 
 if command -v batcat >/dev/null; then
-    alias bat batcat
+    alias bat=batcat
 fi
 bat cache --build
 
