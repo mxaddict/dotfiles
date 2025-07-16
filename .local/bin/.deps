@@ -11,8 +11,10 @@ if command -v pacman >/dev/null; then
         cd /tmp/paru || exit
         makepkg -si
         cd "$pwd" || exit
-        rm -rf /tmp/paru
     fi
+
+    sudo rm /etc/ly/config.ini
+    sudo rm /usr/lib/systemd/system/ly.service
 
     paru -S --needed \
         alacritty \
@@ -61,6 +63,7 @@ if command -v pacman >/dev/null; then
         nautilus \
         neovim \
         networkmanager \
+        nmap \
         nodejs \
         noto-fonts-cjk \
         noto-fonts-emoji \
@@ -107,6 +110,7 @@ if command -v pacman >/dev/null; then
         wireplumber \
         wl-clipboard \
         xdg-desktop-portal-hyprland \
+        zerotier-one \
         zoxide
 
     sudo cp "$HOME/.files/.root/etc/kanata.kbd" /etc/kanata.kbd

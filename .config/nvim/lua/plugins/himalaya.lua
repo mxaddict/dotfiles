@@ -1,3 +1,3 @@
 return {
-  "pimalaya/himalaya-vim",
+  -- "pimalaya/himalaya-vim",
 }
