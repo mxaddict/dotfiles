@@ -110,6 +110,7 @@ if command -v pacman >/dev/null; then
         wireplumber \
         wl-clipboard \
         xdg-desktop-portal-hyprland \
+        zerotier-one \
         zoxide
 
     sudo cp "$HOME/.files/.root/etc/kanata.kbd" /etc/kanata.kbd
