@@ -32,6 +32,7 @@ if command -v pacman >/dev/null; then
         btop \
         chromium \
         cronie \
+        curl \
         duf \
         dysk \
         ethtool \
@@ -106,6 +107,7 @@ if command -v pacman >/dev/null; then
         ufw \
         unzip \
         waybar \
+        wget \
         wireless-regdb \
         wireplumber \
         wl-clipboard \
