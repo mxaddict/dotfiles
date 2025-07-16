@@ -6,5 +6,5 @@
 -- Set to "intelephense" to use intelephense instead of phpactor.
 vim.g.lazyvim_php_lsp = "intelephense"
 
--- Use telescope for picker in himalaya
-vim.g.himalaya_folder_picker = "fzflua"
+-- -- Use telescope for picker in himalaya
+-- vim.g.himalaya_folder_picker = "fzflua"
