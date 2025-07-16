@@ -11,7 +11,7 @@ rofi_kill && exit 0
 
 lock=
 
-width=450
+width=600
 rofi_cmd="rofi -case-smart -dmenu -theme-str 'window { width: $width; }'"
 
 rofi -e "Sniffing Wi-Fi..." -theme-str "window { width: $width; }" &
