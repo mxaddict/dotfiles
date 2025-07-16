@@ -11,8 +11,10 @@ if command -v pacman >/dev/null; then
         cd /tmp/paru || exit
         makepkg -si
         cd "$pwd" || exit
-        rm -rf /tmp/paru
     fi
+
+    sudo rm /etc/ly/config.ini
+    sudo rm /usr/lib/systemd/system/ly.service
 
     paru -S --needed \
         alacritty \

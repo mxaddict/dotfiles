@@ -40,8 +40,7 @@ fi
 bat cache --build
 
 tldr --update
-curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | fish
-fish -c "fisher update"
+fish -c "curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish > /tmp/fisher.fish && source /tmp/fisher.fish && fisher update"
 nvim --headless "+Lazy! install all" +TSUpdateSync +qa
 
 [ -d "$tpm" ] || git clone https://github.com/tmux-plugins/tpm "$tpm"
