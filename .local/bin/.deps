@@ -17,10 +17,11 @@ if command -v pacman >/dev/null; then
     sudo rm /usr/lib/systemd/system/ly.service
 
     paru -S --needed \
+        adw-gtk-theme \
         alacritty \
         alsa-firmware \
         alsa-utils \
-        adw-gtk-theme \
+        avahi \
         bat \
         bear \
         bind \
@@ -138,8 +139,10 @@ if command -v pacman >/dev/null; then
     sudo systemctl enable NetworkManager-dispatcher
     sudo systemctl enable ufw
     sudo systemctl enable tlp
+    sudo systemctl enable avahi-daemon
 
     sudo ufw allow ssh
+    sudo ufw allow mdns
     sudo ufw allow proto udp from any to any port 27031:27036
     sudo ufw allow proto tcp from any to any port 27040
 
