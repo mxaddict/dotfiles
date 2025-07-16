@@ -63,6 +63,7 @@ if command -v pacman >/dev/null; then
         nautilus \
         neovim \
         networkmanager \
+        nmap \
         nodejs \
         noto-fonts-cjk \
         noto-fonts-emoji \
