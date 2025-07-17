@@ -95,6 +95,7 @@ if command -v pacman >/dev/null; then
         starship \
         stow \
         swaync \
+        swayosd \
         tealdeer \
         terminus-font \
         thunderbird \
