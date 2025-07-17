@@ -42,6 +42,7 @@ if command -v pacman >/dev/null; then
         fd \
         firefox \
         fish \
+        fprintd \
         fzf \
         git \
         gnu-free-fonts \
@@ -56,6 +57,7 @@ if command -v pacman >/dev/null; then
         hyprlock \
         hyprpaper \
         hyprpicker \
+        hyprpolkitagent \
         kanata \
         kooha \
         lazygit \
