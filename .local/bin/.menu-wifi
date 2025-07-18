@@ -21,24 +21,24 @@ ssid_active=$(nmcli -g active,ssid dev wifi | grep '^yes' | cut -d: -f2)
 
 list=$(
     while IFS= read -r ssid; do
-        ssid=$(echo "$ssid" | xargs)
         if [[ $ssid == "SSID" || $ssid == "--" || $ssid == "" ]]; then
             continue
         fi
         bars=$(nmcli -g ssid,bars device wifi list | grep -w -F "$ssid" | head -n 1 | cut -d : -f2 | sed 's/*/█/g')
         signal=$(nmcli -g ssid,signal device wifi list | grep -w -F "$ssid" | head -n 1 | cut -d : -f2)
         security=$(nmcli -g ssid,security device wifi list | grep -w -F "$ssid" | head -n 1 | cut -d : -f2 | sed 's/WPA[1]//g' | xargs)
+        icon=""
         if [[ $security != "" ]]; then
             icon=$lock
         fi
-        echo "$signal:$ssid:$bars ($signal%):$icon"
+        echo "$signal:\"$ssid\":$bars ($signal%):$icon"
     done <<<"$ssids"
 )
 
 list=$(echo "$list" | sort -k1 -nr | cut -d : -f2- | column -t -s :)
 wifi=$(rofi_kill && echo "$list" | eval "$rofi_cmd -p Wi-Fi")
-ssid=$(echo "$wifi" | awk '{print $1}')
-security=$(echo "$wifi" | awk '{print $3}')
+ssid=$(echo "$wifi" | cut -d '"' -f2)
+security=$(echo "$wifi" | cut -d '"' -f3 | awk '{print $3}')
 
 if [[ $ssid == "" || $ssid == "$ssid_active" ]]; then
     exit
