@@ -42,6 +42,9 @@ up_to_date = ''
 [aws]
 disabled = true
 
+[gcloud]
+disabled = true
+
 [c]
 symbol = ' '
 detect_files = ['autogen.sh', 'configure', 'configure.ac']
