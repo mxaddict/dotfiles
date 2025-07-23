@@ -16,4 +16,5 @@
 .config/gtk-3.0/assets
 .config/qutebrowser/autoconfig.yml
 .config/qutebrowser/qsettings/QtProject.conf
+.config/qutebrowser/bookmarks/urls
 compile_commands.json
