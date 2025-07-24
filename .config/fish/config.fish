@@ -16,6 +16,9 @@ set -gx EDITOR nvim
 # Disable MANGOHUD by default
 set -gx MANGOHUD 0
 
+# Disable php_cs_fixer Check
+set -gx PHP_CS_FIXER_IGNORE_ENV 1
+
 # Set JOSBS
 set -gx JOBS "$(nproc)"
 
