@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# vi: ft=bash
+
+pkill rofi && exit
+
+timezone=$(sudo timedatectl list-timezones | rofi -dmenu -i -p "Time Zone")
+
+if [[ $timezone != "" ]]; then
+    sudo timedatectl set-timezone "$timezone"
+    echo "Picked $timezone"
+
+    pkill waybar
+    waybar &
+    disown
+fi
