@@ -5,5 +5,8 @@ bucket=${AWS_BUCKET-"deepci-prod-env"}
 project=$(basename "$(pwd)")
 envs="dev stage main"
 for env in $envs; do
-    aws s3 cp ".env.${env}" "s3://${bucket}/neo/${project}/"
+    aws s3 cp ".env.${env}" "s3://${bucket}/neo/${project}/" &
+    aws s3 cp ".env.gs.${env}.json" "s3://${bucket}/neo/${project}/" &
 done
+
+wait
