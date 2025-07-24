@@ -6,6 +6,7 @@ set fish_greeting
 fish_add_path -g ~/.cargo/bin
 fish_add_path -g ~/.local/bin
 fish_add_path -g ~/.config/composer/vendor/bin
+fish_add_path -g ~/.local/share/nvim/mason/bin
 fish_add_path -g /opt/homebrew/bin
 fish_add_path -g /opt/homebrew/opt/m4/bin
 fish_add_path -g /opt/homebrew/opt/llvm/bin
