@@ -85,7 +85,7 @@ if command -v pacman >/dev/null; then
         qt5-wayland \
         qt5ct \
         qt6-wayland \
-        qt6-webengine-widevine \
+        qt6-webengine \
         qt6ct \
         qutebrowser \
         ripgrep \
