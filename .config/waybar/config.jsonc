@@ -63,8 +63,8 @@
 
     "network": {
         "format-icons": {
-            "disconnected": "",
-            "default": "",
+            "disconnected": "󰅛",
+            "default": "",
             "wifi": "",
         },
         "format": "{icon}",
