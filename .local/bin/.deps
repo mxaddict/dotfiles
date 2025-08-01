@@ -101,7 +101,6 @@ if command -v pacman >/dev/null; then
         thunderbird \
         tlp \
         tmux \
-        ttf-font-awesome \
         ttf-hack \
         ttf-hack-nerd \
         ttf-noto-nerd \
@@ -115,6 +114,7 @@ if command -v pacman >/dev/null; then
         wireless-regdb \
         wireplumber \
         wl-clipboard \
+        woff2-font-awesome \
         xdg-desktop-portal-hyprland \
         zerotier-one \
         zoxide
