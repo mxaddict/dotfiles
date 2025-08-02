@@ -40,8 +40,8 @@
 
     "bluetooth": {
         "format-icons": {
-            "default": "",
-            "on": "",
+            "default": "󰂲",
+            "on": "󰂯",
         },
         "tooltip-format": "Bluetooth {status}",
         "format": "{icon}",
@@ -127,7 +127,7 @@
 
     "pulseaudio": {
         "format": "{icon} {volume}%",
-        "format-muted": " ",
+        "format-muted": "",
         "format-icons": {
             "headphone": "",
             "hands-free": "",
