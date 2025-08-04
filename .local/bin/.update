@@ -47,7 +47,8 @@ nvim --headless "+Lazy! install all" +TSUpdateSync +qa
 [ -d "$tpm" ] || git clone https://github.com/tmux-plugins/tpm "$tpm"
 cd "$tpm" || exit
 git pull
-eval "$tpm/bin/install_plugins"
-eval "$tpm/bin/update_plugins all"
-eval "$tpm/bin/clean_plugins"
+export TMUX_PLUGIN_MANAGER_PATH="$tpm"
+"$tpm/bin/install_plugins"
+"$tpm/bin/update_plugins" all
+"$tpm/bin/clean_plugins"
 cd "$pwd" || exit
