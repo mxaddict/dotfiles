@@ -17,6 +17,7 @@ mkdir -p "$HOME/Public"
 mkdir -p "$HOME/Templates"
 mkdir -p "$HOME/Videos"
 mkdir -p "$HOME/.local/log"
+mkdir -p "$HOME/.config/fish/functions"
 
 mkdir -p "$config/hypr"
 touch "$config/hypr/monitors.conf"
