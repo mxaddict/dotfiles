@@ -190,7 +190,7 @@ if command -v apt >/dev/null; then
     [ -f /etc/apt/sources.list.d/zhangsongcui3371-ubuntu-fastfetch-noble.sources ] || sudo add-apt-repository ppa:zhangsongcui3371/fastfetch
     sudo apt update
 
-    sudo apt install \
+    sudo apt install -y \
         alacritty \
         bat \
         bear \
