@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # vi: ft=bash
 
-bucket=${AWS_BUCKET-"deepci-prod-env"}
+bucket=${BUCKET-"env-pmi"}
 project=$(basename "$(pwd)")
 envs="dev stage main"
 for env in $envs; do
-    aws s3 cp ".env.${env}" "s3://${bucket}/neo/${project}/" &
-    aws s3 cp ".env.gs.${env}.json" "s3://${bucket}/neo/${project}/" &
+    gcloud storage cp ".env.${env}" "gs://${bucket}/${project}/" &
+    gcloud storage cp ".env.gs.${env}.json" "gs://${bucket}/${project}/" &
 done
 
 wait
