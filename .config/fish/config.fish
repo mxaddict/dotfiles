@@ -17,6 +17,9 @@ set -gx EDITOR nvim
 # Disable MANGOHUD by default
 set -gx MANGOHUD 0
 
+# Add support for pin entry via ssh
+set -gx GPG_TTY "$(tty)"
+
 # Disable php_cs_fixer Check
 set -gx PHP_CS_FIXER_IGNORE_ENV 1
 
