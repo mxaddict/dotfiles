@@ -13,9 +13,6 @@ if command -v pacman >/dev/null; then
         cd "$pwd" || exit
     fi
 
-    sudo rm /etc/ly/config.ini
-    sudo rm /usr/lib/systemd/system/ly.service
-
     paru -S --needed \
         adw-gtk-theme \
         alacritty \
@@ -120,10 +117,14 @@ if command -v pacman >/dev/null; then
         zerotier-one \
         zoxide
 
+    sudo rm /etc/ly/config.ini
+    sudo rm /usr/lib/systemd/system/ly.service
+
     export DOTROOT="$HOME/.files/.root"
     sudo cp "$DOTROOT/etc/kanata.kbd" /etc/kanata.kbd
     sudo cp "$DOTROOT/etc/ly/config.ini" /etc/ly/config.ini
     sudo cp "$DOTROOT/etc/mkinitcpio.conf" /etc/mkinitcpio.conf
+    sudo cp "$DOTROOT/etc/pacman.conf" /etc/pacman.conf
     sudo cp "$DOTROOT/etc/systemd/logind.conf" /etc/systemd/logind.conf
     sudo cp "$DOTROOT/etc/systemd/sleep.conf" /etc/systemd/sleep.conf
     sudo cp "$DOTROOT/etc/tlp.conf" /etc/tlp.conf
