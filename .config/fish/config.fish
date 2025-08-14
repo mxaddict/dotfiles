@@ -92,8 +92,7 @@ alias fur got
 alias hot got
 
 # fastfetch
-alias f fastfetch
-alias ff fastfetch
+alias ff 'clear; fastfetch'
 
 # Alias for lazygit
 alias lg lazygit
@@ -168,6 +167,13 @@ set -g fish_pager_color_selected_background --background=$selection
 
 # Turn on vi mode for fish
 fish_vi_key_bindings
+
+# Make copy and paste use system clipboard as well
+function fish_user_key_bindings
+    bind -M visual y fish_clipboard_copy
+    bind -M default yy fish_clipboard_copy
+    bind -M default p fish_clipboard_paste
+end
 
 # Load fzf
 type -q fzf_key_bindings && fzf_key_bindings
