@@ -40,12 +40,13 @@
 
     "bluetooth": {
         "format-icons": {
-            "default": "󰂲",
-            "on": "󰂯",
+            "default": "󰂯",
+            "off": "󰂲",
         },
         "tooltip-format": "Bluetooth {status}",
         "format": "{icon}",
         "format-on": "{icon}",
+        "format-connected-battery": "{icon} {device_alias} {device_battery_percentage}%",
         "on-click": "blueman-manager",
     },
 
