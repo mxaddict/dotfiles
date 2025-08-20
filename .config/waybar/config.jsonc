@@ -42,6 +42,7 @@
         "format-icons": {
             "default": "󰂯",
             "off": "󰂲",
+            "disabled": "󰂲",
         },
         "tooltip-format": "Bluetooth {status}",
         "format": "{icon}",
