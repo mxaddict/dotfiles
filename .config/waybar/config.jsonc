@@ -129,7 +129,7 @@
 
     "pulseaudio": {
         "format": "{icon} {volume}%",
-        "format-muted": "",
+        "format-muted": " {volume}%",
         "format-icons": {
             "headphone": "",
             "hands-free": "",
@@ -148,7 +148,7 @@
     "pulseaudio#microphone": {
         "format": "{format_source}",
         "format-source": " {volume}%",
-        "format-source-muted": "",
+        "format-source-muted": " {volume}%",
         "on-click": "pactl set-source-mute @DEFAULT_SOURCE@ toggle",
         "on-click-right": "pavucontrol",
         "on-scroll-down": "pactl set-source-volume @DEFAULT_SOURCE@ -5%",
