@@ -1,1 +1,4 @@
 theme = "tokyonight"
+
+[editor.file-picker]
+hidden = false

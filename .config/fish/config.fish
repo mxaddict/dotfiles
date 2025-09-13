@@ -132,6 +132,10 @@ alias v nvim
 alias vi nvim
 alias vim nvim
 
+# Helix... Maybe replacing vim/nvim?
+alias h helix
+alias hx helix
+
 # TokyoNight Color Palette
 set -l foreground c0caf5
 set -l selection 283457
@@ -197,4 +201,9 @@ end
 # Load starship prompt
 if command -v starship >/dev/null
     starship init fish | source
+end
+
+# FNM setup env
+if command -v fnm >/dev/null
+    fnm env --shell fish | source
 end
