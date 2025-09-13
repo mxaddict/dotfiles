@@ -28,6 +28,7 @@ if command -v pacman >/dev/null; then
         breeze \
         brightnessctl \
         btop \
+        carapace-bin \
         chromium \
         cronie \
         curl \
@@ -163,6 +164,7 @@ if command -v brew >/dev/null; then
         bat \
         bear \
         btop \
+        carapace \
         eza \
         fastfetch \
         fd \
@@ -191,6 +193,7 @@ if command -v apt >/dev/null; then
     [ -f /etc/apt/sources.list.d/fish-shell-ubuntu-release-3-noble.sources ] || sudo apt-add-repository ppa:fish-shell/release-3
     [ -f /etc/apt/sources.list.d/neovim-ppa-ubuntu-unstable-noble.sources ] || sudo add-apt-repository ppa:neovim-ppa/unstable
     [ -f /etc/apt/sources.list.d/zhangsongcui3371-ubuntu-fastfetch-noble.sources ] || sudo add-apt-repository ppa:zhangsongcui3371/fastfetch
+    [ -f /etc/apt/sources.list.d/carapace.list ] || echo "deb [trusted=yes] https://apt.fury.io/rsteube/ /" > /etc/apt/sources.list.d/carapace.list
     sudo apt update
 
     sudo apt install -y \
@@ -201,6 +204,7 @@ if command -v apt >/dev/null; then
         duf \
         eza \
         fastfetch \
+        carapace-bin \
         fd-find \
         fish \
         fzf \
@@ -234,5 +238,6 @@ rustup default stable
 
 cargo install quoty
 cargo install kweri
+cargo install fnm
 
 touch "$HOME/.files/.deps.lock"
