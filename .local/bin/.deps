@@ -213,7 +213,6 @@ if command -v apt >/dev/null; then
         fish \
         fzf \
         git \
-        helix \
         libssl-dev \
         neovim \
         nodejs \
@@ -229,6 +228,7 @@ if command -v apt >/dev/null; then
         unzip
 
     snap install nushell --classic
+    snap install helix --classic
 
     curl -sS https://starship.rs/install.sh | sh
     curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
