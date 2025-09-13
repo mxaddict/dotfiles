@@ -2,3 +2,8 @@ theme = "tokyonight"
 
 [editor.file-picker]
 hidden = false
+
+[editor.cursor-shape]
+normal = "block"
+insert = "bar"
+select = "block"
