@@ -50,6 +50,7 @@ if command -v pacman >/dev/null; then
         gst-plugins-base \
         gst-plugins-good \
         gst-plugins-ugly \
+        helix \
         hypridle \
         hyprland \
         hyprlock \
@@ -172,6 +173,7 @@ if command -v brew >/dev/null; then
         fish \
         fzf \
         git \
+        helix \
         lazygit \
         neovim \
         nodejs \
@@ -211,6 +213,7 @@ if command -v apt >/dev/null; then
         fish \
         fzf \
         git \
+        helix \
         libssl-dev \
         neovim \
         nodejs \
