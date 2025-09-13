@@ -7,6 +7,9 @@ add_newline = false
 # Update the format
 format = '$all'
 
+[[battery.display]]
+threshold = 50
+
 [username]
 disabled = false
 show_always = true

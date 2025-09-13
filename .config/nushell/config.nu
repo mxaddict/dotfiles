@@ -1,34 +1,85 @@
 # config.nu
-#
-# Installed by:
-# version = "0.107.0"
-#
-# This file is used to override default Nushell settings, define
-# (or import) custom commands, or run any other startup tasks.
-# See https://www.nushell.sh/book/configuration.html
-#
-# Nushell sets "sensible defaults" for most configuration settings, 
-# so your `config.nu` only needs to override these defaults if desired.
-#
-# You can open this file in your default editor using:
-#     config nu
-#
-# You can also pretty-print and page through the documentation for configuration
-# options using:
-#     config nu --doc | nu-highlight | less -R
 
 $env.config.edit_mode = 'vi'
 $env.config.buffer_editor = 'helix'
+$env.config.cursor_shape.vi_insert = "line"
+$env.config.cursor_shape.vi_normal = "block"
+$env.config.show_banner = false
 
 source ./zoxide.nu
 source ./starship.nu
 
+# ls
 alias l  = ls
 alias ll = ls -a
 
+# neovim
 alias v = nvim
 alias vi = nvim
 alias vim = nvim
 
+# helix
 alias h  = helix
 alias hx = helix
+
+# Alias for cmatrix
+alias c = cmatrix
+
+# Alias for lazygit
+alias lg = lazygit
+
+# Alias for kweri
+alias q = kweri
+
+# Add navcoin alias
+alias nav = navcoin-cli
+
+# Alias for clear
+alias cl = clear
+
+# Replace tree command with eza
+alias tree = eza --tree
+
+# fastfetch
+def ff [] {
+    clear
+    fastfetch
+}
+
+# Alias for quick and dirty git commit
+def g [] {
+    git commit -am (quoty); git pull --no-edit; git push
+}
+
+def gg [] {
+    git add .; git commit -m (quoty); git pull --no-edit; git push
+}
+
+# More git
+alias gti = got
+alias gto = got
+alias tgi = got
+alias gut = got
+alias fur = got
+alias hot = got
+
+# Git typo
+def got [ ...args ] {
+    print "Hey! Fat fingers!!!"
+    git ...$args
+}
+
+# Check for nproc
+if (which nproc | is-empty) {
+    alias nproc = sysctl -n hw.physicalcpu
+}
+
+# Check for batcat
+if not (which batcat | is-empty) {
+    alias bat = batcat
+}
+
+# Check for exa and alias to eza
+if not (which exa | is-empty) {
+    alias eza = exa
+}

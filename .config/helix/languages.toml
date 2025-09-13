@@ -4,3 +4,50 @@ auto-format = true
 
 [language-server.rust-analyzer]
 command = "rust-analyzer"
+
+[[language]]
+name = "toml"
+auto-format = true
+
+[[language]]
+name = "yaml"
+auto-format = true
+
+[[language]]
+name = "javascript"
+auto-format = true
+
+[[language]]
+name = "typescript"
+auto-format = true
+
+[[language]]
+name = "html"
+auto-format = true
+
+[[language]]
+name = "javascript"
+auto-format = true
+language-servers = ["typescript-language-server"]
+file-types = ["js", "jsx"]
+
+[[language]]
+name = "typescript"
+auto-format = true
+language-servers = ["typescript-language-server"]
+file-types = ["ts", "tsx"]
+
+[language-server.typescript-language-server]
+command = "typescript-language-server"
+args = ["--stdio"]
+
+[[language]]
+name = "vue"
+auto-format = true
+language-servers = ["vue-language-server"]
+file-types = ["vue"]
+
+[language-server.vue-language-server]
+command = "vue-language-server"
+args = ["--stdio"]
+config = {}
