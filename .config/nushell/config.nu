@@ -1,17 +1,13 @@
 # config.nu
 
-$env.config.edit_mode = 'vi'
-$env.config.buffer_editor = 'helix'
-$env.config.cursor_shape.vi_insert = "line"
-$env.config.cursor_shape.vi_normal = "block"
-$env.config.show_banner = false
-
 source ./zoxide.nu
 source ./starship.nu
+source ./carapace.nu
 
 # ls
-alias l  = ls
-alias ll = ls -a
+alias l   = ls
+alias ll  = ls -a
+alias lll = ls -al
 
 # neovim
 alias v = nvim

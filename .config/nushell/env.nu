@@ -1,18 +1,16 @@
 # env.nu
-#
-# Installed by:
-# version = "0.107.0"
-#
-# Previously, environment variables were typically configured in `env.nu`.
-# In general, most configuration can and should be performed in `config.nu`
-# or one of the autoload directories.
-#
-# This file is generated for backwards compatibility for now.
-# It is loaded before config.nu and login.nu
-#
-# See https://www.nushell.sh/book/configuration.html
-#
-# Also see `help config env` for more options.
-#
-# You can remove these comments if you want or leave
-# them for future reference.
+
+$env.config.edit_mode = 'vi'
+$env.config.buffer_editor = 'helix'
+$env.config.cursor_shape.vi_insert = "line"
+$env.config.cursor_shape.vi_normal = "block"
+$env.config.show_banner = false
+$env.CARAPACE_BRIDGES = 'zsh,fish,bash,inshellisense'
+
+$env.PATH ++= [ '~/.cargo/bin' ]
+$env.PATH ++= [ '~/.local/bin' ]
+$env.PATH ++= [ '~/.config/composer/vendor/bin' ]
+$env.PATH ++= [ '~/.local/share/nvim/mason/bin' ]
+$env.PATH ++= [ '/opt/homebrew/bin' ]
+$env.PATH ++= [ '/opt/homebrew/opt/m4/bin' ]
+$env.PATH ++= [ '/opt/homebrew/opt/llvm/bin' ]
