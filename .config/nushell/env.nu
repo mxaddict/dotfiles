@@ -7,7 +7,7 @@ $env.config.cursor_shape.vi_normal = "block"
 $env.config.show_banner = false
 $env.CARAPACE_BRIDGES = 'zsh,fish,bash,inshellisense,cobra'
 
-$env.PATH ++= [
+$env.PATH = ($env.PATH | prepend [
     '~/.cargo/bin',
     '~/.local/bin',
     '~/.config/composer/vendor/bin',
@@ -15,4 +15,8 @@ $env.PATH ++= [
     '/opt/homebrew/bin',
     '/opt/homebrew/opt/m4/bin',
     '/opt/homebrew/opt/llvm/bin',
-]
+])
+
+fnm env --json | from json | load-env
+
+$env.PATH = ($env.PATH | prepend ($env.FNM_MULTISHELL_PATH + '/bin'))

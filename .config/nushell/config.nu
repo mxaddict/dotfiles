@@ -1,8 +1,8 @@
 # config.nu
 
-source ./zoxide.nu
-source ./starship.nu
-source ./carapace.nu
+source ~/.config/nushell/carapace.nu
+source ~/.config/nushell/starship.nu
+source ~/.config/nushell/zoxide.nu
 
 # ls
 alias l   = ls
