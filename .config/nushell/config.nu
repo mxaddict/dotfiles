@@ -36,6 +36,9 @@ alias cl = clear
 # Replace tree command with eza
 alias tree = eza --tree
 
+# nvm lias to fnm
+alias nvm = fnm
+
 # fastfetch
 def ff [] {
     clear

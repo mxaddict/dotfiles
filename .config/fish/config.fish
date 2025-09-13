@@ -127,6 +127,11 @@ alias ll "ls -alF"
 # Clear alias
 alias cl clear
 
+# NVM
+if command -v fnm >/dev/null
+    alias nvm fnm
+end
+
 # I want v to open vi and vi to open vim
 alias n nvim
 alias nv nvim
@@ -177,13 +182,6 @@ set -g fish_pager_color_selected_background --background=$selection
 
 # Turn on vi mode for fish
 fish_vi_key_bindings
-
-# Make copy and paste use system clipboard as well
-function fish_user_key_bindings
-    bind -M visual y fish_clipboard_copy
-    bind -M default yy fish_clipboard_copy
-    bind -M default p fish_clipboard_paste
-end
 
 # Load fzf
 type -q fzf_key_bindings && fzf_key_bindings
