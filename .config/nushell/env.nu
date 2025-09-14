@@ -12,10 +12,10 @@ $env.GPG_TTY = (tty)
 $env.MANGOHUD = 0
 
 $env.PATH = ($env.PATH | prepend [
-    '~/.cargo/bin',
-    '~/.local/bin',
-    '~/.config/composer/vendor/bin',
-    '~/.local/share/nvim/mason/bin',
+    ($env.HOME | path join '.cargo/bin'),
+    ($env.HOME | path join '.local/bin'),
+    ($env.HOME | path join '.config/composer/vendor/bin'),
+    ($env.HOME | path join '.local/share/nvim/mason/bin'),
     '/opt/homebrew/bin',
     '/opt/homebrew/opt/m4/bin',
     '/opt/homebrew/opt/llvm/bin',
@@ -23,7 +23,7 @@ $env.PATH = ($env.PATH | prepend [
 
 if not (which fnm | is-empty) {
     fnm env --json | from json | load-env
-    $env.PATH = ($env.PATH | prepend ($env.FNM_MULTISHELL_PATH + '/bin'))
+    $env.PATH = ($env.PATH | prepend ($env.FNM_MULTISHELL_PATH | path join 'bin'))
 }
 
 $env.JOBS = (.nproc)
