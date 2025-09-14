@@ -8,6 +8,8 @@ $env.config.show_banner = false
 $env.CARAPACE_BRIDGES = 'zsh,fish,bash,inshellisense,cobra'
 $env.COLORTERM = "truecolor"
 $env.LANG = "en_US.UTF-8"
+$env.GPG_TTY = (tty)
+$env.MANGOHUD = 0
 
 $env.PATH = ($env.PATH | prepend [
     '~/.cargo/bin',
@@ -22,3 +24,5 @@ $env.PATH = ($env.PATH | prepend [
 fnm env --json | from json | load-env
 
 $env.PATH = ($env.PATH | prepend ($env.FNM_MULTISHELL_PATH + '/bin'))
+
+$env.JOBS = (.nproc)
