@@ -29,6 +29,17 @@ alias tree = eza --tree
 
 alias nvm = fnm
 
+alias gi  = git
+alias it  = git
+
+alias fur = git
+alias got = git
+alias gti = git
+alias gto = git
+alias gut = git
+alias hot = git
+alias tgi = git
+
 alias ":q!" = exit
 alias ":q" = exit
 alias ":qa!" = exit
@@ -53,17 +64,4 @@ def gg [] {
     git add .; git commit -m (quoty)
     git pull --no-edit
     git push
-}
-
-alias gi  = got
-alias gti = got
-alias gto = got
-alias tgi = got
-alias gut = got
-alias fur = got
-alias hot = got
-
-def got [ ...args ] {
-    print "Hey! Fat fingers!!!"
-    git ...$args
 }
