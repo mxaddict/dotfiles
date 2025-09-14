@@ -8,6 +8,9 @@ rulers = [120]
 true-color = true
 end-of-line-diagnostics = "warning"
 
+[editor.statusline]
+left = ["mode", "spinner", "version-control", "file-name"]
+
 [editor.inline-diagnostics]
 cursor-line = "hint"
 other-lines = "error"
@@ -23,3 +26,9 @@ select = "block"
 [editor.indent-guides]
 character = "╎"
 render = true
+
+[keys.normal]
+X = "select_line_above"
+
+[keys.select]
+X = "select_line_above"
