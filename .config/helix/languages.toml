@@ -3,6 +3,10 @@ name = "rust"
 auto-format = true
 
 [[language]]
+name = "nu"
+auto-format = true
+
+[[language]]
 name = "toml"
 auto-format = true
 language-servers = ["taplo"]
@@ -12,3 +16,28 @@ name = "markdown"
 auto-format = true
 language-servers = ["markdown-oxide"]
 formatter = { command = "prettier", args = ["--parser", "markdown"] }
+
+[[language]]
+name = "vue"
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "vue"] }
+
+[[language]]
+name = "html"
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "html"] }
+
+[[language]]
+name = "typescript"
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "typescript"] }
+
+[[language]]
+name = "javascript"
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "babel"] }
+
+[[language]]
+name = "php"
+auto-format = true
+formatter = { command = "sh", args = ["-c", "phpcbf --standard=PSR12; exit 0"] }

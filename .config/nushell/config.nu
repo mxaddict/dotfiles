@@ -55,6 +55,7 @@ def gg [] {
 }
 
 # More git
+alias gi  = got
 alias gti = got
 alias gto = got
 alias tgi = got
