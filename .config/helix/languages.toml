@@ -22,18 +22,12 @@ auto-format = true
 [[language]]
 name = "markdown"
 auto-format = true
-language-servers = ["markdown-oxide"]
 formatter = { command = "prettier", args = ["--parser", "markdown"] }
 
 [[language]]
 name = "vue"
 auto-format = true
 formatter = { command = "prettier", args = ["--parser", "vue"] }
-
-[[language]]
-name = "html"
-auto-format = true
-formatter = { command = "prettier", args = ["--parser", "html"] }
 
 [[language]]
 name = "typescript"
