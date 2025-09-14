@@ -1,9 +1,20 @@
 theme = "tokyonight"
 
+[editor]
+bufferline = "always"
+cursorline = true
+line-number = "relative"
+rulers = [120]
+true-color = true
+
 [editor.file-picker]
 hidden = false
 
 [editor.cursor-shape]
-normal = "block"
 insert = "bar"
+normal = "block"
 select = "block"
+
+[editor.indent-guides]
+character = "╎"
+render = true
