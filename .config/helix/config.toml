@@ -6,6 +6,11 @@ cursorline = true
 line-number = "relative"
 rulers = [120]
 true-color = true
+end-of-line-diagnostics = "warning"
+
+[editor.inline-diagnostics]
+cursor-line = "hint"
+other-lines = "error"
 
 [editor.file-picker]
 hidden = false
