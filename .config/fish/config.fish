@@ -24,7 +24,7 @@ set -gx GPG_TTY "$(tty)"
 set -gx PHP_CS_FIXER_IGNORE_ENV 1
 
 # Set JOSBS
-set -gx JOBS "$(nproc)"
+set -gx JOBS "$(.nproc)"
 
 # Add makeflags
 set -gx MAKEFLAGS "-j$JOBS"
@@ -66,13 +66,6 @@ set -gx FZF_DEFAULT_OPTS "$FZF_DEFAULT_OPTS \
 if command -v -q batcat
     function bat
         batcat
-    end
-end
-
-# Check for nproc
-if not command -v -q nproc
-    function nproc
-        sysctl -n hw.physicalcpu
     end
 end
 

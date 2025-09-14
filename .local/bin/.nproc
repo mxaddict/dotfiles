@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+# vi: ft=sh
+
+if command -v nproc >/dev/null; then
+    nproc
+else
+    sysctl -n hw.physicalcpu
+fi
