@@ -18,7 +18,6 @@ auto-format = true
 [[language]]
 name = "toml"
 auto-format = true
-language-servers = ["taplo"]
 
 [[language]]
 name = "markdown"
