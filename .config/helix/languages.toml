@@ -7,6 +7,15 @@ name = "nu"
 auto-format = true
 
 [[language]]
+name = "bash"
+auto-format = true
+formatter = { command = "shfmt" }
+
+[[language]]
+name = "fish"
+auto-format = true
+
+[[language]]
 name = "toml"
 auto-format = true
 language-servers = ["taplo"]
