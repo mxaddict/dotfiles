@@ -1,1 +1,14 @@
+[[language]]
+name = "rust"
 auto-format = true
+
+[[language]]
+name = "toml"
+auto-format = true
+language-servers = ["taplo"]
+
+[[language]]
+name = "markdown"
+auto-format = true
+language-servers = ["markdown-oxide"]
+formatter = { command = "prettier", args = ["--parser", "markdown"] }
