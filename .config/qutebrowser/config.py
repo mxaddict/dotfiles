@@ -66,4 +66,7 @@ config.bind("<z><o><l>", "spawn --userscript qute-pass --otp-only")
 
 config.bind('<c><s>', 'config-source')
 
-config.bind('<escape>', 'clear-keychain ;; search ;; fullscreen --leave ;; fake-key <Escape>', mode='normal')
+config.bind('<esc>', 'clear-keychain ;; search ;; fullscreen --leave ;; fake-key <esc>', mode='normal')
+
+config.bind('<space><space>', 'cmd-set-text :open -t', mode='normal')
+config.bind('<space><f>', 'cmd-set-text :open -t {url:pretty}', mode='normal')
