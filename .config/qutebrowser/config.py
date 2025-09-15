@@ -1,10 +1,16 @@
 import os
+from qutebrowser.config.configfiles import ConfigAPI  # noqa: F401
+from qutebrowser.config.config import ConfigContainer  # noqa: F401
+config: ConfigAPI = config  # noqa: F821 pylint: disable=E0602,C0103
+c: ConfigContainer = c  # noqa: F821 pylint: disable=E0602,C0103
 
 user = os.getlogin()
 
 config.load_autoconfig()
 
 c.auto_save.session = True
+
+c.editor.command = ["alacritty", "-e", "helix", "{file}"]
 
 config.set(
     "content.headers.user_agent",
@@ -57,3 +63,7 @@ config.bind("<z><l>", "spawn --userscript qute-pass")
 config.bind("<z><u><l>", "spawn --userscript qute-pass --username-only")
 config.bind("<z><p><l>", "spawn --userscript qute-pass --password-only")
 config.bind("<z><o><l>", "spawn --userscript qute-pass --otp-only")
+
+config.bind('<c><s>', 'config-source')
+
+config.bind('<escape>', 'clear-keychain ;; search ;; fullscreen --leave ;; fake-key <Escape>', mode='normal')
