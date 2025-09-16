@@ -12,9 +12,6 @@ alias v = nvim
 alias vi = nvim
 alias vim = nvim
 
-alias h  = helix
-alias hx = helix
-
 alias c = cmatrix
 
 alias lg = lazygit
