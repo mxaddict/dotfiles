@@ -70,9 +70,9 @@ if command -v -q batcat
 end
 
 # Check for exa and alias to eza
-if command -v -q exa
+if not command -v -q eza
     function eza
-        exa
+        exa $argv
     end
 end
 
@@ -147,7 +147,7 @@ end
 
 # Replace default ls command with eza
 function ls
-    eza --group-directories-first
+    eza --group-directories-first $argv
 end
 
 # Replace tree command with eza
