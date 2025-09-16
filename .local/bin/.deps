@@ -185,19 +185,18 @@ if command -v brew >/dev/null; then
         stow \
         tldr \
         tmux \
-        ufw \
         unzip \
         zoxide
 fi
 
-if command -v apt >/dev/null; then
+if command -v apt-get >/dev/null; then
     [ -f /etc/apt/sources.list.d/fish-shell-ubuntu-release-3-noble.sources ] || sudo apt-add-repository ppa:fish-shell/release-3
     [ -f /etc/apt/sources.list.d/neovim-ppa-ubuntu-unstable-noble.sources ] || sudo add-apt-repository ppa:neovim-ppa/unstable
     [ -f /etc/apt/sources.list.d/zhangsongcui3371-ubuntu-fastfetch-noble.sources ] || sudo add-apt-repository ppa:zhangsongcui3371/fastfetch
     [ -f /etc/apt/sources.list.d/carapace.list ] || echo "deb [trusted=yes] https://apt.fury.io/rsteube/ /" >/etc/apt/sources.list.d/carapace.list
-    sudo apt update
+    sudo apt-get update
 
-    sudo apt install -y \
+    sudo apt-get install -y \
         alacritty \
         bat \
         bear \
