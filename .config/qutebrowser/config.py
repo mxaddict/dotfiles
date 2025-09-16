@@ -11,7 +11,7 @@ config.load_autoconfig()
 
 c.auto_save.session = True
 
-c.editor.command = ["alacritty", "-e", "helix", "{file}"]
+c.editor.command = ["alacritty", "--class", "floating", "-e", "helix", "{file}"]
 
 config.set(
     "content.headers.user_agent",
@@ -60,14 +60,12 @@ config.bind("J", "back")
 config.bind("K", "forward")
 config.bind("L", "tab-next")
 
-config.bind("<z><l>", "spawn --userscript qute-pass")
-config.bind("<z><u><l>", "spawn --userscript qute-pass --username-only")
-config.bind("<z><p><l>", "spawn --userscript qute-pass --password-only")
-config.bind("<z><o><l>", "spawn --userscript qute-pass --otp-only")
-
-config.bind('<c><s>', 'config-source')
-
 config.bind('<esc>', 'clear-keychain ;; search ;; fullscreen --leave ;; fake-key <esc>', mode='normal')
 
-config.bind('<space><space>', 'cmd-set-text :open -t', mode='normal')
-config.bind('<space><f>', 'cmd-set-text :open -t {url:pretty}', mode='normal')
+config.bind('<space><space>', 'edit-url', mode='normal')
+config.bind('<space><r>', 'config-source')
+
+config.bind("<space><l>", "spawn --userscript qute-pass")
+config.bind("<space><u><l>", "spawn --userscript qute-pass --username-only")
+config.bind("<space><p><l>", "spawn --userscript qute-pass --password-only")
+config.bind("<space><o><l>", "spawn --userscript qute-pass --otp-only")
