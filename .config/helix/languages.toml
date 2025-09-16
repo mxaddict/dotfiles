@@ -20,6 +20,16 @@ name = "toml"
 auto-format = true
 
 [[language]]
+name = "css"
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "css"] }
+
+[[language]]
+name = "scss"
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "scss"] }
+
+[[language]]
 name = "markdown"
 auto-format = true
 formatter = { command = "prettier", args = ["--parser", "markdown"] }
