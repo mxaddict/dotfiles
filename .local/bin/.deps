@@ -188,9 +188,6 @@ if command -v brew >/dev/null; then
         ufw \
         unzip \
         zoxide
-
-    rustup install stable
-    rustup default stable
 fi
 
 if command -v apt >/dev/null; then
