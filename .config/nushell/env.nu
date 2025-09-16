@@ -16,6 +16,7 @@ $env.PATH = ($env.PATH | prepend [
     ($env.HOME | path join '.local/bin'),
     ($env.HOME | path join '.config/composer/vendor/bin'),
     ($env.HOME | path join '.local/share/nvim/mason/bin'),
+    '/Library/Application Support/ZeroTier/One',
     '/opt/homebrew/bin',
     '/opt/homebrew/opt/m4/bin',
     '/opt/homebrew/opt/llvm/bin',
