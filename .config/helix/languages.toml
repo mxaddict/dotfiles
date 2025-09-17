@@ -10,6 +10,7 @@ args = ["--stdio"]
 [language-server.vtsls]
 command = "vtsls"
 args = ["--stdio"]
+config.hostInfo = "helix"
 
 [[language]]
 name = "rust"
@@ -52,6 +53,7 @@ formatter = { command = "prettier", args = ["--parser", "markdown"] }
 [[language]]
 name = "vue"
 auto-format = true
+language-servers = ["tailwind", "vtsls", "volar"]
 formatter = { command = "prettier", args = ["--parser", "vue"] }
 
 [[language]]
