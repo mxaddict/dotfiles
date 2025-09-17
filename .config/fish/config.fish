@@ -65,7 +65,7 @@ set -gx FZF_DEFAULT_OPTS "$FZF_DEFAULT_OPTS \
 # Check for batcat
 if command -v -q batcat
     function bat
-        batcat
+        batcat $argv
     end
 end
 
@@ -78,38 +78,38 @@ end
 
 # Replace cat with bat
 function cat
-    bat --plain
+    bat --plain $argv
 end
 
 # Alias for cmatrix
 function c
-    cmatrix
+    cmatrix $argv
 end
 
 # Git typo
 function got
     echo "Hey! Fat fingers!!!"
-    git
+    git $argv
 end
 
 # More git
 function gti
-    got
+    got $argv
 end
 function gto
-    got
+    got $argv
 end
 function tgi
-    got
+    got $argv
 end
 function gut
-    got
+    got $argv
 end
 function fur
-    got
+    got $argv
 end
 function hot
-    got
+    got $argv
 end
 
 # fastfetch
@@ -120,7 +120,7 @@ end
 
 # Alias for lazygit
 function lg
-    lazygit
+    lazygit $argv
 end
 
 # Alias for quick and dirty git commit
@@ -137,12 +137,12 @@ end
 
 # Alias for kweri
 function q
-    kweri
+    kweri $argv
 end
 
 # Add navcoin alias
 function nav
-    navcoin-cli
+    navcoin-cli $argv
 end
 
 # Replace default ls command with eza
@@ -174,36 +174,28 @@ end
 # NVM
 if command -v -q fnm
     function nvm
-        fnm
+        fnm $argv
     end
 end
 
 # I want v to open vi and vi to open vim
 function n
-    nvim
+    nvim $argv
 end
 function nv
-    nvim
+    nvim $argv
 end
 function nvi
-    nvim
+    nvim $argv
 end
 function v
-    nvim
+    nvim $argv
 end
 function vi
-    nvim
+    nvim $argv
 end
 function vim
-    nvim
-end
-
-# Helix... Maybe replacing vim/nvim?
-function h
-    helix
-end
-function hx
-    helix
+    nvim $argv
 end
 
 # TokyoNight Color Palette
