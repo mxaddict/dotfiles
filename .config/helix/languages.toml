@@ -1,17 +1,3 @@
-[language-server.volar]
-command = "vue-language-server"
-args = ["--stdio"]
-config = { typescript = { tsdk = "node_modules/typescript/lib/" } }
-
-[language-server.tailwind]
-command = "tailwindcss-language-server"
-args = ["--stdio"]
-
-[language-server.vtsls]
-command = "vtsls"
-args = ["--stdio"]
-config.hostInfo = "helix"
-
 [[language]]
 name = "rust"
 auto-format = true
@@ -36,13 +22,11 @@ auto-format = true
 [[language]]
 name = "css"
 auto-format = true
-language-servers = ["tailwind"]
 formatter = { command = "prettier", args = ["--parser", "css"] }
 
 [[language]]
 name = "scss"
 auto-format = true
-language-servers = ["tailwind"]
 formatter = { command = "prettier", args = ["--parser", "scss"] }
 
 [[language]]
@@ -53,19 +37,27 @@ formatter = { command = "prettier", args = ["--parser", "markdown"] }
 [[language]]
 name = "vue"
 auto-format = true
-language-servers = ["tailwind", "vtsls", "volar"]
+language-servers = ["vuels"]
 formatter = { command = "prettier", args = ["--parser", "vue"] }
+
+[language-server.vuels.config]
+vue = { hybridMode = false }
+typescript = { tsdk = "node_modules/typescript/lib" }
 
 [[language]]
 name = "typescript"
 auto-format = true
-language-servers = ["vtsls"]
 formatter = { command = "prettier", args = ["--parser", "typescript"] }
 
 [[language]]
 name = "javascript"
 auto-format = true
 formatter = { command = "prettier", args = ["--parser", "babel"] }
+
+[[language]]
+name = "html"
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "html"] }
 
 [[language]]
 name = "php"
