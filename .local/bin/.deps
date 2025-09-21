@@ -90,7 +90,7 @@ if command -v pacman >/dev/null; then
         qutebrowser \
         reflector \
         ripgrep \
-        rofi-wayland \
+        rofi \
         rustup \
         sof-firmware \
         starship \
