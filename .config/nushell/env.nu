@@ -6,6 +6,7 @@ $env.config.cursor_shape.vi_insert = "line"
 $env.config.cursor_shape.vi_normal = "block"
 $env.config.show_banner = false
 $env.config.history.sync_on_enter = false
+$env.EDITOR = "hx"
 $env.CARAPACE_BRIDGES = 'zsh,fish,bash,inshellisense,cobra'
 $env.COLORTERM = "truecolor"
 $env.LANG = "en_US.UTF-8"
