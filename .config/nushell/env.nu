@@ -1,7 +1,7 @@
 # env.nu
 
 $env.config.edit_mode = 'vi'
-$env.config.buffer_editor = 'helix'
+$env.config.buffer_editor = 'nvim'
 $env.config.cursor_shape.vi_insert = "line"
 $env.config.cursor_shape.vi_normal = "block"
 $env.config.show_banner = false
