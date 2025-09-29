@@ -180,7 +180,7 @@ if command -v brew >/dev/null; then
         npm \
         nushell \
         ripgrep \
-        rust \
+        rustup \
         starship \
         stow \
         tldr \
@@ -221,19 +221,13 @@ if command -v apt-get >/dev/null; then
         stow \
         tldr \
         tmux \
-        unzip
+        unzip \
+        zoxide
 
-    snap install nushell --classic
     snap install helix --classic
-
-    curl -sS https://starship.rs/install.sh | sh
-    curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
-
-    LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')
-    curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
-    tar xf lazygit.tar.gz lazygit
-    sudo install lazygit /usr/local/bin
-    rm -rf lazygit lazygit.tar.gz
+    snap install lazygit
+    snap install nushell --classic
+    snap install starship --edge
 fi
 
 rustup install stable
