@@ -6,5 +6,8 @@
 -- Set to "intelephense" to use intelephense instead of phpactor.
 vim.g.lazyvim_php_lsp = "intelephense"
 
+-- Disable animations
+vim.g.snacks_animate = false
+
 -- -- Use telescope for picker in himalaya
 -- vim.g.himalaya_folder_picker = "fzflua"
