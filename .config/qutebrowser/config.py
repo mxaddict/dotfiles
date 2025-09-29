@@ -1,9 +1,10 @@
 import os
 from qutebrowser.config.configfiles import ConfigAPI  # noqa: F401
 from qutebrowser.config.config import ConfigContainer  # noqa: F401
+
 config: ConfigAPI = config  # noqa: F821 pylint: disable=E0602,C0103
 c: ConfigContainer = c  # noqa: F821 pylint: disable=E0602,C0103
-config.source('./tokyonight.py')
+config.source("./tokyonight.py")
 
 user = os.getlogin()
 
@@ -11,7 +12,7 @@ config.load_autoconfig()
 
 c.auto_save.session = True
 
-c.editor.command = ["alacritty", "--class", "floating", "-e", "helix", "{file}"]
+c.editor.command = ["alacritty", "--class", "floating", "-e", "nvim", "{file}"]
 
 config.set(
     "content.headers.user_agent",
@@ -60,10 +61,14 @@ config.bind("J", "back")
 config.bind("K", "forward")
 config.bind("L", "tab-next")
 
-config.bind('<esc>', 'clear-keychain ;; search ;; fullscreen --leave ;; fake-key <esc>', mode='normal')
+config.bind(
+    "<esc>",
+    "clear-keychain ;; search ;; fullscreen --leave ;; fake-key <esc>",
+    mode="normal",
+)
 
-config.bind('<space><space>', 'edit-url', mode='normal')
-config.bind('<space><r>', 'config-source')
+config.bind("<space><space>", "edit-url", mode="normal")
+config.bind("<space><r>", "config-source")
 
 config.bind("<space><l>", "spawn --userscript qute-pass")
 config.bind("<space><u><l>", "spawn --userscript qute-pass --username-only")
