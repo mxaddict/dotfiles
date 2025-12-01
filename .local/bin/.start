@@ -2,8 +2,8 @@
 # vi: ft=sh
 
 qutebrowser &
-#discord &
-#teams-for-linux &
+discord &
+teams-for-linux &
 thunderbird &
-#spotify-launcher &
+spotify-launcher &
 steam &

@@ -152,18 +152,18 @@ end
 
 # Replace tree command with eza
 function tree
-    eza --tree
+    eza --tree $argv
 end
 
 # Some more ls
 function l
-    ls -lF
+    ls -lF $argv
 end
 function la
-    ls -aF
+    ls -aF $argv
 end
 function ll
-    ls -alF
+    ls -alF $argv
 end
 
 # Clear alias
