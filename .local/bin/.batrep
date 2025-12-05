@@ -3,6 +3,8 @@
 
 LOG_FILE="$HOME/.local/log/bathist.log"
 
+cat "$LOG_FILE"
+
 awk -F', ' '
 BEGIN {
     total_change = 0
