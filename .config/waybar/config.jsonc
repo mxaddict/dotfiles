@@ -49,8 +49,8 @@
         "tooltip-format": "Profile: {profile}\nDriver: {driver}",
         "tooltip": true,
         "format-icons": {
-            "default": "󱤎",
-            "performance": "󱤎",
+            "default": "󰓅",
+            "performance": "󰓅",
             "balanced": "",
             "power-saver": "",
         },
