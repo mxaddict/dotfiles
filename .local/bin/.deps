@@ -80,6 +80,7 @@ if command -v pacman >/dev/null; then
         pipewire \
         pipewire-alsa \
         pipewire-pulse \
+        power-profiles-daemon \
         python-tldextract \
         qalculate-qt \
         qt5-wayland \
@@ -100,7 +101,6 @@ if command -v pacman >/dev/null; then
         tealdeer \
         terminus-font \
         thunderbird \
-        tlp \
         tmux \
         ttf-hack \
         ttf-hack-nerd \
@@ -136,9 +136,9 @@ if command -v pacman >/dev/null; then
 
     sudo mkinitcpio -P
 
-    sudo systemctl mask systemd-rfkill.socket
-    sudo systemctl mask systemd-rfkill.service
-    sudo systemctl mask power-profiles-daemon.service
+    sudo systemctl unmask systemd-rfkill.socket
+    sudo systemctl unmask systemd-rfkill.service
+    sudo systemctl unmask power-profiles-daemon.service
     sudo systemctl disable display-manager.service
 
     sudo systemctl enable kanata
@@ -147,8 +147,8 @@ if command -v pacman >/dev/null; then
     sudo systemctl enable NetworkManager
     sudo systemctl enable NetworkManager-dispatcher
     sudo systemctl enable ufw
-    sudo systemctl enable tlp
     sudo systemctl enable avahi-daemon
+    sudo systemctl enable power-profiles-daemon
 
     sudo ufw allow ssh
     sudo ufw allow mdns

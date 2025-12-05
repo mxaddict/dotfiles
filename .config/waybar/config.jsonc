@@ -6,7 +6,13 @@
     "passthrough": false,
     "gtk-layer-shell": true,
     "height": 50,
-    "modules-left": ["custom/power", "battery", "network", "bluetooth"],
+    "modules-left": [
+        "custom/power",
+        "battery",
+        "power-profiles-daemon",
+        "network",
+        "bluetooth",
+    ],
     "modules-center": ["hyprland/workspaces"],
     "modules-right": [
         "tray",
@@ -38,6 +44,18 @@
         "format": " {percentage_used}%",
     },
 
+    "power-profiles-daemon": {
+        "format": "{icon}",
+        "tooltip-format": "Profile: {profile}\nDriver: {driver}",
+        "tooltip": true,
+        "format-icons": {
+            "default": "",
+            "performance": "",
+            "balanced": "",
+            "power-saver": "",
+        },
+    },
+
     "bluetooth": {
         "format-icons": {
             "default": "󰂯",
@@ -53,7 +71,7 @@
 
     "battery": {
         "format": "{icon}",
-        "format-charging": "󱐋",
+        "format-charging": ["", "", "", "", ""],
         "format-plugged": "",
         "format-icons": ["", "", "", "", ""],
         "tooltip-format": "{capacity}% {power}W {timeTo}",

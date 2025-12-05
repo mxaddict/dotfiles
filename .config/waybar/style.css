@@ -1,75 +1,76 @@
 * {
-    border: none;
-    border-radius: 0;
-    font-family: "Hack Nerd Font Propo";
-    font-weight: normal;
-    font-size: 16px;
-    min-height: 16px;
+  border: none;
+  border-radius: 0;
+  font-family: "Hack Nerd Font Propo";
+  font-weight: normal;
+  font-size: 16px;
+  min-height: 16px;
 }
 
 window#waybar {
-    background: transparent;
-    color: #cdd6f4;
+  background: transparent;
+  color: #cdd6f4;
 }
 
 tooltip {
-    background: #1e1e2e;
-    color: #cdd6f4;
+  background: #1e1e2e;
+  color: #cdd6f4;
 }
 
 #battery,
+#bluetooth,
 #clock,
 #cpu,
 #custom-notification,
 #custom-power,
 #disk,
 #memory,
-#bluetooth,
 #network,
+#power-profiles-daemon,
 #pulseaudio,
 #temperature,
 #tray,
 #window,
 #workspaces {
-    background: #1a1b26;
-    opacity: 0.8;
-    padding: 0px 12px;
-    margin: 2px 0px;
-    margin-top: 10px;
-    border: #2bc5e3 2px solid;
-    border-radius: 8px;
-    margin-left: 10px;
-    margin-right: 0px;
-    min-width: 20px;
+  background: #1a1b26;
+  opacity: 0.8;
+  padding: 0px 12px;
+  margin: 2px 0px;
+  margin-top: 10px;
+  border: #2bc5e3 2px solid;
+  border-radius: 8px;
+  margin-left: 10px;
+  margin-right: 0px;
+  min-width: 20px;
 }
 
 #workspaces button {
-    padding: 0 10px;
+  padding: 0 10px;
 }
 
 #workspaces button.active,
 #workspaces button:hover {
-    color: #2bc5e3;
+  color: #2bc5e3;
 }
 
 #battery.critical,
 #temperature.critical {
-    color: #e92d4d;
+  color: #e92d4d;
 }
 
 #battery.warning,
 #temperature.warning {
-    color: #fc4c02;
+  color: #fc4c02;
 }
 
 #custom-notification {
-    margin-right: 10px;
+  margin-right: 10px;
 }
 
 #pulseaudio {
-    color: #89b4fa;
+  color: #89b4fa;
 }
 
 #pulseaudio.microphone {
-    color: #cba6f7;
+  color: #cba6f7;
 }
