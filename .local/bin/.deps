@@ -32,6 +32,7 @@ if command -v pacman >/dev/null; then
         chromium \
         cronie \
         curl \
+        discord \
         duf \
         dysk \
         ethtool \
@@ -94,11 +95,13 @@ if command -v pacman >/dev/null; then
         rofi \
         rustup \
         sof-firmware \
+        spotify-launcher \
         starship \
         stow \
         swaync \
         swayosd \
         tealdeer \
+        teams-for-linux \
         terminus-font \
         thunderbird \
         tmux \
