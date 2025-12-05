@@ -49,8 +49,8 @@
         "tooltip-format": "Profile: {profile}\nDriver: {driver}",
         "tooltip": true,
         "format-icons": {
-            "default": "",
-            "performance": "",
+            "default": "󱤎",
+            "performance": "󱤎",
             "balanced": "",
             "power-saver": "",
         },
@@ -71,7 +71,7 @@
 
     "battery": {
         "format": "{icon}",
-        "format-charging": ["", "", "", "", ""],
+        "format-charging": "󱐋",
         "format-plugged": "",
         "format-icons": ["", "", "", "", ""],
         "tooltip-format": "{capacity}% {power}W {timeTo}",
