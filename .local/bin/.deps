@@ -153,8 +153,11 @@ if command -v pacman >/dev/null; then
     sudo systemctl enable avahi-daemon
     sudo systemctl enable power-profiles-daemon
 
+    sudo ufw allow http
+    sudo ufw allow https
     sudo ufw allow ssh
     sudo ufw allow mdns
+    sudo ufw allow 6660
     sudo ufw allow 9993/udp                                   # zerotier port
     sudo ufw allow proto udp from any to any port 27031:27036 # steam
     sudo ufw allow proto tcp from any to any port 27040       # steam
