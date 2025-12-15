@@ -29,6 +29,7 @@ if command -v pacman >/dev/null; then
         brightnessctl \
         btop \
         carapace-bin \
+        catppuccin-sddm-theme-macchiato \
         chromium \
         cronie \
         curl \
@@ -62,7 +63,6 @@ if command -v pacman >/dev/null; then
         kooha \
         lazygit \
         libadwaita \
-        ly \
         man-db \
         nautilus \
         neovim \
@@ -94,6 +94,7 @@ if command -v pacman >/dev/null; then
         ripgrep \
         rofi \
         rustup \
+        sddm \
         sof-firmware \
         spotify-launcher \
         starship \
@@ -123,19 +124,14 @@ if command -v pacman >/dev/null; then
         zerotier-one \
         zoxide
 
-    sudo rm /etc/ly/config.ini
-    sudo rm /usr/lib/systemd/system/ly.service
-
     export DOTROOT="$HOME/.files/.root"
     sudo cp "$DOTROOT/etc/kanata.kbd" /etc/kanata.kbd
-    sudo cp "$DOTROOT/etc/ly/config.ini" /etc/ly/config.ini
     sudo cp "$DOTROOT/etc/mkinitcpio.conf" /etc/mkinitcpio.conf
     sudo cp "$DOTROOT/etc/pacman.conf" /etc/pacman.conf
+    sudo cp "$DOTROOT/etc/sddm.conf" /etc/sddm.conf
     sudo cp "$DOTROOT/etc/systemd/logind.conf" /etc/systemd/logind.conf
     sudo cp "$DOTROOT/etc/systemd/sleep.conf" /etc/systemd/sleep.conf
-    sudo cp "$DOTROOT/etc/tlp.conf" /etc/tlp.conf
     sudo cp "$DOTROOT/etc/vconsole.conf" /etc/vconsole.conf
-    sudo cp "$DOTROOT/usr/lib/systemd/system/ly.service" /usr/lib/systemd/system/ly.service
 
     sudo mkinitcpio -P
 
@@ -144,8 +140,9 @@ if command -v pacman >/dev/null; then
     sudo systemctl unmask power-profiles-daemon.service
     sudo systemctl disable display-manager.service
 
+    sudo systemctl enable sddm
+
     sudo systemctl enable kanata
-    sudo systemctl enable ly.service
     sudo systemctl enable bluetooth
     sudo systemctl enable NetworkManager
     sudo systemctl enable NetworkManager-dispatcher
