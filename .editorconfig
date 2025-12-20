@@ -12,3 +12,7 @@ indent_size = 2
 
 [*.gitconfig]
 indent_style = tab
+
+[*.gd]
+indent_style = tab
+indent_size = 4
