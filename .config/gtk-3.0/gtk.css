@@ -93,3 +93,4 @@
 @define-color shade_color #000000;
 @define-color backdrop_color #404753;
 @define-color overlay_color #000000;
+@import 'colors.css';
