@@ -29,11 +29,11 @@ if command -v pacman >/dev/null; then
         brightnessctl \
         btop \
         carapace-bin \
-        catppuccin-sddm-theme-macchiato \
         chromium \
         cronie \
         curl \
         discord \
+        dolphin \
         duf \
         dysk \
         ethtool \
@@ -64,7 +64,6 @@ if command -v pacman >/dev/null; then
         lazygit \
         libadwaita \
         man-db \
-        nautilus \
         neovim \
         networkmanager \
         nmap \
@@ -81,6 +80,7 @@ if command -v pacman >/dev/null; then
         pipewire \
         pipewire-alsa \
         pipewire-pulse \
+        plasma \
         power-profiles-daemon \
         python-tldextract \
         qalculate-qt \
