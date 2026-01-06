@@ -45,6 +45,7 @@ if command -v pacman >/dev/null; then
         fzf \
         git \
         gnu-free-fonts \
+        gnupg \
         grimblast-git \
         gst-libav \
         gst-plugins-bad \
