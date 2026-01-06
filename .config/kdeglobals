@@ -134,12 +134,15 @@ ForegroundVisited=155,89,182
 
 [General]
 ColorSchemeHash=2c3f86428c11011a7c64ee1e7f47c274d498ff10
+TerminalApplication=alacritty
+TerminalService=Alacritty.desktop
 
 [Icons]
-Theme=Papirus-Dark
+Theme=breeze-dark
 
 [KDE]
-LookAndFeelPackage=org.kde.breezedark.desktop
+AnimationDurationFactor=0.25
+widgetStyle=Breeze
 
 [WM]
 activeBackground=39,44,49

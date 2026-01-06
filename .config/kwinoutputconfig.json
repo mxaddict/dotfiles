@@ -27,37 +27,7 @@
                 "sdrBrightness": 200,
                 "sdrGamutWideness": 0,
                 "transform": "Normal",
-                "uuid": "9ff7e3f5-897f-4a0d-8b24-8c04ccc004a2",
-                "vrrPolicy": "Never",
-                "wideColorGamut": false
-            },
-            {
-                "allowDdcCi": true,
-                "allowSdrSoftwareBrightness": false,
-                "autoRotation": "InTabletMode",
-                "brightness": 1,
-                "colorPowerTradeoff": "PreferEfficiency",
-                "colorProfileSource": "sRGB",
-                "connectorName": "HDMI-A-1",
-                "detectedDdcCi": true,
-                "edidHash": "798b8990dc0579cf60a0c41f74eb2f3f",
-                "edidIdentifier": "AOC 46083 4850 8 2024 0",
-                "edrPolicy": "always",
-                "highDynamicRange": false,
-                "iccProfilePath": "",
-                "maxBitsPerColor": 0,
-                "mode": {
-                    "height": 1440,
-                    "refreshRate": 144001,
-                    "width": 2560
-                },
-                "overscan": 0,
-                "rgbRange": "Automatic",
-                "scale": 1,
-                "sdrBrightness": 417,
-                "sdrGamutWideness": 0,
-                "transform": "Normal",
-                "uuid": "50a9b7f7-2f15-42e6-a17f-0a14d8e3bee4",
+                "uuid": "de5aa853-aa8e-4aa0-a02d-29db1508e87a",
                 "vrrPolicy": "Never",
                 "wideColorGamut": false
             }
@@ -72,16 +42,6 @@
                     {
                         "enabled": true,
                         "outputIndex": 0,
-                        "position": {
-                            "x": 0,
-                            "y": 1440
-                        },
-                        "priority": 1,
-                        "replicationSource": ""
-                    },
-                    {
-                        "enabled": true,
-                        "outputIndex": 1,
                         "position": {
                             "x": 0,
                             "y": 0

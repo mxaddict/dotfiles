@@ -1,16 +1,18 @@
 [Desktops]
-Id_1=1d142352-dbfd-42f1-a9b2-0038c9725a6b
+Id_1=5b7df7ef-87ec-41a3-95a7-565a81bace4b
 Number=1
 Rows=1
 
 [Tiling]
 padding=4
 
-[Tiling][1d142352-dbfd-42f1-a9b2-0038c9725a6b][50a9b7f7-2f15-42e6-a17f-0a14d8e3bee4]
-tiles={"layoutDirection":"horizontal","tiles":[{"width":0.25},{"width":0.5},{"width":0.25}]}
-
-[Tiling][1d142352-dbfd-42f1-a9b2-0038c9725a6b][9ff7e3f5-897f-4a0d-8b24-8c04ccc004a2]
+[Tiling][5b7df7ef-87ec-41a3-95a7-565a81bace4b][de5aa853-aa8e-4aa0-a02d-29db1508e87a]
 tiles={"layoutDirection":"horizontal","tiles":[{"width":0.25},{"width":0.5},{"width":0.25}]}
 
 [Xwayland]
 Scale=1
+
+[org.kde.kdecoration2]
+NoPlugin=false
+library=org.kde.breeze
+theme=Breeze
