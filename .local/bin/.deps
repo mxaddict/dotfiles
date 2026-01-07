@@ -60,6 +60,7 @@ if command -v pacman >/dev/null; then
         kooha \
         lazygit \
         libadwaita \
+        ly \
         man-db \
         nautilus \
         neovim \
