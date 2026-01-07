@@ -21,7 +21,7 @@ plugin=org.kde.plasma.kickoff
 [Containments][23][Applets][24][Configuration]
 PreloadWeight=100
 popupHeight=569
-popupWidth=647
+popupWidth=715
 
 [Containments][23][Applets][24][Configuration][ConfigDialog]
 DialogHeight=540
@@ -122,6 +122,13 @@ plugin=org.kde.plasma.weather
 immutability=1
 plugin=org.kde.plasma.keyboardindicator
 
+[Containments][23][Applets][28][Applets][45]
+immutability=1
+plugin=org.kde.plasma.volume
+
+[Containments][23][Applets][28][Applets][45][Configuration][General]
+migrated=true
+
 [Containments][23][Applets][28][Applets][46]
 immutability=1
 plugin=org.kde.plasma.bluetooth
@@ -162,6 +169,7 @@ SlidePaths=/usr/share/wallpapers/
 
 [Containments][45]
 ItemGeometries-1920x1080=
+ItemGeometries-2560x1440=
 ItemGeometriesHorizontal=
 activityId=5b70c697-3e88-4c7f-8f49-454f5d70249d
 formfactor=0
