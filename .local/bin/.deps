@@ -56,6 +56,7 @@ if command -v pacman >/dev/null; then
         hyprpaper \
         hyprpicker \
         hyprpolkitagent \
+        hyprqt6engine \
         kanata \
         kooha \
         lazygit \
@@ -83,10 +84,8 @@ if command -v pacman >/dev/null; then
         python-tldextract \
         qalculate-qt \
         qt5-wayland \
-        qt5ct \
         qt6-wayland \
         qt6-webengine \
-        qt6ct \
         qutebrowser \
         reflector \
         ripgrep \
