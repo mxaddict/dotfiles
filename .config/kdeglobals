@@ -144,6 +144,7 @@ Theme=Papirus-Dark
 [KDE]
 AnimationDurationFactor=0.25
 LookAndFeelPackage=org.kde.breezedark.desktop
+widgetStyle=Breeze
 
 [KFileDialog Settings]
 Allow Expansion=false
