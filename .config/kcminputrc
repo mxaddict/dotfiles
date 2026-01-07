@@ -1,0 +1,13 @@
+[Libinput][13652][62728][pulsar X2 V2]
+NaturalScroll=true
+PointerAccelerationProfile=1
+
+[Libinput][13652][62728][pulsar X2 V2 Consumer Control]
+NaturalScroll=true
+
+[Libinput][1739][52837][VEN_06CB:00 06CB:CE65 Touchpad]
+NaturalScroll=true
+PointerAccelerationProfile=1
+
+[Mouse]
+cursorTheme=Breeze_Light
