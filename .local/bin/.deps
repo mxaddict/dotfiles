@@ -28,8 +28,6 @@ if command -v pacman >/dev/null; then
         breeze \
         brightnessctl \
         btop \
-        carapace-bin \
-        catppuccin-sddm-theme-macchiato \
         chromium \
         cronie \
         curl \
@@ -52,7 +50,6 @@ if command -v pacman >/dev/null; then
         gst-plugins-base \
         gst-plugins-good \
         gst-plugins-ugly \
-        helix \
         hypridle \
         hyprland \
         hyprlock \
@@ -64,7 +61,7 @@ if command -v pacman >/dev/null; then
         lazygit \
         libadwaita \
         man-db \
-        nautilus \
+        nemo \
         neovim \
         networkmanager \
         nmap \
@@ -72,8 +69,8 @@ if command -v pacman >/dev/null; then
         noto-fonts-cjk \
         noto-fonts-emoji \
         npm \
-        nushell \
         nwg-displays \
+        nwg-look \
         papirus-icon-theme \
         pass \
         pass-otp \
@@ -94,7 +91,6 @@ if command -v pacman >/dev/null; then
         ripgrep \
         rofi \
         rustup \
-        sddm \
         sof-firmware \
         spotify-launcher \
         starship \
@@ -106,6 +102,7 @@ if command -v pacman >/dev/null; then
         terminus-font \
         thunderbird \
         tmux \
+        traceroute \
         ttf-hack \
         ttf-hack-nerd \
         ttf-noto-nerd \
@@ -126,9 +123,9 @@ if command -v pacman >/dev/null; then
 
     export DOTROOT="$HOME/.files/.root"
     sudo cp "$DOTROOT/etc/kanata.kbd" /etc/kanata.kbd
+    sudo cp "$DOTROOT/etc/ly/config.ini" /etc/ly/config.ini
     sudo cp "$DOTROOT/etc/mkinitcpio.conf" /etc/mkinitcpio.conf
     sudo cp "$DOTROOT/etc/pacman.conf" /etc/pacman.conf
-    sudo cp "$DOTROOT/etc/sddm.conf" /etc/sddm.conf
     sudo cp "$DOTROOT/etc/systemd/logind.conf" /etc/systemd/logind.conf
     sudo cp "$DOTROOT/etc/systemd/sleep.conf" /etc/systemd/sleep.conf
     sudo cp "$DOTROOT/etc/vconsole.conf" /etc/vconsole.conf
@@ -140,7 +137,7 @@ if command -v pacman >/dev/null; then
     sudo systemctl unmask power-profiles-daemon.service
     sudo systemctl disable display-manager.service
 
-    sudo systemctl enable sddm
+    sudo systemctl enable ly@tty2.service
 
     sudo systemctl enable kanata
     sudo systemctl enable bluetooth
@@ -154,7 +151,7 @@ if command -v pacman >/dev/null; then
     sudo ufw allow https
     sudo ufw allow ssh
     sudo ufw allow mdns
-    sudo ufw allow 6660
+    sudo ufw allow 42069                                      # COT
     sudo ufw allow 9993/udp                                   # zerotier port
     sudo ufw allow proto udp from any to any port 27031:27036 # steam
     sudo ufw allow proto tcp from any to any port 27040       # steam
@@ -169,19 +166,16 @@ if command -v brew >/dev/null; then
         bat \
         bear \
         btop \
-        carapace \
         eza \
         fastfetch \
         fd \
         fish \
         fzf \
         git \
-        helix \
         lazygit \
         neovim \
         nodejs \
         npm \
-        nushell \
         ripgrep \
         rustup \
         starship \
@@ -196,7 +190,6 @@ if command -v apt-get >/dev/null; then
     [ -f /etc/apt/sources.list.d/fish-shell-ubuntu-release-3-noble.sources ] || sudo apt-add-repository ppa:fish-shell/release-3
     [ -f /etc/apt/sources.list.d/neovim-ppa-ubuntu-unstable-noble.sources ] || sudo add-apt-repository ppa:neovim-ppa/unstable
     [ -f /etc/apt/sources.list.d/zhangsongcui3371-ubuntu-fastfetch-noble.sources ] || sudo add-apt-repository ppa:zhangsongcui3371/fastfetch
-    [ -f /etc/apt/sources.list.d/carapace.list ] || echo "deb [trusted=yes] https://apt.fury.io/rsteube/ /" >/etc/apt/sources.list.d/carapace.list
     sudo apt-get update
 
     sudo apt-get install -y \
@@ -207,7 +200,6 @@ if command -v apt-get >/dev/null; then
         duf \
         eza \
         fastfetch \
-        carapace-bin \
         fd-find \
         fish \
         fzf \
@@ -226,18 +218,12 @@ if command -v apt-get >/dev/null; then
         tmux \
         unzip \
         zoxide
-
-    snap install helix --classic
-    snap install lazygit
-    snap install nushell --classic
-    snap install starship --edge
 fi
 
 rustup install stable
 rustup default stable
 
 cargo install quoty
-cargo install kweri
 cargo install fnm
 
 touch "$HOME/.files/.deps.lock"

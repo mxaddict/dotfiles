@@ -262,8 +262,3 @@ end
 if command -v -q fnm
     fnm env --shell fish | source
 end
-
-# carapace
-if command -v -q carapace
-    carapace _carapace | source
-end
