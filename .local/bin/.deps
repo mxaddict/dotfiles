@@ -61,7 +61,7 @@ if command -v pacman >/dev/null; then
         lazygit \
         libadwaita \
         man-db \
-        nemo \
+        nautilus \
         neovim \
         networkmanager \
         nmap \
