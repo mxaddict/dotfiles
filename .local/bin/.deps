@@ -117,6 +117,7 @@ if command -v pacman >/dev/null; then
         wireplumber \
         wl-clipboard \
         woff2-font-awesome \
+        xdg-desktop-portal-gtk \
         xdg-desktop-portal-hyprland \
         zerotier-one \
         zoxide
