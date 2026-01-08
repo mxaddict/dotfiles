@@ -41,6 +41,7 @@ if command -v pacman >/dev/null; then
         firefox \
         fish \
         fprintd \
+        fwupd \
         fzf \
         git \
         gnu-free-fonts \
