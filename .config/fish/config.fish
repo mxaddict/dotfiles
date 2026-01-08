@@ -33,9 +33,6 @@ set -gx MAKEFLAGS "-j$JOBS"
 set -gx PARU_PAGER "bat --color=always"
 set -gx MANPAGER "sh -c 'sed -u -e \"s/\\x1B\[[0-9;]*m//g; s/.\\x08//g\" | bat -p -lman'"
 
-# Carapace ENV
-set -gx CARAPACE_BRIDGES 'nu,zsh,fish,bash,inshellisense'
-
 # FZF theme
 set -gx FZF_CTRL_T_OPTS "--preview 'bat -n --color=always {}'"
 set -gx FZF_DEFAULT_OPTS "$FZF_DEFAULT_OPTS \
