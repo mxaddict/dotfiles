@@ -64,6 +64,7 @@ if command -v pacman >/dev/null; then
         libadwaita \
         ly \
         man-db \
+        mpv \
         nautilus \
         neovim \
         networkmanager \
@@ -120,6 +121,7 @@ if command -v pacman >/dev/null; then
         woff2-font-awesome \
         xdg-desktop-portal-gtk \
         xdg-desktop-portal-hyprland \
+        yt-dlp \
         zerotier-one \
         zoxide
 
