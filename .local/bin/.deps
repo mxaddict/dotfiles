@@ -58,6 +58,7 @@ if command -v pacman >/dev/null; then
         hyprpicker \
         hyprpolkitagent \
         hyprqt6engine \
+        imv \
         kanata \
         kooha \
         lazygit \
