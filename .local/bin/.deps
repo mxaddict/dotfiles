@@ -96,6 +96,7 @@ if command -v pacman >/dev/null; then
         rsync \
         rustup \
         sof-firmware \
+        speedtest-cli \
         spotify-launcher \
         starship \
         stow \
