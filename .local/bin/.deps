@@ -18,6 +18,7 @@ if command -v pacman >/dev/null; then
         alacritty \
         alsa-firmware \
         alsa-utils \
+        ardour \
         avahi \
         bat \
         bear \
@@ -30,6 +31,8 @@ if command -v pacman >/dev/null; then
         btop \
         chromium \
         cronie \
+        cups \
+        cups-pdf \
         curl \
         discord \
         duf \
@@ -43,9 +46,11 @@ if command -v pacman >/dev/null; then
         fprintd \
         fwupd \
         fzf \
+        ghostscript \
         git \
         gnu-free-fonts \
         grimblast-git \
+        gsfonts \
         gst-libav \
         gst-plugins-bad \
         gst-plugins-base \
@@ -74,6 +79,7 @@ if command -v pacman >/dev/null; then
         noto-fonts-cjk \
         noto-fonts-emoji \
         npm \
+        nss-mdns \
         nwg-displays \
         nwg-look \
         papirus-icon-theme \
