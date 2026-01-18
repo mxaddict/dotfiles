@@ -8,7 +8,7 @@ add_newline = false
 format = '$all'
 
 [[battery.display]]
-threshold = 50
+threshold = 30
 
 [username]
 disabled = false
