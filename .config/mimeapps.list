@@ -21,3 +21,4 @@ video/mpeg=mpv.desktop
 video/ogg=mpv.desktop
 video/x-ms-wmv=mpv.desktop
 video/mp2t=mpv.desktop
+x-scheme-handler/mailto=org.mozilla.Thunderbird.desktop
