@@ -93,6 +93,7 @@ if command -v pacman >/dev/null; then
         reflector \
         ripgrep \
         rofi \
+        rsync \
         rustup \
         sof-firmware \
         spotify-launcher \
