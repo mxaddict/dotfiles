@@ -78,7 +78,6 @@ if command -v pacman >/dev/null; then
         networkmanager \
         nmap \
         nodejs \
-        notify-send \
         noto-fonts-cjk \
         noto-fonts-emoji \
         npm \
@@ -132,7 +131,6 @@ if command -v pacman >/dev/null; then
         wireless-regdb \
         wireplumber \
         wl-clipboard \
-        wl-copy \
         woff2-font-awesome \
         xdg-desktop-portal-gtk \
         xdg-desktop-portal-hyprland \
