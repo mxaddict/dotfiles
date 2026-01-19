@@ -142,11 +142,12 @@ if command -v pacman >/dev/null; then
     sudo cp "$DOTROOT/etc/pacman.conf" /etc/pacman.conf
     sudo cp "$DOTROOT/etc/systemd/logind.conf" /etc/systemd/logind.conf
     sudo cp "$DOTROOT/etc/systemd/sleep.conf" /etc/systemd/sleep.conf
+    sudo cp "$DOTROOT/etc/systemd/system/power-check.service" /etc/systemd/system/power-check.service
+    sudo cp "$DOTROOT/etc/systemd/system/power-check.timer" /etc/systemd/system/power-check.timer
     sudo cp "$DOTROOT/etc/udev/rules.d/99-power-profiles.rules" /etc/udev/rules.d/99-power-profiles.rules
     sudo cp "$DOTROOT/etc/vconsole.conf" /etc/vconsole.conf
     sudo cp "$DOTROOT/usr/bin/auto-power-profile" /usr/bin/auto-power-profile
-    sudo cp "$DOTROOT/etc/systemd/system/power-check.service" /etc/systemd/system/power-check.service
-    sudo cp "$DOTROOT/etc/systemd/system/power-check.timer" /etc/systemd/system/power-check.timer
+    sudo cp "$DOTROOT/usr/lib/systemd/system-sleep/fprintd-restart" /usr/lib/systemd/system-sleep/fprintd-restart
 
     sudo mkinitcpio -P
 

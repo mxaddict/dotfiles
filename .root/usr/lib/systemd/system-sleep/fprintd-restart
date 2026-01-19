@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+# vi: ft=sh
+
+case $1/$2 in
+pre/*)
+    systemctl stop fprintd
+    ;;
+post/*)
+    systemctl start fprintd
+    ;;
+esac
