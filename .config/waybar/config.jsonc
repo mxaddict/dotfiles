@@ -72,7 +72,7 @@
     "battery": {
         "format": "{icon}",
         "format-charging": "{icon} 󱐋",
-        "format-plugged": "{icon} 󰂄",
+        "format-plugged": "",
         "format-icons": ["", "", "", "", ""],
         "tooltip-format": "{capacity}% {power}W {timeTo}",
         "states": {
