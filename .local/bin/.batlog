@@ -3,6 +3,8 @@
 
 LOG_FILE="$HOME/.local/log/bathist.log"
 
+rm "$LOG_FILE"
+
 while true; do
     DATE=$(date +"%Y-%m-%d %H:%M:%S")
     TIMESTAMP=$(date +%s)
@@ -14,6 +16,9 @@ while true; do
     else
         echo "$DATE, $TIMESTAMP, Error reading battery capacity or device not found." >>"$LOG_FILE"
     fi
+
+    clear
+    .batrep
 
     sleep 30
 done
