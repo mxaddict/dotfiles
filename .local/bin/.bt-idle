@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # vi: ft=bash
 
-TIMEOUT=60
+TIMEOUT=120
 counter=0
-interval=10
+interval=20
 
 on_ac_power() {
     if grep -q "1" /sys/class/power_supply/AC*/online 2>/dev/null; then
@@ -31,7 +31,6 @@ while true; do
     if [ $counter -ge $TIMEOUT ]; then
         bluetoothctl power off
         counter=0
-        notify-send "Bluetooth" "Auto-powered off (Battery Saving)" -i bluetooth
     fi
 
     sleep $interval
