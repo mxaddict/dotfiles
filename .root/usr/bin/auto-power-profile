@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# vi: ft=bash
+
+CAP=$(cat /sys/class/power_supply/BAT0/capacity)
+ON_AC=$(cat /sys/class/power_supply/AC/online)
+
+if [ "$ON_AC" -eq 1 ]; then
+    powerprofilesctl set performance
+elif [ "$CAP" -le 30 ]; then
+    powerprofilesctl set power-saver
+else
+    powerprofilesctl set balanced
+fi
