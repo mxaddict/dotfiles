@@ -3,19 +3,36 @@
 
 TIMEOUT=60
 counter=0
+interval=10
+
+on_ac_power() {
+    if grep -q "1" /sys/class/power_supply/AC*/online 2>/dev/null; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+is_bt_on() {
+    bluetoothctl show | grep -q "Powered: yes"
+}
 
 while true; do
-    if bluetoothctl info | grep -q "Connected: yes"; then
+    if on_ac_power; then
+        counter=0
+    elif ! is_bt_on; then
+        counter=0
+    elif bluetoothctl info | grep -q "Connected: yes"; then
         counter=0
     else
-        ((counter += 10))
+        ((counter += interval))
     fi
 
     if [ $counter -ge $TIMEOUT ]; then
         bluetoothctl power off
         counter=0
-        notify-send "Bluetooth" "Powered off due to inactivity" -i bluetooth
+        notify-send "Bluetooth" "Auto-powered off (Battery Saving)" -i bluetooth
     fi
 
-    sleep 10
+    sleep $interval
 done
