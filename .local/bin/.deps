@@ -123,6 +123,7 @@ if command -v pacman >/dev/null; then
         ttf-roboto-mono-nerd \
         ufw \
         unzip \
+        usbutils \
         waybar \
         wget \
         wireless-regdb \
