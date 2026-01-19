@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# vi: ft=bash
+
+TIMEOUT=60
+counter=0
+
+while true; do
+    if bluetoothctl info | grep -q "Connected: yes"; then
+        counter=0
+    else
+        ((counter += 10))
+    fi
+
+    if [ $counter -ge $TIMEOUT ]; then
+        bluetoothctl power off
+        counter=0
+        notify-send "Bluetooth" "Powered off due to inactivity" -i bluetooth
+    fi
+
+    sleep 10
+done
