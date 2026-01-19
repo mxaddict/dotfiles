@@ -90,6 +90,7 @@ if command -v pacman >/dev/null; then
         pavucontrol \
         pipewire \
         pipewire-alsa \
+        pipewire-jack \
         pipewire-pulse \
         power-profiles-daemon \
         python-tldextract \
