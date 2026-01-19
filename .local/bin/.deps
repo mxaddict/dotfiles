@@ -145,6 +145,8 @@ if command -v pacman >/dev/null; then
     sudo cp "$DOTROOT/etc/udev/rules.d/99-power-profiles.rules" /etc/udev/rules.d/99-power-profiles.rules
     sudo cp "$DOTROOT/etc/vconsole.conf" /etc/vconsole.conf
     sudo cp "$DOTROOT/usr/bin/auto-power-profile" /usr/bin/auto-power-profile
+    sudo cp "$DOTROOT/etc/systemd/system/power-check.service" /etc/systemd/system/power-check.service
+    sudo cp "$DOTROOT/etc/systemd/system/power-check.timer" /etc/systemd/system/power-check.timer
 
     sudo mkinitcpio -P
 
@@ -158,13 +160,14 @@ if command -v pacman >/dev/null; then
 
     sudo systemctl enable ly@tty2.service
 
-    sudo systemctl enable kanata
-    sudo systemctl enable bluetooth
-    sudo systemctl enable NetworkManager
-    sudo systemctl enable NetworkManager-dispatcher
-    sudo systemctl enable ufw
-    sudo systemctl enable avahi-daemon
-    sudo systemctl enable power-profiles-daemon
+    sudo systemctl enable NetworkManager.service
+    sudo systemctl enable NetworkManager-dispatcher.service
+    sudo systemctl enable avahi-daemon.service
+    sudo systemctl enable bluetooth.service
+    sudo systemctl enable kanata.service
+    sudo systemctl enable power-check.timer
+    sudo systemctl enable power-profiles-daemon.service
+    sudo systemctl enable ufw.service
 
     sudo ufw allow http
     sudo ufw allow https

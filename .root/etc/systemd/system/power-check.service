@@ -1,0 +1,6 @@
+[Unit]
+Description=Check battery level and set power profile
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/auto-power-profile
