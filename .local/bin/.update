@@ -52,7 +52,7 @@ nvim --headless +TSUpdate "+Lazy! install all" +qa
 cd "$tpm" || exit
 git pull
 tmux source "$config/tmux/tmux.conf"
-"$tpm/bin/install_plugins"
-"$tpm/bin/update_plugins" all
-"$tpm/bin/clean_plugins"
+"$tpm/bin/install_plugins" 2>/dev/null
+"$tpm/bin/update_plugins" all 2>/dev/null
+"$tpm/bin/clean_plugins" 2>/dev/null
 cd "$pwd" || exit
