@@ -3,15 +3,16 @@
 # WARN: make sure things are sure
 set -euo pipefail
 
+# 1. Auto-elevate to root
+if [[ $EUID -ne 0 ]]; then
+    echo "This script requires root. Elevating with sudo..."
+    exec sudo "$0" "$@"
+fi
+
 RAM_SIZE=$(free -m | awk '/^Mem:/{print $2 + 1024}')
 SWAP_PATH="/swap"
 CMDLINE_CONF="/etc/cmdline.d/root.conf"
 FS_TYPE=$(findmnt -no FSTYPE -T /)
-
-if [[ $EUID -ne 0 ]]; then
-    echo "This script must be run as root (use sudo)."
-    exit 1
-fi
 
 echo "--- Arch Linux Swap & Hibernation Setup ---"
 echo "Detected Filesystem: $FS_TYPE"
@@ -20,7 +21,6 @@ echo "Turning off swap..."
 swapoff -a 2>/dev/null || true
 
 echo "Creating ${RAM_SIZE}MB swap file at $SWAP_PATH..."
-
 if [[ "$FS_TYPE" == "btrfs" ]]; then
     btrfs filesystem mkswapfile --size "${RAM_SIZE}m" "$SWAP_PATH"
 else
@@ -38,7 +38,6 @@ echo "Activating swap..."
 swapon -a
 
 UUID=$(findmnt -no UUID -T "$SWAP_PATH")
-
 if [[ "$FS_TYPE" == "btrfs" ]]; then
     OFFSET=$(btrfs inspect-internal map-swapfile -r "$SWAP_PATH")
 else
@@ -54,7 +53,7 @@ if [[ -f "$CMDLINE_CONF" ]]; then
     echo "Rebuilding kernel image..."
     mkinitcpio -P
     echo "===================================================="
-    echo " SUCCESS! Added the resume and resume_offset"
+    echo " SUCCESS! UKI updated with resume and resume_offset"
     echo "===================================================="
 else
     echo "===================================================="
