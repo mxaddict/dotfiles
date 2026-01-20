@@ -48,8 +48,8 @@ fi
 RESUME_PARAMS="resume=UUID=$UUID resume_offset=$OFFSET"
 
 echo "Updating $CMDLINE_CONF with resume parameters..."
-touch "$CMDLINE_CONF"
 mkdir -p "$CMDLINE_DIR"
+touch "$CMDLINE_CONF"
 sed -i -E 's/resume=[^ ]* ?//g; s/resume_offset=[^ ]* ?//g' "$CMDLINE_CONF"
 echo -n " $RESUME_PARAMS" >>"$CMDLINE_CONF"
 echo "Rebuilding kernel image..."
