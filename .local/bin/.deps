@@ -185,7 +185,7 @@ if command -v pacman >/dev/null; then
     sudo ufw allow proto udp from any to any port 27031:27036 # steam
     sudo ufw allow proto tcp from any to any port 27040       # steam
 
-    sudo ufw enable
+    sudo ufw enable --force
     sudo ufw status
 fi
 
