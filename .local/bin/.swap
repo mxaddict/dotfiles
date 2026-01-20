@@ -46,19 +46,14 @@ fi
 
 RESUME_PARAMS="resume=UUID=$UUID resume_offset=$OFFSET"
 
-if [[ -f "$CMDLINE_CONF" ]]; then
-    echo "Updating $CMDLINE_CONF with resume parameters..."
-    sed -i -E 's/resume=[^ ]* //g; s/resume_offset=[^ ]* //g' "$CMDLINE_CONF"
-    echo -n " $RESUME_PARAMS" >>"$CMDLINE_CONF"
-    echo "Rebuilding kernel image..."
-    mkinitcpio -P
-    echo "===================================================="
-    echo " SUCCESS! UKI updated with resume and resume_offset"
-    echo "===================================================="
-else
-    echo "===================================================="
-    echo " SUCCESS! ADD THESE TO YOUR KERNEL PARAMETERS:"
-    echo "===================================================="
-    echo "$RESUME_PARAMS"
-    echo "===================================================="
-fi
+echo "Updating $CMDLINE_CONF with resume parameters..."
+touch "$CMDLINE_CONF"
+sed -i -E 's/resume=[^ ]* ?//g; s/resume_offset=[^ ]* ?//g' "$CMDLINE_CONF"
+echo -n " $RESUME_PARAMS" >>"$CMDLINE_CONF"
+echo "Rebuilding kernel image..."
+mkinitcpio -P
+echo "===================================================="
+echo " SUCCESS! UKI updated with resume and resume_offset"
+echo "===================================================="
+echo "$RESUME_PARAMS"
+echo "===================================================="
