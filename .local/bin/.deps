@@ -153,7 +153,7 @@ if command -v pacman >/dev/null; then
     sudo cp "$DOTROOT/usr/bin/auto-power-profile" /usr/bin/auto-power-profile
 
     # TODO: we need to remove this once all machines are updated
-    sudo rm /usr/lib/systemd/system-sleep/fprintd-restart
+    sudo rm /usr/lib/systemd/system-sleep/fprintd-restart 2>/dev/null || true
 
     sudo mkinitcpio -P
 
@@ -163,7 +163,7 @@ if command -v pacman >/dev/null; then
     sudo systemctl unmask systemd-rfkill.socket
     sudo systemctl unmask systemd-rfkill.service
     sudo systemctl unmask power-profiles-daemon.service
-    sudo systemctl disable display-manager.service
+    sudo systemctl disable display-manager.service 2>/dev/null || true
 
     sudo systemctl enable ly@tty2.service
 
