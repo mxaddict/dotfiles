@@ -5,6 +5,7 @@ set -euo pipefail
 
 RAM_SIZE=$(free -m | awk '/^Mem:/{print $2 + 1024}')
 SWAP_PATH="/swap"
+CMDLINE_CONF="/etc/cmdline.d/root.conf"
 FS_TYPE=$(findmnt -no FSTYPE -T /)
 
 if [[ $EUID -ne 0 ]]; then
@@ -14,6 +15,10 @@ fi
 
 echo "--- Arch Linux Swap & Hibernation Setup ---"
 echo "Detected Filesystem: $FS_TYPE"
+
+echo "Turning off swap..."
+swapoff -a 2>/dev/null || true
+
 echo "Creating ${RAM_SIZE}MB swap file at $SWAP_PATH..."
 
 if [[ "$FS_TYPE" == "btrfs" ]]; then
@@ -40,8 +45,21 @@ else
     OFFSET=$(filefrag -v "$SWAP_PATH" | awk '$1=="0:" {print substr($4, 1, length($4)-2)}')
 fi
 
-echo "===================================================="
-echo " SUCCESS! ADD THESE TO YOUR KERNEL PARAMETERS:"
-echo "===================================================="
-echo "resume=UUID=$UUID resume_offset=$OFFSET"
-echo "===================================================="
+RESUME_PARAMS="resume=UUID=$UUID resume_offset=$OFFSET"
+
+if [[ -f "$CMDLINE_CONF" ]]; then
+    echo "Updating $CMDLINE_CONF with resume parameters..."
+    sed -i -E 's/resume=[^ ]* //g; s/resume_offset=[^ ]* //g' "$CMDLINE_CONF"
+    echo -n " $RESUME_PARAMS" >>"$CMDLINE_CONF"
+    echo "Rebuilding kernel image..."
+    mkinitcpio -P
+    echo "===================================================="
+    echo " SUCCESS! Added the resume and resume_offset"
+    echo "===================================================="
+else
+    echo "===================================================="
+    echo " SUCCESS! ADD THESE TO YOUR KERNEL PARAMETERS:"
+    echo "===================================================="
+    echo "$RESUME_PARAMS"
+    echo "===================================================="
+fi
