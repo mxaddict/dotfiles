@@ -151,7 +151,9 @@ if command -v pacman >/dev/null; then
     sudo cp "$DOTROOT/etc/udev/rules.d/99-power-profiles.rules" /etc/udev/rules.d/99-power-profiles.rules
     sudo cp "$DOTROOT/etc/vconsole.conf" /etc/vconsole.conf
     sudo cp "$DOTROOT/usr/bin/auto-power-profile" /usr/bin/auto-power-profile
-    sudo cp "$DOTROOT/usr/lib/systemd/system-sleep/fprintd-restart" /usr/lib/systemd/system-sleep/fprintd-restart
+
+    # TODO: we need to remove this once all machines are updated
+    sudo rm /usr/lib/systemd/system-sleep/fprintd-restart
 
     sudo mkinitcpio -P
 
