@@ -54,8 +54,15 @@ sed -i -E 's/ ?resume=[^ ]*//g; s/ ?resume_offset=[^ ]*//g' "$CMDLINE_CONF"
 echo -n " $RESUME_PARAMS" >>"$CMDLINE_CONF"
 CLEAN_LINE=$(xargs <"$CMDLINE_CONF")
 echo "$CLEAN_LINE" >"$CMDLINE_CONF"
-echo "Rebuilding kernel image..."
-mkinitcpio -P
+echo "Rebuilding UKI..."
+if sudo mkinitcpio -P; then
+    echo "Verifying EFI binary..."
+    if file /boot/EFI/Linux/arch-linux.efi | grep -q "PE32+ executable"; then
+        echo "UKI looks healthy."
+    else
+        echo "CRITICAL: UKI appears corrupted after build!"
+    fi
+fi
 echo "===================================================="
 echo " SUCCESS! UKI updated with resume and resume_offset"
 echo "===================================================="
