@@ -3,8 +3,6 @@
 
 LOG_FILE="$HOME/.local/log/bathist.log"
 
-rm "$LOG_FILE"
-
 while true; do
     DATE=$(date +"%Y-%m-%d %H:%M:%S")
     TIMESTAMP=$(date +%s)
