@@ -25,7 +25,7 @@ echo "Creating ${RAM_SIZE}MB swap file at $SWAP_PATH..."
 if [[ "$FS_TYPE" == "btrfs" ]]; then
     btrfs filesystem mkswapfile --size "${RAM_SIZE}m" "$SWAP_PATH"
 else
-    dd if=/dev/zero of="$SWAP_PATH" bs=1M count="$RAM_SIZE" status=progress
+    fallocate -l "${RAM_SIZE}M" "$SWAP_PATH"
     chmod 600 "$SWAP_PATH"
     mkswap "$SWAP_PATH"
 fi
@@ -50,8 +50,10 @@ RESUME_PARAMS="resume=UUID=$UUID resume_offset=$OFFSET"
 echo "Updating $CMDLINE_CONF with resume parameters..."
 mkdir -p "$CMDLINE_DIR"
 touch "$CMDLINE_CONF"
-sed -i -E 's/resume=[^ ]* ?//g; s/resume_offset=[^ ]* ?//g' "$CMDLINE_CONF"
+sed -i -E 's/ ?resume=[^ ]*//g; s/ ?resume_offset=[^ ]*//g' "$CMDLINE_CONF"
 echo -n " $RESUME_PARAMS" >>"$CMDLINE_CONF"
+CLEAN_LINE=$(xargs <"$CMDLINE_CONF")
+echo "$CLEAN_LINE" >"$CMDLINE_CONF"
 echo "Rebuilding kernel image..."
 mkinitcpio -P
 echo "===================================================="
