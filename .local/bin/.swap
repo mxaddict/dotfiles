@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# vi: ft=bash
+# WARN: make sure things are sure
+set -euo pipefail
+
+RAM_SIZE=$(free -m | awk '/^Mem:/{print $2 + 1024}')
+SWAP_PATH="/swap"
+FS_TYPE=$(findmnt -no FSTYPE -T /)
+
+if [[ $EUID -ne 0 ]]; then
+    echo "This script must be run as root (use sudo)."
+    exit 1
+fi
+
+echo "--- Arch Linux Swap & Hibernation Setup ---"
+echo "Detected Filesystem: $FS_TYPE"
+echo "Creating ${RAM_SIZE}MB swap file at $SWAP_PATH..."
+
+if [[ "$FS_TYPE" == "btrfs" ]]; then
+    btrfs filesystem mkswapfile --size "${RAM_SIZE}m" "$SWAP_PATH"
+else
+    dd if=/dev/zero of="$SWAP_PATH" bs=1M count="$RAM_SIZE" status=progress
+    chmod 600 "$SWAP_PATH"
+    mkswap "$SWAP_PATH"
+fi
+
+if ! grep -q "$SWAP_PATH" /etc/fstab; then
+    echo "Adding $SWAP_PATH to /etc/fstab..."
+    echo "$SWAP_PATH none swap sw 0 0" >>/etc/fstab
+fi
+
+echo "Activating swap..."
+swapon -a
+
+UUID=$(findmnt -no UUID -T "$SWAP_PATH")
+
+if [[ "$FS_TYPE" == "btrfs" ]]; then
+    OFFSET=$(btrfs inspect-internal map-swapfile -r "$SWAP_PATH")
+else
+    OFFSET=$(filefrag -v "$SWAP_PATH" | awk '$1=="0:" {print substr($4, 1, length($4)-2)}')
+fi
+
+echo "===================================================="
+echo " SUCCESS! ADD THESE TO YOUR KERNEL PARAMETERS:"
+echo "===================================================="
+echo "resume=UUID=$UUID resume_offset=$OFFSET"
+echo "===================================================="
