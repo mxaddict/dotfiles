@@ -104,6 +104,7 @@ if command -v pacman >/dev/null; then
         rofi \
         rsync \
         rustup \
+        sbctl \
         slurp \
         sof-firmware \
         speedtest-cli \
