@@ -27,9 +27,9 @@ touch "$config/hypr/workspaces.conf"
 [ -d "$dotfiles" ] || git clone https://github.com/mxaddict/dotfiles.git "$dotfiles"
 pwd=$(pwd)
 cd "$dotfiles" || exit
-git stash
+git stash || true
 git pull --no-edit
-git stash pop
+git stash pop || true
 
 [ -f "$HOME/.files/.deps.lock" ] || "$HOME/.files/.local/bin/.deps"
 
