@@ -1,5 +1,7 @@
 #!/usr/bin/env sh
 # vi: ft=sh
+# WARN: make sure things are sure
+set -euo pipefail
 
 # Where is the DIR for dotfiles?
 dotfiles="$HOME/.files"
@@ -51,8 +53,8 @@ nvim --headless +TSUpdate "+Lazy! install all" +qa
 [ -d "$tpm" ] || git clone https://github.com/tmux-plugins/tpm "$tpm"
 cd "$tpm" || exit
 git pull
-tmux source "$config/tmux/tmux.conf"
-"$tpm/bin/install_plugins" 2>/dev/null
-"$tpm/bin/update_plugins" all 2>/dev/null
-"$tpm/bin/clean_plugins" 2>/dev/null
+tmux source "$config/tmux/tmux.conf" 2>/dev/null || true
+"$tpm/bin/install_plugins"
+"$tpm/bin/update_plugins" all
+"$tpm/bin/clean_plugins"
 cd "$pwd" || exit
