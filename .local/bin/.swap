@@ -56,6 +56,7 @@ CLEAN_LINE=$(xargs <"$CMDLINE_CONF")
 echo "$CLEAN_LINE" >"$CMDLINE_CONF"
 echo "Rebuilding UKI..."
 mkinitcpio -P
+sync
 echo "Verifying EFI binary..."
 if file /boot/EFI/Linux/arch-linux.efi | grep -q "PE32+ executable"; then
     echo "UKI looks healthy."
