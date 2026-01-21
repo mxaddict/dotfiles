@@ -14,6 +14,13 @@ c.auto_save.session = True
 
 c.editor.command = ["alacritty", "--class", "floating", "-e", "nvim", "{file}"]
 
+# Set the font family and size
+c.fonts.tabs.selected = "16px Hack Nerd Font Mono"
+c.fonts.tabs.unselected = "16px Hack Nerd Font Mono"
+c.fonts.statusbar = "16px Hack Nerd Font Mono"
+c.fonts.completion.entry = "16px Hack Nerd Font Mono"
+c.fonts.completion.category = "16px Hack Nerd Font Mono"
+
 config.set(
     "content.headers.user_agent",
     "Mozilla/5.0 ({os_info}; rv:136.0) Gecko/20100101 Firefox/139.0",
