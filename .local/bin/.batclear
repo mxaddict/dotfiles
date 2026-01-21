@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+# vi: ft=sh
+
+LOG_FILE="$HOME/.local/log/bathist.log"
+
+echo "Clearing battery history log file"
+echo "$LOG_FILE"
+rm "$LOG_FILE"

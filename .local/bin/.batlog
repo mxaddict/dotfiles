@@ -15,8 +15,5 @@ while true; do
         echo "$DATE, $TIMESTAMP, Error reading battery capacity or device not found." >>"$LOG_FILE"
     fi
 
-    clear
-    .batrep
-
-    sleep 30
+    sleep 60
 done
