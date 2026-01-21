@@ -61,3 +61,4 @@ if [[ -z $password ]]; then
 fi
 
 nmcli connection add type wifi con-name "$ssid" ssid "$ssid" wifi-sec.key-mgmt wpa-psk wifi-sec.psk "$password"
+nmcli connection up "$ssid"
