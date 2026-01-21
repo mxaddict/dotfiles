@@ -37,7 +37,7 @@ if command -v pacman >/dev/null; then
         cups \
         cups-pdf \
         curl \
-        discord \
+        dex \
         duf \
         dysk \
         ethtool \
@@ -72,6 +72,7 @@ if command -v pacman >/dev/null; then
         kooha \
         lazygit \
         libadwaita \
+        libnotify \
         ly \
         man-db \
         mpv \
@@ -111,13 +112,11 @@ if command -v pacman >/dev/null; then
         snapshot \
         sof-firmware \
         speedtest-cli \
-        spotify-launcher \
         starship \
         stow \
         swaync \
         swayosd \
         tealdeer \
-        teams-for-linux \
         terminus-font \
         thunderbird \
         tmux \

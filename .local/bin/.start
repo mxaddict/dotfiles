@@ -1,9 +1,9 @@
-#!/usr/bin/env sh
-# vi: ft=sh
+#!/usr/bin/env bash
+# vi: ft=bash
 
-qutebrowser &
-discord &
-teams-for-linux &
+chromium &
 thunderbird &
-spotify-launcher &
 steam &
+dex "$HOME/.local/share/applications/chromium.discord.desktop" &
+dex "$HOME/.local/share/applications/chromium.teams.desktop" &
+dex "$HOME/.local/share/applications/chromium.spotify.desktop" &
