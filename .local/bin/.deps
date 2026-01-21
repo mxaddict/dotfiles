@@ -144,6 +144,7 @@ if command -v pacman >/dev/null; then
     sudo cp "$DOTROOT/etc/kanata.kbd" /etc/kanata.kbd
     sudo cp "$DOTROOT/etc/ly/config.ini" /etc/ly/config.ini
     sudo cp "$DOTROOT/etc/mkinitcpio.conf" /etc/mkinitcpio.conf
+    sudo cp "$DOTROOT/etc/mkinitcpio.d/linux.preset" /etc/mkinitcpio.d/linux.preset
     sudo cp "$DOTROOT/etc/pacman.conf" /etc/pacman.conf
     sudo cp "$DOTROOT/etc/systemd/logind.conf" /etc/systemd/logind.conf
     sudo cp "$DOTROOT/etc/systemd/sleep.conf" /etc/systemd/sleep.conf
