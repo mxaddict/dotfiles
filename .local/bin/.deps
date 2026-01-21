@@ -106,6 +106,7 @@ if command -v pacman >/dev/null; then
         rustup \
         sbctl \
         slurp \
+        snapshot \
         sof-firmware \
         speedtest-cli \
         spotify-launcher \
