@@ -21,6 +21,7 @@ echo "Detected Filesystem: $FS_TYPE"
 
 echo "Turning off swap..."
 swapoff -a 2>/dev/null || true
+rm -f "$SWAP_PATH" 2>/dev/null || true
 
 echo "Creating ${RAM_SIZE}MB swap file at $SWAP_PATH..."
 if [[ "$FS_TYPE" == "btrfs" ]]; then
@@ -30,6 +31,8 @@ else
     chmod 600 "$SWAP_PATH"
     mkswap "$SWAP_PATH"
 fi
+
+sync
 
 if ! grep -q "$SWAP_PATH" /etc/fstab; then
     echo "Adding $SWAP_PATH to /etc/fstab..."
