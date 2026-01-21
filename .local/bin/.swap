@@ -13,6 +13,7 @@ RAM_SIZE=$(free -m | awk '/^Mem:/{print $2 + 1024}')
 SWAP_PATH="/swap"
 CMDLINE_DIR="/etc/cmdline.d"
 CMDLINE_CONF="$CMDLINE_DIR/root.conf"
+CMDLINE_PROC="/proc/cmdline"
 FS_TYPE=$(findmnt -no FSTYPE -T /)
 
 echo "--- Arch Linux Swap & Hibernation Setup ---"
@@ -50,6 +51,7 @@ RESUME_PARAMS="resume=UUID=$UUID resume_offset=$OFFSET"
 echo "Updating $CMDLINE_CONF with resume parameters..."
 mkdir -p "$CMDLINE_DIR"
 touch "$CMDLINE_CONF"
+cp "$CMDLINE_PROC" "$CMDLINE_CONF"
 sed -i -E 's/ ?resume=[^ ]*//g; s/ ?resume_offset=[^ ]*//g' "$CMDLINE_CONF"
 echo -n " $RESUME_PARAMS" >>"$CMDLINE_CONF"
 CLEAN_LINE=$(xargs <"$CMDLINE_CONF")
