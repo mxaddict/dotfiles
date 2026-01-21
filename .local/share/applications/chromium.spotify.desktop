@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Spotify (Chromium)
+Comment=Spotify web appler
+Exec=chromium --app=https://open.spotify.com
+Icon=spotify
+Terminal=false
+Categories=Audio;Music;Player;AudioVideo;
+StartupWMClass=open.spotify.com

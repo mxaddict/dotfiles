@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Teams (Chromium)
+Comment=Microsoft Teams web applet
+Exec=chromium --app=https://teams.microsoft.com
+Icon=teams
+Terminal=false
+Categories=Network;Chat;
+StartupWMClass=teams.microsoft.com
