@@ -3,7 +3,7 @@ Version=1.0
 Type=Application
 Name=Teams (Chromium)
 Comment=Microsoft Teams web applet
-Exec=chromium --app=https://teams.microsoft.com --user-data-dir=$HOME/.config/chromium-teams
+Exec=chromium --app=https://teams.microsoft.com --user-data-dir=~/.config/chromium-teams
 Icon=teams
 Terminal=false
 Categories=Network;Chat;

@@ -3,7 +3,7 @@ Version=1.0
 Type=Application
 Name=Spotify (Chromium)
 Comment=Spotify web appler
-Exec=chromium --app=https://open.spotify.com --user-data-dir=$HOME/.config/chromium-spotify
+Exec=chromium --app=https://open.spotify.com --user-data-dir=~/.config/chromium-spotify
 Icon=spotify
 Terminal=false
 Categories=Audio;Music;Player;AudioVideo;
