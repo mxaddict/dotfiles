@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # vi: ft=bash
 
-chromium &
+vieb &
 thunderbird &
 steam &
 dex "$HOME/.local/share/applications/chromium.discord.desktop" &
