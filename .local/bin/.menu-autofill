@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# vi: ft=bash
+
+TITLE=$(hyprctl activewindow -j | jq -r '.title')
+
+MODE=${1:-pass}
+DOMAIN=$(echo "$TITLE" | grep -oP '(?<=\s|^)[a-z0-9.-]+\.[a-z]{2,}(?=\s|$|/)' | head -n 1)
+
+.menu-pass "$MODE" "$DOMAIN"
