@@ -1,0 +1,6 @@
+" vi: ft=vim
+
+set windowtitle="%app - %title: %url"
+
+" Tokyo Night
+colorscheme=tokyonight
