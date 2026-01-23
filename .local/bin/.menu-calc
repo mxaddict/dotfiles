@@ -14,28 +14,25 @@ fi
 
 qalc -e "1 BTC" &
 
-last_rofi=""
-qalc_ret=""
+regex='[=≈]\s*\K.*'
+answer=""
+answer_raw=""
 while :; do
-    rofi_ret=$(tac "$history" | head -5000 | rofi -case-smart -dmenu -p Calc)
+    rofi_result=$(tac "$history" | head -5000 | rofi -case-smart -dmenu -p Calc -filter "$answer")
 
-    rtrn=$?
+    exit_code=$?
 
-    if test "$rtrn" = "0"; then
-        if [[ "$rofi_ret" =~ .*=.* ]]; then
-            result=$(echo "$rofi_ret" | awk "{'print $NF'}")
-            wl-copy "$result"
-            exit 0
-        else
-            qalc_ret=$(qalc "$rofi_ret")
-            last_rofi=$rofi_ret
-            echo "$qalc_ret" >>"$history"
-        fi
-    else
-        if [ -n "$last_rofi" ]; then
-            result=$(qalc -t "$last_rofi")
-            wl-copy "$result"
-        fi
+    if test "$exit_code" = "1"; then
         exit 0
+    fi
+
+    if [[ "$rofi_result" =~ .*[=≈].* ]]; then
+        echo "$rofi_result" | grep -oP "$regex" | wl-copy
+        exit 0
+    else
+        answer_raw=$(qalc "$rofi_result")
+        answer=$(echo "$answer_raw" | grep -oP "$regex")
+        echo "$answer" | wl-copy
+        echo "$answer_raw" >>"$history"
     fi
 done
