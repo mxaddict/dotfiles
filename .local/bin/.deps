@@ -100,8 +100,6 @@ if command -v pacman >/dev/null; then
         qalculate-qt \
         qt5-wayland \
         qt6-wayland \
-        qt6-webengine \
-        qutebrowser \
         reflector \
         ripgrep \
         rofi \
@@ -130,6 +128,7 @@ if command -v pacman >/dev/null; then
         ufw \
         unzip \
         usbutils \
+        vieb-bin \
         waybar \
         wget \
         wireless-regdb \
