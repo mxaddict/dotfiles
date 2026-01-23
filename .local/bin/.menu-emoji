@@ -1,4 +1,12 @@
 #!/usr/bin/env bash
 # vi: ft=bash
 
-pkill rofi || rofi -case-smart -dmenu -p Emoji <"$HOME/.local/share/emojis" | cut -d ' ' -f 1 | tr -d '\n' | wl-copy
+pkill rofi && exit 0
+
+moji=$(rofi -case-smart -dmenu -p Emoji <"$HOME/.local/share/emojis" | cut -d ' ' -f 1 | tr -d '\n')
+
+if [[ -n "$moji" ]]; then
+    echo -n "$moji" | wl-copy
+
+    wtype "$moji"
+fi
