@@ -5,6 +5,7 @@ MODES=("auth" "user" "pass" "otp")
 PASSWORD_STORE_DIR="${PASSWORD_STORE_DIR:-$HOME/.password-store/}"
 MODE=${1:-pass}
 FILTER=${2:""}
+WTYPE="wtype -s 100 -d 20"
 
 if [[ ! " ${MODES[*]} " =~ \ ${MODE}\  ]]; then
     echo "Unsupported mode: $MODE" >&2
@@ -23,16 +24,10 @@ selection=$(echo "$entries" | rofi -dmenu -p "[$MODE]" -i)
 if [[ "$MODE" == "auth" ]]; then
     user=$(basename "$selection")
     pass=$(pass show "$selection" | head -n 1)
-    wtype "$user"
-    sleep 0.1
-
-    wtype -k Tab
-    sleep 0.1
-
-    wtype "$pass"
-    sleep 0.1
-
-    wtype -k Return
+    $WTYPE "$user"
+    $WTYPE -k Tab
+    $WTYPE "$pass"
+    $WTYPE -k Return
     exit 0
 elif [[ "$MODE" == "user" ]]; then
     token=$(basename "$selection")
@@ -42,7 +37,5 @@ elif [[ "$MODE" == "otp" ]]; then
     token=$(pass otp "$selection")
 fi
 
-wtype "$token"
-sleep 0.1
-
-wtype -k Return
+$WTYPE "$token"
+$WTYPE -k Return
