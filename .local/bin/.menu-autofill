@@ -4,6 +4,6 @@
 TITLE=$(hyprctl activewindow -j | jq -r '.title')
 
 MODE=${1:-pass}
-DOMAIN=$(echo "$TITLE" | grep -oP '(?<=\s|^)[a-z0-9.-]+\.[a-z]{2,}(?=\s|$|/)' | head -n 1)
+DOMAIN=$(echo "$TITLE" | grep -oP '(?<=//)[a-z0-9.-]+\.[a-z]{2,}' | head -n 1)
 
-.menu-pass "$MODE" "$DOMAIN"
+.menu-pass "$MODE" "$DOMAIN/"
