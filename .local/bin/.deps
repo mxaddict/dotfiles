@@ -49,6 +49,7 @@ if command -v pacman >/dev/null; then
         fprintd \
         fwupd \
         fzf \
+        gemini-cli \
         ghostscript \
         git \
         gnu-free-fonts \
