@@ -5,6 +5,7 @@
 *~
 .base16*
 .cache
+.config/Vieb/
 .config/dconf/user
 .config/fish/completions/
 .config/fish/conf.d/
