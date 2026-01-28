@@ -16,3 +16,5 @@
 	prune = true
 [diff "gpg"]
 	textconv = gpg --decrypt --quiet --batch
+[init]
+	defaultBranch = main
