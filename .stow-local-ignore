@@ -1,7 +1,8 @@
+.deps.lock
 .git
 .root
-.deps.lock
 FIREWALL.md
+LICENSE
 README.md
 SUSPEND.md
-LICENSE
+screenshot.png
