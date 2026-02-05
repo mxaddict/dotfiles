@@ -1,5 +1,5 @@
-#!/usr/bin/env sh
-# vi: ft=sh
+#!/usr/bin/env bash
+# vi: ft=bash
 # WARN: make sure things are sure
 set -euo pipefail
 
@@ -23,6 +23,10 @@ mkdir -p "$HOME/.local/log"
 mkdir -p "$config/hypr"
 touch "$config/hypr/monitors.conf"
 touch "$config/hypr/workspaces.conf"
+
+for profile in ~/.thunderbird/*.default*/; do
+    echo 'user_pref("mail.shared.delete_2_is_delete", true);' >>"${profile}user.js"
+done
 
 [ -d "$dotfiles" ] || git clone https://github.com/mxaddict/dotfiles.git "$dotfiles"
 pwd=$(pwd)
