@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 # vi: ft=sh
 # WARN: make sure things are sure
 set -euo pipefail

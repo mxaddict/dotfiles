@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# vi: ft=bash
+
+if systemctl is-active --quiet kanata.service; then
+    sudo systemctl stop kanata.service
+    notify-send -u low -t 2000 "Keyboard" "Kanata: OFF (Native Mode)"
+else
+    sudo systemctl start kanata.service
+    notify-send -u normal -t 2000 "Keyboard" "Kanata: ON (Layer Mode)"
+fi
