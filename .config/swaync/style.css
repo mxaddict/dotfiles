@@ -178,7 +178,7 @@ trough {
 }
 
 .control-center .widget-title > label {
-  color: var(--tokyo-fg);
+  color: var(--tokyo-orange);
   font-size: 2rem;
 }
 
@@ -227,7 +227,7 @@ scrollbar trough {
 }
 
 .widget-dnd > switch:checked {
-  background: var(--tokyo-red);
+  background: var(--tokyo-orange);
 }
 
 .widget-dnd > switch:hover {
