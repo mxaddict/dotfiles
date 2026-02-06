@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# vi: ft=bash
+
+alacritty --class "bloating" -e btop
