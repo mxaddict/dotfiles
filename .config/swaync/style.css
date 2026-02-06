@@ -1,3 +1,24 @@
+:root {
+  --tokyo-bg: #1a1b26;
+  --tokyo-bg-light: #24283b;
+  --tokyo-fg: #c0caf5;
+  --tokyo-comment: #565f89;
+  --tokyo-red: #f7768e;
+  --tokyo-orange: #ff9e64;
+  --tokyo-yellow: #e0af68;
+  --tokyo-green: #9ece6a;
+  --tokyo-teal: #73daca;
+  --tokyo-cyan: #7dcfff;
+  --tokyo-blue: #7aa2f7;
+  --tokyo-purple: #bb9af7;
+
+  --tokyo-bg-hover: #2a2c3e;
+  --tokyo-bg-focus-alpha: rgba(68, 68, 68, 0.6);
+  --tokyo-close-bg-alpha: rgba(255, 255, 255, 0.1);
+  --tokyo-close-bg-hover-alpha: rgba(255, 255, 255, 0.15);
+  --swaync-border-radius: 8px;
+}
+
 * {
   all: unset;
   font-family: 'Hadk Nerd Font';
@@ -6,7 +27,7 @@
 }
 
 trough highlight {
-  background: #cdd6f4;
+  background: var(--tokyo-fg);
 }
 
 scale {
@@ -14,15 +35,15 @@ scale {
 }
 
 scale trough {
-  border-radius: 8px;
+  border-radius: var(--swaync-border-radius);
   margin: 0rem 1rem;
   min-height: 8px;
   min-width: 70px;
 }
 
 trough slider {
-  background-color: #89b4fa;
-  border-radius: 8px;
+  background-color: var(--tokyo-blue);
+  border-radius: var(--swaync-border-radius);
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
   margin: -10px;
   transition: all 0.2s ease;
@@ -31,11 +52,11 @@ trough slider {
 trough slider:hover {
   box-shadow:
     0 0 2px rgba(0, 0, 0, 0.8),
-    0 0 8px #89b4fa;
+    0 0 8px var(--tokyo-blue);
 }
 
 trough {
-  background-color: #313244;
+  background-color: var(--tokyo-bg-light);
 }
 
 .notification,
@@ -44,24 +65,23 @@ trough {
 .notification-action,
 .widget-dnd > switch,
 .control-center .widget-title button {
-  border: 2px solid #0afba2;
+  border: 2px solid var(--tokyo-teal);
 }
 
-/* notifications */
 .notification {
-  background: #181825;
-  border-radius: 8px;
-  color: #cdd6f4;
+  background: var(--tokyo-bg-light);
+  border-radius: var(--swaync-border-radius);
+  color: var(--tokyo-fg);
   margin: 18px;
   padding: 8px;
 }
 
 .notification.critical {
-  border-color: #f38ba8;
+  border-color: var(--tokyo-red);
 }
 
 .notification.low {
-  border-color: #89b4fa;
+  border-color: var(--tokyo-blue);
 }
 
 .notification .notification-content {
@@ -73,15 +93,15 @@ trough {
 }
 
 .notification-content .summary {
-  color: #cdd6f4;
+  color: var(--tokyo-fg);
 }
 
 .notification-content .time {
-  color: #a6adc8;
+  color: var(--tokyo-comment);
 }
 
 .notification-content .body {
-  color: #bac2de;
+  color: var(--tokyo-fg);
 }
 
 .notification > *:last-child > * {
@@ -96,86 +116,85 @@ trough {
 .close-button {
   margin: 24px;
   padding: 2px;
-  border-radius: 8px;
-  color: #1e1e2e;
-  background-color: #f38ba8;
+  border-radius: var(--swaync-border-radius);
+  color: var(--tokyo-bg);
+  background-color: var(--tokyo-red);
 }
 
 .close-button:hover {
-  background-color: #eba0ac;
+  background-color: var(--tokyo-red);
 }
 
 .close-button:active {
-  background-color: #f5c2e7;
+  background-color: var(--tokyo-orange);
 }
 
 .notification .notification-action {
-  border-radius: 8px;
-  color: #cdd6f4;
+  border-radius: var(--swaync-border-radius);
+  color: var(--tokyo-fg);
   font-size: 0.2rem;
   margin: 4px;
   padding: 8px;
 }
 
 .notification .notification-action {
-  background-color: #313244;
+  background-color: var(--tokyo-bg-light);
 }
 
 .notification .notification-action:hover {
-  background-color: #45475a;
+  background-color: var(--tokyo-bg-hover);
 }
 
 .notification .notification-action:active {
-  background-color: #585b70;
+  background-color: var(--tokyo-comment);
 }
 
 .notification.critical progress {
-  background-color: #f38ba8;
+  background-color: var(--tokyo-red);
 }
 
 .notification.low progress,
 .notification.normal progress {
-  background-color: #89b4fa;
+  background-color: var(--tokyo-blue);
 }
 
 .notification progress,
 .notification trough,
 .notification progressbar {
-  border-radius: 8px;
+  border-radius: var(--swaync-border-radius);
   padding: 3px 0;
 }
 
-/* control center */
 .control-center {
-  border-radius: 8px;
-  background-color: #1e1e2e;
-  color: #cdd6f4;
+  border-radius: var(--swaync-border-radius);
+  background-color: var(--tokyo-bg);
+  color: var(--tokyo-fg);
   padding: 16px;
 }
 
 .control-center .notification {
   margin: 4px 0px;
-  border-radius: 8px;
+  border-radius: var(--swaync-border-radius);
 }
 
 .control-center .widget-title > label {
-  color: #cdd6f4;
+  color: var(--tokyo-fg);
   font-size: 2rem;
 }
 
 .control-center .widget-title button {
-  background-color: #313244;
-  border-radius: 8px;
-  color: #cdd6f4;
+  background-color: var(--tokyo-bg-light);
+  border-radius: var(--swaync-border-radius);
+  color: var(--tokyo-fg);
   padding: 4px 8px;
 }
 
 .control-center .widget-title button:hover {
-  background-color: #45475a;
+  background-color: var(--tokyo-bg-hover);
 }
 
 .control-center .widget-title button:active {
-  background-color: #585b70;
+  background-color: var(--tokyo-comment);
 }
 
 .control-center .notification-group {
@@ -183,7 +202,7 @@ trough {
 }
 
 .control-center .notification-group:focus .notification {
-  background-color: #313244;
+  background-color: var(--tokyo-bg-light);
 }
 
 scrollbar slider {
@@ -195,66 +214,64 @@ scrollbar trough {
   margin: 2px 0;
 }
 
-/* dnd */
 .widget-dnd {
   font-size: 2rem;
   margin-top: 16px;
-  border-radius: 8px;
+  border-radius: var(--swaync-border-radius);
 }
 
 .widget-dnd > switch {
   font-size: initial;
-  border-radius: 8px;
-  background: #313244;
+  border-radius: var(--swaync-border-radius);
+  background: var(--tokyo-bg-light);
 }
 
 .widget-dnd > switch:checked {
-  background: #f38ba8;
+  background: var(--tokyo-red);
 }
 
 .widget-dnd > switch:hover {
-  background: #eba0ac;
+  background: var(--tokyo-red);
 }
 
 .widget-dnd > switch slider {
-  background: #0afba2;
-  border-radius: 8px;
+  background: var(--tokyo-teal);
+  border-radius: var(--swaync-border-radius);
   margin: 4px;
 }
 
-/* mpris */
 .widget-mpris-player {
   margin-top: 16px;
-  background: #313244;
-  border-radius: 8px;
-  color: #cdd6f4;
+  background: var(--tokyo-bg-light);
+  border-radius: var(--swaync-border-radius);
+  color: var(--tokyo-fg);
 }
 
 .mpris-overlay {
-  background-color: #313244;
+  background-color: var(--tokyo-bg-light);
   opacity: 0.9;
   padding: 15px 10px;
 }
 
 .widget-mpris-album-art {
   -gtk-icon-size: 100px;
-  border-radius: 8px;
+  border-radius: var(--swaync-border-radius);
   margin: 0 10px;
 }
 
 .widget-mpris-title {
   font-size: 1.2rem;
-  color: #cdd6f4;
+  color: var(--tokyo-fg);
 }
 
 .widget-mpris-subtitle {
   font-size: 1rem;
-  color: #bac2de;
+  color: var(--tokyo-comment);
 }
 
 .widget-mpris button {
-  border-radius: 8px;
-  color: #cdd6f4;
+  border-radius: var(--swaync-border-radius);
+  color: var(--tokyo-fg);
   margin: 0 5px;
   padding: 2px;
 }
@@ -264,11 +281,11 @@ scrollbar trough {
 }
 
 .widget-mpris button:hover {
-  background-color: #313244;
+  background-color: var(--tokyo-bg-light);
 }
 
 .widget-mpris button:active {
-  background-color: #45475a;
+  background-color: var(--tokyo-bg-hover);
 }
 
 .widget-mpris button:disabled {
@@ -281,17 +298,17 @@ scrollbar trough {
 }
 
 .widget-menubar > box > .menu-button-bar > :last-child {
-  color: #f38ba8;
+  color: var(--tokyo-red);
 }
 
 .power-buttons button:hover,
 .powermode-buttons button:hover,
 .screenshot-buttons button:hover {
-  background: #313244;
+  background: var(--tokyo-bg-light);
 }
 
 .control-center .widget-label > label {
-  color: #cdd6f4;
+  color: var(--tokyo-fg);
   font-size: 2rem;
 }
 
@@ -308,21 +325,21 @@ scrollbar trough {
 }
 
 .widget-volume label {
-  color: #74c7ec;
+  color: var(--tokyo-cyan);
   padding: 0 1rem;
 }
 
 .widget-volume trough highlight {
-  background: #74c7ec;
+  background: var(--tokyo-cyan);
 }
 
 .widget-backlight trough highlight {
-  background: #f9e2af;
+  background: var(--tokyo-yellow);
 }
 
 .widget-backlight label {
   font-size: 1.5rem;
-  color: #f9e2af;
+  color: var(--tokyo-yellow);
 }
 
 .widget-backlight .KB {
