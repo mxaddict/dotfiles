@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# vi: ft=bash
+
+killall -9 swaync
+
+swaync &
+
+sleep 5
+
+notify-send "Normal Notification" "This is a standard notification message." &
+notify-send -u critical "Critical Alert!" "Something important requires your immediate attention." &
+notify-send -u low "Low Priority" "This is a low priority informational message that might not require immediate action." &
+notify-send -A 'Default Action' -A 'Other Action' "Actionable Notification" "Click a button to respond to this notification." &
+notify-send -a "Some App" -i ~/Pictures/Screenshots/20260206_06h38m34s.png "Image Notification" "This notification includes a small image." &
+notify-send -a "Some App" "Long Body Notification" "This notification features a significantly longer body text to demonstrate how the theme handles multi-line content. It should wrap gracefully and remain readable within the notification pop-up, ensuring that no information is cut off or difficult to read. This is crucial for user experience." &
+notify-send -a "Some App" -A 'View' -A 'Dismiss' -i ~/Pictures/Screenshots/20260206_06h38m34s.png "Image & Actions" "This notification combines an image with interactive actions." &
