@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# vi: ft=bash
+
+alacritty --class floating -e wiremix --tab output

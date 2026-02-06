@@ -91,7 +91,6 @@ if command -v pacman >/dev/null; then
         papirus-icon-theme \
         pass \
         pass-otp \
-        pavucontrol \
         pipewire \
         pipewire-alsa \
         pipewire-jack \
@@ -133,6 +132,7 @@ if command -v pacman >/dev/null; then
         waybar \
         wget \
         wireless-regdb \
+        wiremix \
         wireplumber \
         wl-clipboard \
         woff2-font-awesome \
