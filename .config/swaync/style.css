@@ -44,15 +44,13 @@ scale trough {
 trough slider {
   background-color: var(--tokyo-blue);
   border-radius: var(--swaync-border-radius);
-  box-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+  border: 1px solid var(--tokyo-comment);
   margin: -10px;
   transition: all 0.2s ease;
 }
 
 trough slider:hover {
-  box-shadow:
-    0 0 2px rgba(0, 0, 0, 0.8),
-    0 0 8px var(--tokyo-blue);
+  border: 1px solid var(--tokyo-blue);
 }
 
 trough {
