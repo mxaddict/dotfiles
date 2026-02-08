@@ -24,10 +24,6 @@ mkdir -p "$config/hypr"
 touch "$config/hypr/monitors.conf"
 touch "$config/hypr/workspaces.conf"
 
-for profile in ~/.thunderbird/*.default*/; do
-    echo 'user_pref("mail.shared.delete_2_is_delete", true);' >>"${profile}user.js"
-done
-
 [ -d "$dotfiles" ] || git clone https://github.com/mxaddict/dotfiles.git "$dotfiles"
 pwd=$(pwd)
 cd "$dotfiles" || exit
