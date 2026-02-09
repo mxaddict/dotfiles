@@ -62,7 +62,7 @@ if [ "$STASHED_CHANGES" = true ]; then
 fi
 
 echo -e "$GREEN_CHECK Checking dependencies..."
-[ -f "$HOME/.files/.deps.lock" ] || "$HOME/.files/.local/bin/.deps" >/dev/null 2>&1
+"$HOME/.files/.local/bin/.deps"
 
 echo -e "$GREEN_CHECK Stowing dotfiles..."
 stow --adopt . >/dev/null 2>&1
