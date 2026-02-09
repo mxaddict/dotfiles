@@ -8,28 +8,55 @@ dotfiles="$HOME/.files"
 config="$HOME/.config"
 tpm="$config/tmux/plugins/tpm"
 
-mkdir -p "$HOME/Desktop"
-mkdir -p "$HOME/Documents"
-mkdir -p "$HOME/Downloads"
-mkdir -p "$HOME/Music"
-mkdir -p "$HOME/OSs"
-mkdir -p "$HOME/Pictures/Screenshots"
-mkdir -p "$HOME/Projects"
-mkdir -p "$HOME/Public"
-mkdir -p "$HOME/Templates"
-mkdir -p "$HOME/Videos"
-mkdir -p "$HOME/.local/log"
+declare -a DIRS=(
+    "Desktop"
+    "Documents"
+    "Downloads"
+    "Music"
+    "OSs"
+    "Pictures/Screenshots"
+    "Projects"
+    "Public"
+    "Templates"
+    "Videos"
+    ".local/log"
+)
+
+for DIR in "${DIRS[@]}"; do
+    mkdir -p "$HOME/$DIR"
+done
 
 mkdir -p "$config/hypr"
 touch "$config/hypr/monitors.conf"
 touch "$config/hypr/workspaces.conf"
 
 [ -d "$dotfiles" ] || git clone https://github.com/mxaddict/dotfiles.git "$dotfiles"
+SELF_PATH="$(readlink -f "$0")"
+ORIGINAL_ARGS=("$@")
+
 pwd=$(pwd)
 cd "$dotfiles" || exit
-git stash || true
-git pull --no-edit
-git stash pop || true
+
+STASHED_CHANGES=false
+if ! git diff --quiet --exit-code; then
+    echo "Stashing local changes before update..."
+    git stash push --include-untracked -m "Pre-update stash by self-update script"
+    STASHED_CHANGES=true
+fi
+
+PULL_OUTPUT=$(git pull --ff-only 2>&1)
+git_pull_status=$?
+
+if [ "$git_pull_status" -eq 0 ] && [[ ! "$PULL_OUTPUT" == *"Already up to date."* ]]; then
+    echo "Dotfiles updated. Re-executing script with new version."
+    cd "$pwd"
+    exec "$SELF_PATH" "${ORIGINAL_ARGS[@]}"
+fi
+
+if [ "$STASHED_CHANGES" = true ]; then
+    echo "Applying stashed changes..."
+    git stash pop || true
+fi
 
 [ -f "$HOME/.files/.deps.lock" ] || "$HOME/.files/.local/bin/.deps"
 
