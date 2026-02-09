@@ -26,7 +26,7 @@ if command -v pacman >/dev/null; then
         bat \
         bear \
         bind \
-        blueman \
+        bluetui \
         bluez \
         bluez-utils \
         breeze \
