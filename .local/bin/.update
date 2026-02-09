@@ -3,7 +3,6 @@
 # WARN: make sure things are sure
 set -euo pipefail
 
-# Where is the DIR for dotfiles?
 dotfiles="$HOME/.files"
 config="$HOME/.config"
 tpm="$config/tmux/plugins/tpm"
