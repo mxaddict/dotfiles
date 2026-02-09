@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# vi: ft=sh
+# vi: ft=bash
 # WARN: make sure things are sure
 set -euo pipefail
 
@@ -144,21 +144,24 @@ if command -v pacman >/dev/null; then
         zoxide
 
     export DOTROOT="$HOME/.files/.root"
-    sudo cp "$DOTROOT/etc/kanata.kbd" /etc/kanata.kbd
-    sudo cp "$DOTROOT/etc/ly/config.ini" /etc/ly/config.ini
-    sudo cp "$DOTROOT/etc/mkinitcpio.conf" /etc/mkinitcpio.conf
-    sudo cp "$DOTROOT/etc/mkinitcpio.d/linux.preset" /etc/mkinitcpio.d/linux.preset
-    sudo cp "$DOTROOT/etc/pacman.conf" /etc/pacman.conf
-    sudo cp "$DOTROOT/etc/systemd/logind.conf" /etc/systemd/logind.conf
-    sudo cp "$DOTROOT/etc/systemd/sleep.conf" /etc/systemd/sleep.conf
-    sudo cp "$DOTROOT/etc/systemd/system/power-check.service" /etc/systemd/system/power-check.service
-    sudo cp "$DOTROOT/etc/systemd/system/power-check.timer" /etc/systemd/system/power-check.timer
-    sudo cp "$DOTROOT/etc/udev/rules.d/99-power-profiles.rules" /etc/udev/rules.d/99-power-profiles.rules
-    sudo cp "$DOTROOT/etc/vconsole.conf" /etc/vconsole.conf
-    sudo cp "$DOTROOT/usr/bin/auto-power-profile" /usr/bin/auto-power-profile
+    declare -a FILES=(
+        "etc/kanata.kbd"
+        "etc/ly/config.ini"
+        "etc/mkinitcpio.conf"
+        "etc/mkinitcpio.d/linux.preset"
+        "etc/pacman.conf"
+        "etc/systemd/logind.conf"
+        "etc/systemd/sleep.conf"
+        "etc/systemd/system/power-check.service"
+        "etc/systemd/system/power-check.timer"
+        "etc/udev/rules.d/99-power-profiles.rules"
+        "etc/vconsole.conf"
+        "usr/bin/auto-power-profile"
+    )
 
-    # TODO: we need to remove this once all machines are updated
-    sudo rm /usr/lib/systemd/system-sleep/fprintd-restart 2>/dev/null || true
+    for FILE_PATH in "${FILES[@]}"; do
+        sudo cp "$DOTROOT/$FILE_PATH" "/$FILE_PATH"
+    done
 
     sudo mkinitcpio -P
     sudo sync
@@ -195,6 +198,27 @@ if command -v pacman >/dev/null; then
     sudo ufw status
 fi
 
+if command -v dnf >/dev/null; then
+    sudo dnf install -y \
+        alacritty \
+        bat \
+        eza \
+        fastfetch \
+        fd-find \
+        fish \
+        fzf \
+        git \
+        neovim \
+        nodejs \
+        npm \
+        ripgrep \
+        stow \
+        tealdeer \
+        tmux \
+        unzip \
+        zoxide
+fi
+
 if command -v brew >/dev/null; then
     brew install \
         alacritty \
@@ -215,7 +239,7 @@ if command -v brew >/dev/null; then
         rustup \
         starship \
         stow \
-        tldr \
+        tealdeer \
         tmux \
         unzip \
         zoxide
@@ -249,10 +273,16 @@ if command -v apt-get >/dev/null; then
         ripgrep \
         rustup \
         stow \
-        tldr \
+        tealdeer \
         tmux \
         unzip \
         zoxide
+fi
+
+if command -v nvim >/dev/null; then
+    sudo ln -sf "$(which nvim)" "/usr/local/bin/vi"
+    sudo ln -sf "$(which nvim)" "/usr/local/bin/vim"
+    sudo ln -sf "$(which nvim)" "/usr/local/bin/v"
 fi
 
 rustup install stable
