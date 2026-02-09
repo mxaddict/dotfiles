@@ -3,10 +3,13 @@
 # WARN: make sure things are sure
 set -euo pipefail
 
+GREEN_CHECK="\e[32m✅\e[0m"
+
 dotfiles="$HOME/.files"
 config="$HOME/.config"
 tpm="$config/tmux/plugins/tpm"
 
+echo -e "$GREEN_CHECK Creating essential user directories..."
 declare -a DIRS=(
     "Desktop"
     "Documents"
@@ -22,14 +25,15 @@ declare -a DIRS=(
 )
 
 for DIR in "${DIRS[@]}"; do
-    mkdir -p "$HOME/$DIR"
+    mkdir -p "$HOME/$DIR" >/dev/null 2>&1
 done
 
-mkdir -p "$config/hypr"
-touch "$config/hypr/monitors.conf"
-touch "$config/hypr/workspaces.conf"
+mkdir -p "$config/hypr" >/dev/null 2>&1
+touch "$config/hypr/monitors.conf" >/dev/null 2>&1
+touch "$config/hypr/workspaces.conf" >/dev/null 2>&1
 
-[ -d "$dotfiles" ] || git clone https://github.com/mxaddict/dotfiles.git "$dotfiles"
+echo -e "$GREEN_CHECK Updating dotfiles repository..."
+[ -d "$dotfiles" ] || git clone https://github.com/mxaddict/dotfiles.git "$dotfiles" >/dev/null 2>&1
 SELF_PATH="$(readlink -f "$0")"
 ORIGINAL_ARGS=("$@")
 
@@ -38,8 +42,8 @@ cd "$dotfiles" || exit
 
 STASHED_CHANGES=false
 if ! git diff --quiet --exit-code; then
-    echo "Stashing local changes before update..."
-    git stash push --include-untracked -m "Pre-update stash by self-update script"
+    echo -e "$GREEN_CHECK Stashing local changes before update..."
+    git stash push --include-untracked -m "Pre-update stash by self-update script" >/dev/null 2>&1
     STASHED_CHANGES=true
 fi
 
@@ -47,40 +51,52 @@ PULL_OUTPUT=$(git pull --ff-only 2>&1)
 git_pull_status=$?
 
 if [ "$git_pull_status" -eq 0 ] && [[ ! "$PULL_OUTPUT" == *"Already up to date."* ]]; then
-    echo "Dotfiles updated. Re-executing script with new version."
+    echo -e "$GREEN_CHECK Dotfiles updated. Re-executing script with new version."
     cd "$pwd"
     exec "$SELF_PATH" "${ORIGINAL_ARGS[@]}"
 fi
 
 if [ "$STASHED_CHANGES" = true ]; then
-    echo "Applying stashed changes..."
-    git stash pop || true
+    echo -e "$GREEN_CHECK Applying stashed changes..."
+    git stash pop >/dev/null 2>&1 || true
 fi
 
-[ -f "$HOME/.files/.deps.lock" ] || "$HOME/.files/.local/bin/.deps"
+echo -e "$GREEN_CHECK Checking dependencies..."
+[ -f "$HOME/.files/.deps.lock" ] || "$HOME/.files/.local/bin/.deps" >/dev/null 2>&1
 
-stow --adopt .
+echo -e "$GREEN_CHECK Stowing dotfiles..."
+stow --adopt . >/dev/null 2>&1
 cd "$pwd" || exit
 
 if command -v dconf >/dev/null; then
-    dconf load / <~/.config/dconf/user.ini
+    echo -e "$GREEN_CHECK Loading dconf settings..."
+    dconf load / <~/.config/dconf/user.ini >/dev/null 2>&1
 fi
 
 if command -v batcat >/dev/null; then
     alias bat=batcat
 fi
-bat cache --build
+if command -v bat >/dev/null; then
+    echo -e "$GREEN_CHECK Building bat cache..."
+    bat cache --build >/dev/null 2>&1
+fi
 
-tldr --update
-fish -c "curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish > /tmp/fisher.fish"
-fish -c "source /tmp/fisher.fish && fisher update"
-nvim --headless "+Lazy! install all" "+Lazy! update all" +TSUpdate +qa
+echo -e "$GREEN_CHECK Updating tldr cache..."
+tldr --update >/dev/null 2>&1
+echo -e "$GREEN_CHECK Updating Fish shell plugins..."
+fish -c "curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish > /tmp/fisher.fish" >/dev/null 2>&1
+fish -c "source /tmp/fisher.fish && fisher update" >/dev/null 2>&1
+echo -e "$GREEN_CHECK Updating Neovim plugins..."
+nvim --headless "+Lazy! install all" "+Lazy! update all" +TSUpdate +qa >/dev/null 2>&1
 
-[ -d "$tpm" ] || git clone https://github.com/tmux-plugins/tpm "$tpm"
+echo -e "$GREEN_CHECK Updating Tmux plugins..."
+[ -d "$tpm" ] || git clone https://github.com/tmux-plugins/tpm "$tpm" >/dev/null 2>&1
 cd "$tpm" || exit
-git pull
+git pull >/dev/null 2>&1
 tmux source "$config/tmux/tmux.conf" 2>/dev/null || true
-"$tpm/bin/install_plugins"
-"$tpm/bin/update_plugins" all
-"$tpm/bin/clean_plugins"
+"$tpm/bin/install_plugins" >/dev/null 2>&1
+"$tpm/bin/update_plugins" all >/dev/null 2>&1
+"$tpm/bin/clean_plugins" >/dev/null 2>&1
 cd "$pwd" || exit
+
+echo -e "$GREEN_CHECK Dotfiles update complete."
