@@ -19,7 +19,7 @@ if command -v pacman >/dev/null; then
     fi
 
     echo -e "$GREEN_CHECK Updating Arch Linux system packages..."
-    paru -Syu --noconfirm >/dev/null 2>&1 || true
+    paru -Syu --noconfirm >/dev/null 2>&1
     echo -e "$GREEN_CHECK Installing core system packages (Arch Linux)..."
     paru -S --needed --noconfirm \
         adw-gtk-theme \
