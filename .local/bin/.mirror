@@ -2,8 +2,7 @@
 # vi: ft=sh
 
 sudo reflector \
-    --country 'Japan' \
-    --latest 10 \
+    --latest 20 \
     --protocol https \
     --sort rate \
     --save /etc/pacman.d/mirrorlist
