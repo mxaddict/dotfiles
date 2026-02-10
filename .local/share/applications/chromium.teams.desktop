@@ -1,7 +1,7 @@
 [Desktop Entry]
 Version=1.0
 Type=Application
-Name=Teams (Chromium)
+Name=Teams (Applet)
 Comment=Microsoft Teams web applet
 Exec=chromium --app=https://teams.microsoft.com --user-data-dir=.config/chromium-teams
 Icon=teams

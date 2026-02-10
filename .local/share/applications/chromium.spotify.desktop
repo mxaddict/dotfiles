@@ -1,8 +1,8 @@
 [Desktop Entry]
 Version=1.0
 Type=Application
-Name=Spotify (Chromium)
-Comment=Spotify web appler
+Name=Spotify (Applet)
+Comment=Spotify web applet
 Exec=chromium --app=https://open.spotify.com --user-data-dir=.config/chromium-spotify
 Icon=spotify
 Terminal=false
