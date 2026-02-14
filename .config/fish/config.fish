@@ -1,4 +1,5 @@
 #!/usr/bin/env fish
+# vi: ft=fish
 # No greeting text for now
 set fish_greeting
 
@@ -121,13 +122,27 @@ function lg
 end
 
 # Alias for quick and dirty git commit
-function g
-    git commit -am "$(quoty)"
-    git pull --no-edit
-    git push
-end
 function gg
-    git add . && git commit -m "$(quoty)"
+    set -l msg (quoty)
+
+    if test -n "$msg"
+        git add .
+        git commit -m "$msg"
+    else
+        echo "Error: Could'nt get quote from quoty"
+        return 1
+    end
+end
+function gl
+    set -l loc (curl -s https://ipinfo.io/loc)
+
+    if test -n "$loc"
+        git add .
+        git commit -m "$loc"
+    else
+        echo "Error: Could'nt get location"
+        return 1
+    end
     git pull --no-edit
     git push
 end
