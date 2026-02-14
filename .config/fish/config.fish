@@ -113,7 +113,7 @@ end
 # fastfetch
 function ff
     clear
-    fastfetch
+    fastfetch $argv
 end
 
 # Alias for lazygit
