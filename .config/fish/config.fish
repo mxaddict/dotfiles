@@ -132,6 +132,8 @@ function gg
         echo "Error: Could'nt get quote from quoty"
         return 1
     end
+    git pull --no-edit
+    git push
 end
 function gl
     set -l loc (curl -s https://ipinfo.io/loc)
