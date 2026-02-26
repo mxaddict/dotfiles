@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# vi: ft=bash
+
+DEFAULT_BROWSER=$(xdg-settings get default-web-browser)
+
+if [ -z "$DEFAULT_BROWSER" ]; then
+    echo "No default browser found in xdg-settings."
+    exit 1
+fi
+
+BROWSER_CMD=$(grep -m 1 "Exec=" "/usr/share/applications/$DEFAULT_BROWSER" | sed 's/Exec=//;s/ %u//;s/ %U//;s/".*//')
+
+if [ -n "$BROWSER_CMD" ]; then
+    echo "Launching default browser: $BROWSER_CMD"
+    $BROWSER_CMD "$@" >/dev/null 2>&1 &
+else
+    echo "Could not parse executable from $DEFAULT_BROWSER"
+    exit 1
+fi
