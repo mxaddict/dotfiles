@@ -217,6 +217,7 @@ if command -v pacman >/dev/null; then
     sudo ufw allow mdns >/dev/null 2>&1
     sudo ufw allow 42069 >/dev/null 2>&1                                      # COT
     sudo ufw allow 9993/udp >/dev/null 2>&1                                   # zerotier port
+    sudo ufw allow 11434 >/dev/null 2>&1                                      # ollama
     sudo ufw allow proto udp from any to any port 27031:27036 >/dev/null 2>&1 # steam
     sudo ufw allow proto tcp from any to any port 27040 >/dev/null 2>&1       # steam
 
