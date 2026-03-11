@@ -28,13 +28,31 @@ color scheme is based on the popular
   versatile application launcher and window switcher.
 - **Notification Daemon**: [swaync](https://github.com/Lentera/swaync) - A
   simple notification daemon for Wayland.
+- **File Manager**: [Nautilus](https://help.gnome.org/users/nautilus/) - The
+  default GNOME file manager
+- **Browser**: [Vieb](https://github.com/LunarNathan/vieb) - A vim-like browser
+- **Screenshot Tool**: [Grimblast](https://github.com/hyprwm/grimblast) - For
+  taking screenshots and screen recording
+- **System Monitoring**: [Btop](https://github.com/aristocratos/btop) - A modern
+  replacement for htop
+- **Keybindings**: Intuitive keybindings are configured in `hyprland.conf` for
+  efficient window management and application launching.
+- **Fish Shell**: The fish shell is configured with useful aliases, functions,
+  and a [Starship](https://starship.rs/) prompt. It also integrates with `fzf`
+  and `zoxide`.
+- **Neovim**: A full-featured Neovim setup based on LazyVim with plugins for
+  LSP, linting, formatting, and more.
 
 ## Key Features
 
 - **Consistent Theming**: A consistent TokyoNight theme is applied across all
   applications, including Alacritty, Neovim, Waybar, and Rofi.
 - **Custom Scripts**: A collection of useful scripts are available in
-  `.local/bin` to automate common tasks.
+  `.local/bin` to automate common tasks like:
+  - Application launchers (browser, file manager, etc.)
+  - System controls (power menu, audio, brightness)
+  - Developer tools (git commits with location, etc.)
+  - Network management and more
 - **Keybindings**: Intuitive keybindings are configured in `hyprland.conf` for
   efficient window management and application launching.
 - **Fish Shell**: The fish shell is configured with useful aliases, functions,
