@@ -1,8 +1,6 @@
+*.md
 .deps.lock
 .git
 .root
-FIREWALL.md
 LICENSE
-README.md
-SUSPEND.md
 screenshot.png
