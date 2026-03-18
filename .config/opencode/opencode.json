@@ -3,7 +3,7 @@
   "provider": {
     "ollama": {
       "npm": "@ai-sdk/openai-compatible",
-      "name": "Ollama",
+      "name": "Ollama @ Home",
       "options": {
         "baseURL": "http://pc.mx.kryptic.sh:11434/v1"
       },
