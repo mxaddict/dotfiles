@@ -6,6 +6,7 @@
 *~
 .base16*
 .cache
+.claude/
 .config/Vieb/
 .config/dconf/user
 .config/fish/completions/
