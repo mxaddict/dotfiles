@@ -79,9 +79,9 @@ function cat
     bat --plain $argv
 end
 
-# Alias for cmatrix
+# Claude resume alias
 function c
-    cmatrix $argv
+    claude --resume $argv
 end
 
 # Git typo
@@ -185,10 +185,6 @@ function cl
     clear
 end
 
-# Claude resume alias
-function cld
-    claude --resume $argv
-end
 
 # NVM
 if command -v -q fnm
