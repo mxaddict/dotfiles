@@ -51,7 +51,7 @@ color scheme is based on the popular
   `.local/bin` to automate common tasks like:
   - Application launchers (browser, file manager, etc.)
   - System controls (power menu, audio, brightness)
-  - Developer tools (git commits with location, etc.)
+  - Developer tools (git commits with location, tmux sessions, etc.)
   - Network management and more
 - **Keybindings**: Intuitive keybindings are configured in `hyprland.conf` for
   efficient window management and application launching.
