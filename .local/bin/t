@@ -2,7 +2,7 @@
 # vi: ft=bash
 set -euo pipefail
 
-SESSION_NAME=$(basename "$PWD")
+SESSION_NAME=$(basename "$PWD" | tr '.' '_')
 
 # Attach to existing session if it exists
 if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
