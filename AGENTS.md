@@ -1,103 +1,50 @@
 # AGENTS.md
 
-This file contains guidelines and configurations for agentic coding agents
-operating in this repository.
+This file provides guidance to AI coding agents working in this repository.
+It is symlinked as `CLAUDE.md` and `GEMINI.md` so all agents share the same
+instructions.
 
-## Build/Lint/Test Commands
+## What This Is
 
-This is a dotfiles repository with no traditional software build processes. The
-configuration files are maintained manually.
+Personal dotfiles repository for an Arch Linux (Hyprland) desktop environment. Configs are symlinked into `$HOME` using [GNU Stow](https://www.gnu.org/software/stow/). The repo root mirrors the home directory structure — files at `.config/foo/bar` get stowed to `~/.config/foo/bar`.
 
-- No specific build commands
-- No automated linting or testing framework
-- Manual verification through system testing
+## Key Commands
 
-## Code Style Guidelines
+- **Install/update everything**: `.update` (or `~/.local/bin/.update`) — pulls repo, installs deps, stows dotfiles, updates plugins
+- **Install dependencies only**: `.deps` (or `~/.local/bin/.deps`) — installs system packages via pacman/paru, dnf, apt, or brew depending on platform
+- **Quick git commit with random quote**: `gg` (fish function) — stages all, commits with a quote from `quoty`, pulls, pushes
 
-### General Conventions
+There are no build, lint, or test commands — this is a config-only repo.
 
-- All files use UTF-8 encoding
-- Line endings are LF (Unix-style)
-- Files end with a newline character
-- Trailing whitespace is trimmed
+## Repository Structure
 
-### Indentation and Formatting
+- **`.config/`** — XDG config files (the bulk of the repo)
+  - `hypr/` — Hyprland compositor (tiling WM, keybindings, idle, lock, wallpaper)
+  - `nvim/` — Neovim config based on LazyVim (`lua/plugins/` for plugin specs, `lua/config/` for options/keymaps/autocmds)
+  - `fish/config.fish` — Fish shell config (aliases, env vars, vi mode, TokyoNight colors, starship/fzf/zoxide integration)
+  - `alacritty/` — Terminal emulator config
+  - `tmux/` — Tmux config (plugins managed by TPM, stored in `plugins/` which is gitignored)
+  - `waybar/` — Status bar config
+  - `rofi/` — Application launcher theme
+  - `swaync/` — Notification daemon config
+  - `starship.toml` — Shell prompt config
+- **`.local/bin/`** — Custom scripts (prefixed with `.`): menus (`.menu-*`), system helpers (`.update`, `.deps`, `.swap`, `.start`), bat wrappers (`.batlog`, `.batrep`)
+- **`.root/`** — System-level configs (`/etc/` files) copied by `.deps` script — kanata keyboard remapping, pacman.conf, systemd units, udev rules
+- **`.gitconfig`** — Git config (GPG signing enabled, auto setup remote on push)
+- **`.editorconfig`** — 4-space indent default; 2-space for CSS/HTML/JS/JSON/Lua/MD/YAML/TOML; tabs for .gitconfig and .gd files
+- **`.stow-local-ignore`** — Excludes non-config files (markdown, screenshots, LICENSE, `.root/`) from stow
 
-- Default indent size: 4 spaces
-- Indent style: spaces
-- For CSS, HTML, JS, JSX, Lua, MD, SCSS, TOML, TSX, VUE, YAML, YML files: 2
-  space indent
-- For .gitconfig files: tab indent (indent_size = 8)
-- For .gd files: tab indent (indent_size = 4)
-- Maximum line width: 80 characters (for C++ according to clang-format)
+## Code Style
 
-### Language-Specific Guidelines
+- Follow `.editorconfig` for indentation rules
+- JS/TS: Prettier with single quotes, trailing commas (es5), 80 char width, prose wrap always
+- C/C++: `.clang-format` based on Google style, 4-space tabs, 80 char max width
+- Shell scripts: use `set -euo pipefail` in bash; fish scripts use fish idioms
+- Theme: TokyoNight throughout (Alacritty, Neovim, Fish, Waybar, Rofi, FZF)
 
-#### C/C++
+## Important Conventions
 
-- Follow Google C/C++ Code Style
-- Pointer alignment: Left (align on the left)
-- Braces for control structures: Custom style with AfterControlStatement: Never
-- No short if statements without braces
-- Space after cast: false
-- Spaces around operators: true, with specific configurations for each operator
-  type
-- Tab width: 4
-
-#### JavaScript/TypeScript
-
-- Follow Prettier configuration defined in .prettierrc
-- Print width: 80 characters
-- Use single quotes
-- Trailing commas: es5
-- proseWrap: always
-
-### Naming Conventions
-
-- Variable and function names: camelCase
-- Class names: PascalCase
-- Constants: UPPER_CASE
-- File names: lowercase with hyphens or underscores
-- Configuration file names: lowercase with dots
-
-### Error Handling
-
-- No specific error handling conventions defined in configuration files
-- Manual verification through system testing for configuration issues
-
-### Import Styles
-
-- For JavaScript/TypeScript: Standard ES6 import/export syntax
-- For shell scripts: Standard sourcing and function-based organization
-
-## Cursor/Rules Configuration
-
-### Existing Rules
-
-- No .cursor/rules directory found
-- No .cursorrules file found
-- No .github/copilot-instructions.md file found
-
-### Copilot Guidelines
-
-No specific Copilot instructions defined in this repository.
-
-## Development Environment Setup
-
-This repository contains configuration files for:
-
-- Hyprland (Wayland compositor)
-- Fish shell
-- Neovim with LazyVim
-- Alacritty terminal emulator
-- Waybar status bar
-- Rofi application launcher
-- Swaync notification daemon
-- Various GNOME and Linux utilities
-
-## Maintenance Process
-
-1. Manual verification of changes
-2. Direct editing of configuration files in the repository
-3. Testing through system restart or reload mechanisms
-4. No automated test suite or build pipeline
+- Scripts in `.local/bin/` are prefixed with `.` (e.g., `.update`, `.deps`, `.menu-power`)
+- The `.deps` script handles multi-distro support (Arch/Fedora/Debian/macOS) — maintain all platform branches when editing
+- Neovim plugins go in `lua/plugins/` as individual files following LazyVim plugin spec format
+- Git commits are GPG-signed; the repo uses `main` as the default branch
