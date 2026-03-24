@@ -5,6 +5,7 @@ notify-send "Join them not beat them"
 vieb &
 thunderbird &
 steam &
+Telegram &
 dex "$HOME/.local/share/applications/chromium.discord.desktop" &
 dex "$HOME/.local/share/applications/chromium.teams.desktop" &
 dex "$HOME/.local/share/applications/chromium.spotify.desktop" &
