@@ -1,8 +1,13 @@
 {
-  "model": "claude-opus-4-6[1m]",
-  "effortLevel": "high",
-  "enabledPlugins": {
-    "rust-analyzer-lsp@claude-plugins-official": true
+  "env": {
+    "CLAUDE_CODE_USE_VERTEX": "1",
+    "CLOUD_ML_REGION": "asia-southeast1",
+    "ANTHROPIC_VERTEX_PROJECT_ID": "em-claude-code-assistance",
+    "VERTEX_REGION_CLAUDE_4_6_OPUS": "asia-southeast1",
+    "VERTEX_REGION_CLAUDE_4_5_OPUS": "asia-southeast1",
+    "VERTEX_REGION_CLAUDE_4_6_SONNET": "asia-southeast1",
+    "VERTEX_REGION_CLAUDE_4_5_SONNET": "asia-southeast1",
+    "VERTEX_REGION_CLAUDE_4_5_HAIKU": "global"
   },
   "permissions": {
     "allow": [
@@ -39,14 +44,12 @@
       "Bash(git stash*)"
     ]
   },
-  "env": {
-    "CLAUDE_CODE_USE_VERTEX": "1",
-    "CLOUD_ML_REGION": "asia-southeast1",
-    "ANTHROPIC_VERTEX_PROJECT_ID": "em-claude-code-assistance",
-    "VERTEX_REGION_CLAUDE_4_6_OPUS": "asia-southeast1",
-    "VERTEX_REGION_CLAUDE_4_5_OPUS": "asia-southeast1",
-    "VERTEX_REGION_CLAUDE_4_6_SONNET": "asia-southeast1",
-    "VERTEX_REGION_CLAUDE_4_5_SONNET": "asia-southeast1",
-    "VERTEX_REGION_CLAUDE_4_5_HAIKU": "global"
-  }
+  "model": "claude-opus-4-6[1m]",
+  "enabledPlugins": {
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "php-lsp@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true
+  },
+  "effortLevel": "high"
 }
