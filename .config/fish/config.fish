@@ -34,16 +34,6 @@ set -gx MAKEFLAGS "-j$JOBS"
 set -gx PARU_PAGER "bat --color=always"
 set -gx MANPAGER "sh -c 'sed -u -e \"s/\\x1B\[[0-9;]*m//g; s/.\\x08//g\" | bat -p -lman'"
 
-# Claude gayness
-set -gx CLAUDE_CODE_USE_VERTEX 1
-set -gx CLOUD_ML_REGION asia-southeast1
-set -gx ANTHROPIC_VERTEX_PROJECT_ID em-claude-code-assistance
-set -gx VERTEX_REGION_CLAUDE_4_6_OPUS asia-southeast1
-set -gx VERTEX_REGION_CLAUDE_4_5_OPUS asia-southeast1
-set -gx VERTEX_REGION_CLAUDE_4_6_SONNET asia-southeast1
-set -gx VERTEX_REGION_CLAUDE_4_5_SONNET asia-southeast1
-set -gx VERTEX_REGION_CLAUDE_4_5_HAIKU global
-
 # FZF theme
 set -gx FZF_CTRL_T_OPTS "--preview 'bat -n --color=always {}'"
 set -gx FZF_DEFAULT_OPTS "$FZF_DEFAULT_OPTS \
