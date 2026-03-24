@@ -185,6 +185,11 @@ function cl
     clear
 end
 
+# Claude resume alias
+function cld
+    claude --resume $argv
+end
+
 # NVM
 if command -v -q fnm
     function nvm
