@@ -84,6 +84,7 @@ if command -v pacman >/dev/null; then
         ly \
         man-db \
         mpv \
+        mtr \
         nautilus \
         neovim \
         networkmanager \
