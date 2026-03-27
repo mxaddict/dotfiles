@@ -10,10 +10,7 @@ if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
     exit 0
 fi
 
-# Create new session with nvim in window 0
-tmux new-session -d -s "$SESSION_NAME" -c "$PWD" nvim
-
-# Create windows 1 and 2
+tmux new-session -d -s "$SESSION_NAME" -c "$PWD"
 tmux new-window -t "$SESSION_NAME" -c "$PWD"
 tmux new-window -t "$SESSION_NAME" -c "$PWD"
 
