@@ -58,6 +58,7 @@ if command -v pacman >/dev/null; then
         gemini-cli \
         ghostscript \
         git \
+        glab \
         gnu-free-fonts \
         grim \
         gsfonts \
