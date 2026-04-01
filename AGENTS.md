@@ -20,6 +20,8 @@ directory structure — files at `.config/foo/bar` get stowed to
   system packages via pacman/paru, dnf, apt, or brew depending on platform
 - **Quick git commit with random quote**: `gg` (fish function) — stages all,
   commits with a quote from `quoty`, pulls, pushes
+- **Manual git commit with quoty**: When working on this repository, always use
+  `git commit -m "$(quoty)"` for commit messages
 
 There are no build, lint, or test commands — this is a config-only repo.
 
@@ -58,6 +60,7 @@ There are no build, lint, or test commands — this is a config-only repo.
   prose wrap always
 - C/C++: `.clang-format` based on Google style, 4-space tabs, 80 char max width
 - Shell scripts: use `set -euo pipefail` in bash; fish scripts use fish idioms
+- Markdown files: Run `prettier --write` on files after editing
 - Theme: TokyoNight throughout (Alacritty, Neovim, Fish, Waybar, Rofi, FZF)
 
 ## Important Conventions
