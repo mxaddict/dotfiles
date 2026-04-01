@@ -79,9 +79,14 @@ function cat
     bat --plain $argv
 end
 
-# Claude resume alias
+# Claude continue alias
 function c
-    claude --resume $argv
+    claude --continue $argv
+end
+
+# Opencode continue alias
+function o
+    opencode --continue $argv
 end
 
 # Git typo

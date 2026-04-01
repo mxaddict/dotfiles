@@ -8,8 +8,44 @@
         "baseURL": "http://pc.mx.kryptic.sh:11434/v1"
       },
       "models": {
+        "deepseek-coder:33b": {
+          "name": "deepseek-coder:33b"
+        },
+        "deepseek-coder:6.7b": {
+          "name": "deepseek-coder:6.7b"
+        },
+        "deepseek-coder:1.3b": {
+          "name": "deepseek-coder:1.3b"
+        },
+        "qwen2.5-coder:32b": {
+          "name": "qwen2.5-coder:32b"
+        },
+        "qwen2.5-coder:14b": {
+          "name": "qwen2.5-coder:14b"
+        },
+        "qwen2.5-coder:7b": {
+          "name": "qwen2.5-coder:7b"
+        },
         "qwen3-coder:30b": {
           "name": "qwen3-coder:30b"
+        },
+        "starcoder2:3b": {
+          "name": "starcoder2:3b"
+        },
+        "starcoder2:7b": {
+          "name": "starcoder2:7b"
+        },
+        "codellama:7b": {
+          "name": "codellama:7b"
+        },
+        "codellama:13b": {
+          "name": "codellama:13b"
+        },
+        "codegemma:2b": {
+          "name": "codegemma:2b"
+        },
+        "codegemma:7b": {
+          "name": "codegemma:7b"
         }
       }
     }
