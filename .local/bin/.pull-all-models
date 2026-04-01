@@ -6,7 +6,7 @@
 echo "Pulling all models configured in opencode..."
 
 # Extract model names from the opencode.json file
-MODEL_LIST=$(jq -r '.provider.ollama.models | keys[]' /home/mxaddict/.files/.config/opencode/opencode.json)
+MODEL_LIST=$(jq -r '.provider.ollama.models | keys[]' "$HOME/.files/.config/opencode/opencode.json")
 
 # Counter for progress
 COUNT=0
@@ -17,6 +17,6 @@ while IFS= read -r model; do
     COUNT=$((COUNT + 1))
     echo "[$COUNT/$TOTAL] Pulling $model..."
     ollama pull "$model"
-done <<< "$MODEL_LIST"
+done <<<"$MODEL_LIST"
 
 echo "Finished pulling all models!"
