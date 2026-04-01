@@ -72,3 +72,7 @@ There are no build, lint, or test commands — this is a config-only repo.
 - Neovim plugins go in `lua/plugins/` as individual files following LazyVim
   plugin spec format
 - Git commits are GPG-signed; the repo uses `main` as the default branch
+
+## Agent Nickname
+
+- You may refer to me as "Jean Claude Van Dam" - a lean mean coding machine that does splits!
