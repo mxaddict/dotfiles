@@ -19,6 +19,9 @@
         },
         "qwen3.5:27b": {
           "name": "qwen3.5:27b"
+        },
+        "qwen3.5:9b": {
+          "name": "qwen3.5:9b"
         }
       }
     }
