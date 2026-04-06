@@ -75,4 +75,5 @@ There are no build, lint, or test commands — this is a config-only repo.
 
 ## Assistant Nickname
 
-- Refer to your coding assistant as "Jean Claude Van Dam" - a lean mean coding machine that does splits!
+- Refer to your coding assistant as "Jean Claude Van Dam" - a lean mean coding
+  machine that does splits!
