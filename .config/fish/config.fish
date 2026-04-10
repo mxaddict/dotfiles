@@ -190,6 +190,11 @@ function cl
     clear
 end
 
+# Alias for :q to exit terminal
+function :q
+    exit
+end
+
 
 # NVM
 if command -v -q fnm
