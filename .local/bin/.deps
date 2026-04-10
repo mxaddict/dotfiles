@@ -116,7 +116,6 @@ if command -v pacman >/dev/null; then
         rsync \
         rustup \
         sbctl \
-        shim \
         slurp \
         snapshot \
         sof-firmware \
@@ -156,6 +155,7 @@ if command -v pacman >/dev/null; then
 
     export DOTROOT="$HOME/.files/.root"
     declare -a FILES=(
+        "etc/fwupd/fwupd.conf"
         "etc/kanata.kbd"
         "etc/ly/config.ini"
         "etc/mkinitcpio.conf"
@@ -172,6 +172,7 @@ if command -v pacman >/dev/null; then
 
     for FILE_PATH in "${FILES[@]}"; do
         sudo cp "$DOTROOT/$FILE_PATH" "/$FILE_PATH"
+        echo -e "  $GREEN_CHECK Updated $FILE_PATH"
     done
 
     echo -e "$GREEN_CHECK Regenerating initramfs..."
@@ -213,6 +214,15 @@ if command -v pacman >/dev/null; then
 
     echo -e "$GREEN_CHECK Enabling ufw.service..."
     sudo systemctl enable ufw.service >/dev/null 2>&1
+
+    echo -e "$GREEN_CHECK Enabling fwupd.service..."
+    sudo systemctl enable fwupd.service >/dev/null 2>&1
+
+    echo -e "$GREEN_CHECK Restarting fwupd.service..."
+    sudo systemctl restart fwupd.service >/dev/null 2>&1
+
+    echo -e "$GREEN_CHECK Generating fwupdx64.efi.signed"
+    sudo sbctl sign -s -o /usr/lib/fwupd/efi/fwupdx64.efi.signed /usr/lib/fwupd/efi/fwupdx64.efi >/dev/null 2>&1
 
     echo -e "$GREEN_CHECK Configuring UFW firewall rules..."
     sudo ufw allow http >/dev/null 2>&1
