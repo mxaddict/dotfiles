@@ -116,6 +116,7 @@ if command -v pacman >/dev/null; then
         rsync \
         rustup \
         sbctl \
+        shim \
         slurp \
         snapshot \
         sof-firmware \
