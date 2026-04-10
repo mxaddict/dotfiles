@@ -137,7 +137,7 @@ function gg
         echo "Error: Could'nt get quote from quoty"
         return 1
     end
-    git pull --no-edit
+    git pull --rebase
     git push
 end
 function gl
@@ -150,7 +150,7 @@ function gl
         echo "Error: Could'nt get location"
         return 1
     end
-    git pull --no-edit
+    git pull --rebase
     git push
 end
 
@@ -194,7 +194,6 @@ end
 function :q
     exit
 end
-
 
 # NVM
 if command -v -q fnm
