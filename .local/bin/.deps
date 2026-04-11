@@ -59,6 +59,7 @@ if command -v pacman >/dev/null; then
         ghostscript \
         git \
         glab \
+        github-cli \
         gnu-free-fonts \
         grim \
         gsfonts \
