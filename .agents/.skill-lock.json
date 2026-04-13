@@ -8,7 +8,7 @@
       "skillPath": "caveman/SKILL.md",
       "skillFolderHash": "825e13085d1515fe67881b2123f3bf9b34c26154",
       "installedAt": "2026-04-11T15:06:22.133Z",
-      "updatedAt": "2026-04-11T15:06:22.133Z"
+      "updatedAt": "2026-04-13T20:39:28.091Z"
     },
     "caveman-commit": {
       "source": "JuliusBrussee/caveman",
@@ -17,7 +17,7 @@
       "skillPath": "skills/caveman-commit/SKILL.md",
       "skillFolderHash": "f8d14c8de94e55b43de62b4b3081230248e2f481",
       "installedAt": "2026-04-11T15:06:22.618Z",
-      "updatedAt": "2026-04-11T15:06:22.618Z"
+      "updatedAt": "2026-04-13T20:39:28.993Z"
     },
     "caveman-compress": {
       "source": "JuliusBrussee/caveman",
@@ -26,7 +26,7 @@
       "skillPath": "caveman-compress/SKILL.md",
       "skillFolderHash": "85fc4f66717ab4f24a5b8d72fab3641b6be37a5f",
       "installedAt": "2026-04-11T15:06:23.081Z",
-      "updatedAt": "2026-04-11T15:06:23.081Z"
+      "updatedAt": "2026-04-13T20:39:29.445Z"
     },
     "caveman-review": {
       "source": "JuliusBrussee/caveman",
@@ -35,7 +35,7 @@
       "skillPath": "skills/caveman-review/SKILL.md",
       "skillFolderHash": "2147719da5f81255dbf960d6ce46d5a7ee9d0860",
       "installedAt": "2026-04-11T15:06:23.560Z",
-      "updatedAt": "2026-04-11T15:06:23.560Z"
+      "updatedAt": "2026-04-13T20:39:30.343Z"
     },
     "find-skills": {
       "source": "vercel-labs/skills",
@@ -45,9 +45,32 @@
       "skillFolderHash": "3013fdeb8a11b10b1eb795ec3ae8bfca38f7c26d",
       "installedAt": "2026-04-11T15:06:33.076Z",
       "updatedAt": "2026-04-11T15:06:33.076Z"
+    },
+    "caveman-help": {
+      "source": "JuliusBrussee/caveman",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/JuliusBrussee/caveman.git",
+      "skillPath": "skills/caveman-help/SKILL.md",
+      "skillFolderHash": "0456947ac9539b1f8cba536f3b7a19d7a0f4eb91",
+      "installedAt": "2026-04-13T20:39:30.804Z",
+      "updatedAt": "2026-04-13T20:39:30.804Z"
     }
   },
   "dismissed": {
     "findSkillsPrompt": true
-  }
+  },
+  "lastSelectedAgents": [
+    "amp",
+    "antigravity",
+    "cline",
+    "codex",
+    "cursor",
+    "deepagents",
+    "firebender",
+    "gemini-cli",
+    "github-copilot",
+    "kimi-cli",
+    "opencode",
+    "warp"
+  ]
 }
