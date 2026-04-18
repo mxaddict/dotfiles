@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PAGE=1
+PER_PAGE=100
+
+declare -A KEY_MAP   # "pid:kid" => "key title"
+declare -A PROJECTS  # pid => name
+
+echo "=== Fetching all projects ==="
+
+while true; do
+  response=$(glab api "projects?membership=true&per_page=$PER_PAGE&page=$PAGE" | jq -c '.[] | {id: .id, name: .name_with_namespace}')
+
+  [[ -z "$response" ]] && break
+
+  while IFS= read -r project; do
+    pid=$(echo "$project" | jq -r '.id')
+    pname=$(echo "$project" | jq -r '.name')
+    PROJECTS["$pid"]="$pname"
+    echo "  [$pid] $pname"
+  done <<< "$response"
+
+  sleep 1
+  ((PAGE++))
+done
+
+echo ""
+echo "Total projects: ${#PROJECTS[@]}"
+echo ""
+echo "=== Fetching deploy keys ==="
+
+for pid in "${!PROJECTS[@]}"; do
+  pname="${PROJECTS[$pid]}"
+  keys=$(glab api "projects/$pid/deploy_keys" | jq -c '.[] | {id: .id, title: .title}')
+
+  while IFS= read -r key; do
+    [[ -z "$key" ]] && continue
+    kid=$(echo "$key" | jq -r '.id')
+    ktitle=$(echo "$key" | jq -r '.title')
+    KEY_MAP["$pid:$kid"]="$ktitle"
+    echo "  Project [$pid] $pname — Key [$kid] $ktitle"
+  done <<< "$keys"
+  sleep 1
+done
+
+echo ""
+echo "Total keys to delete: ${#KEY_MAP[@]}"
+echo ""
+read -rp "Delete all? [y/N] " confirm
+[[ "$confirm" != "y" && "$confirm" != "Y" ]] && echo "Aborted." && exit 0
+
+echo ""
+echo "=== Deleting ==="
+
+for entry in "${!KEY_MAP[@]}"; do
+  pid="${entry%%:*}"
+  kid="${entry##*:}"
+  title="${KEY_MAP[$entry]}"
+  glab api --method DELETE "projects/$pid/deploy_keys/$kid"
+  echo "Deleted key [$kid] $title from project $pid"
+  sleep 1
+done
+
+echo "Done."
