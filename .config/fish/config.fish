@@ -82,12 +82,12 @@ end
 
 # Claude continue alias
 function c
-    claude --continue $argv
+    claude --continue $argv || claude
 end
 
 # Opencode continue alias
 function o
-    opencode --continue $argv
+    opencode --continue $argv || opencode
 end
 
 # Git typo
