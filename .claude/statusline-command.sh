@@ -34,12 +34,13 @@ SEP="\e[38;5;244m"         # mid separator
 RESET="\e[0m"
 
 # Nerd Font icons — vim/lualine style
-DIR_ICON='\uf15b'    #  file (buffer icon)
-BRANCH_ICON='\ue0a0' #  git branch
-UP_ICON='\uf062'     #  arrow-up (in tokens)
-DOWN_ICON='\uf063'   #  arrow-down (out tokens)
-MODEL_ICON='\uf525'  #  android (model)
-EFFORT_ICON='\uf0e7' #  bolt (effort)
+DIR_ICON=    #  file (buffer icon)
+BRANCH_ICON= #  git branch
+UP_ICON=     #  arrow-up (in tokens)
+DOWN_ICON=   #  arrow-down (out tokens)
+MODEL_ICON=  #  android (model)
+EFFORT_ICON= #  bolt (effort)
+BONE_ICON=🦴   # bone
 BAR=" | "
 
 # Build left segments
@@ -55,7 +56,7 @@ caveman_flag="$HOME/.claude/.caveman-active"
 if [ -f "$caveman_flag" ]; then
     caveman_mode=$(cat "$caveman_flag" 2>/dev/null)
     caveman_mode=${caveman_mode:-full}
-    left="${left}${SEP}${BAR}\e[38;5;172m🦴 ${caveman_mode}"
+    left="${left}${SEP}${BAR}\e[38;5;172m${BONE_ICON} ${caveman_mode}"
 fi
 
 if [ -n "$input_tokens" ]; then
