@@ -2,87 +2,96 @@
 input=$(cat)
 cwd=$(echo "$input" | jq -r '.workspace.current_dir // .cwd')
 branch=$(git -C "$cwd" --no-optional-locks branch --show-current 2>/dev/null)
-input_tokens=$(echo "$input" | jq -r '.context_window.current_usage.input_tokens // empty')
-output_tokens=$(echo "$input" | jq -r '.context_window.current_usage.output_tokens // empty')
+input_tokens=$(echo "$input" | jq -r '.context_window.total_input_tokens // empty')
+output_tokens=$(echo "$input" | jq -r '.context_window.total_output_tokens // empty')
 used_pct=$(echo "$input" | jq -r '.context_window.used_percentage // empty')
 model_name=$(echo "$input" | jq -r '.model.display_name // empty')
-effort=$(echo "$input" | jq -r '.effort_level // .effortLevel // empty')
+effort=$(jq -r '.effortLevel // empty' "$HOME/.claude/settings.json" 2>/dev/null)
 
 # Shorten home directory
-home_short=$(echo "$cwd" | sed "s|^$HOME|~|")
+home_short=$(basename "$cwd")
 
-# ANSI color helpers
-# Backgrounds (256-color)
-BG_BLUE="\e[48;5;24m"      # dark blue    — dir segment
-BG_PURPLE="\e[48;5;55m"    # purple       — git branch segment
-BG_TEAL="\e[48;5;30m"      # teal         — token segment
-BG_ORANGE="\e[48;5;130m"   # orange       — ctx token count segment
-BG_GRAY="\e[48;5;238m"     # dark gray    — context % segment
-BG_DARKGREEN="\e[48;5;22m" # dark green   — model/effort segment
-FG_WHITE="\e[38;5;255m"    # bright white text
+# Format number with k/m/b suffix
+fmt_num() {
+    n=$1
+    if [ "$n" -ge 1000000000 ]; then
+        echo "$n 1000000000 b" | awk '{v=$1/$2; if(v==int(v)) printf "%db\n",v; else printf "%.1fb\n",v}'
+    elif [ "$n" -ge 1000000 ]; then
+        echo "$n 1000000 m" | awk '{v=$1/$2; if(v==int(v)) printf "%dm\n",v; else printf "%.1fm\n",v}'
+    elif [ "$n" -ge 1000 ]; then
+        echo "$n 1000 k" | awk '{v=$1/$2; if(v==int(v)) printf "%dk\n",v; else printf "%.1fk\n",v}'
+    else printf "%d" "$n"; fi
+}
+
+# Foreground colors (bright)
+FG_BLUE="\e[38;5;75m"      # bright blue    — dir segment
+FG_PURPLE="\e[38;5;141m"   # bright purple  — git branch segment
+FG_CYAN="\e[38;5;117m"     # bright cyan    — input tokens
+FG_PINK="\e[38;5;213m"     # bright pink    — output tokens
+FG_RED="\e[38;5;204m"      # bright coral red — effort segment
+FG_DARKGREEN="\e[38;5;83m" # bright green   — model/effort segment
+SEP="\e[38;5;244m"         # mid separator
 RESET="\e[0m"
 
-# Symbols
-DIR_ICON="\xf0\x9f\x93\x82" # 📂
-BRANCH_ICON="\xe2\x9c\xa6"  # ✦
-UP_ICON="\xe2\xac\x86"      # ⬆
-DOWN_ICON="\xe2\xac\x87"    # ⬇
-CTX_ICON="\xe2\x97\x8f"     # ●
+# Nerd Font icons — vim/lualine style
+DIR_ICON='\uf15b'    #  file (buffer icon)
+BRANCH_ICON='\ue0a0' #  git branch
+UP_ICON='\uf062'     #  arrow-up (in tokens)
+DOWN_ICON='\uf063'   #  arrow-down (out tokens)
+MODEL_ICON='\uf525'  #  android (model)
+EFFORT_ICON='\uf0e7' #  bolt (effort)
+BAR=" | "
 
-# Segment 1: directory (dark blue)
-seg1="${BG_BLUE}${FG_WHITE} ${DIR_ICON} ${home_short} "
+# Build left segments
+left=""
 
-# Segment 2: git branch (purple) — only when inside a git repo
-seg2=""
+left="${left}${FG_BLUE}${DIR_ICON} ${home_short}"
+
 if [ -n "$branch" ]; then
-    seg2="${BG_PURPLE}${FG_WHITE} ${BRANCH_ICON} ${branch} "
+    left="${left}${SEP}${BAR}${FG_PURPLE}${BRANCH_ICON} ${branch}"
 fi
 
-# Segment 3: token counts (teal) — only when we have token data
-seg3=""
-if [ -n "$input_tokens" ] && [ -n "$output_tokens" ]; then
-    seg3="${BG_TEAL}${FG_WHITE} ${UP_ICON}${input_tokens} ${DOWN_ICON}${output_tokens} "
+caveman_flag="$HOME/.claude/.caveman-active"
+if [ -f "$caveman_flag" ]; then
+    caveman_mode=$(cat "$caveman_flag" 2>/dev/null)
+    caveman_mode=${caveman_mode:-full}
+    left="${left}${SEP}${BAR}\e[38;5;172m🦴 ${caveman_mode}"
 fi
 
-# Segment 4: raw context token count (orange) — only when current_usage is available
-ctx_tokens=$(echo "$input" | jq -r '.context_window.current_usage.input_tokens // empty')
-seg4=""
-if [ -n "$ctx_tokens" ]; then
-    seg4="${BG_ORANGE}${FG_WHITE} ${CTX_ICON}ctx: ${ctx_tokens} "
+if [ -n "$input_tokens" ]; then
+    left="${left}${SEP}${BAR}${FG_CYAN}${UP_ICON} $(fmt_num "$input_tokens")"
 fi
 
-# Segment 5: context used % (gray) — only when percentage is available
-seg5=""
-if [ -n "$used_pct" ]; then
-    used_int=$(printf '%.0f' "$used_pct")
-    seg5="${BG_GRAY}${FG_WHITE} ${CTX_ICON}${used_int}% "
+if [ -n "$output_tokens" ]; then
+    left="${left}${SEP}${BAR}${FG_PINK}${DOWN_ICON} $(fmt_num "$output_tokens")"
 fi
 
-# Right segment: model | effort (dark green) — only when model name is available
-seg_right=""
-seg_right_text=""
+ctx_size=$(echo "$input" | jq -r '((.context_window.current_usage.input_tokens // 0) + (.context_window.current_usage.cache_read_input_tokens // 0) + (.context_window.current_usage.cache_creation_input_tokens // 0)) | select(. > 0)')
+if [ -n "$ctx_size" ]; then
+    max_ctx=$(echo "$input" | jq -r '.context_window.context_window_size // empty')
+    max_fmt=$(fmt_num "${max_ctx:-0}")
+    ctx_text=" $(fmt_num "$ctx_size") of ${max_fmt} "
+    ctx_len=${#ctx_text}
+    used_int=${used_pct:-0}
+    filled=$(((used_int * (ctx_len + 1) + 50) / 100))
+    BG_FILLED="\e[48;5;30m\e[38;5;255m"
+    BG_EMPTY="\e[48;5;236m\e[38;5;250m"
+    ctx_bar=""
+    i=0
+    while [ $i -lt $ctx_len ]; do
+        ch=$(printf '%s' "$ctx_text" | cut -c$((i + 1)))
+        if [ $((i + 1)) -lt $filled ]; then ctx_bar="${ctx_bar}${BG_FILLED}${ch}"; else ctx_bar="${ctx_bar}${BG_EMPTY}${ch}"; fi
+        i=$((i + 1))
+    done
+    left="${left}${SEP}${BAR}${ctx_bar}\e[0m"
+fi
+
 if [ -n "$model_name" ]; then
-    if [ -n "$effort" ]; then
-        seg_right_text=" ${model_name} | ${effort} "
-    else
-        seg_right_text=" ${model_name} "
-    fi
-    seg_right="${BG_DARKGREEN}${FG_WHITE}${seg_right_text}"
+    left="${left}${SEP}${BAR}${FG_DARKGREEN}${MODEL_ICON} ${model_name}"
 fi
 
-# Calculate padding to right-align the right segment
-if [ -n "$seg_right" ]; then
-    # Build plain-text version of left side by stripping ANSI escapes
-    left_plain=$(printf "%b" "${seg1}${seg2}${seg3}${seg4}${seg5}" | sed 's/\x1b\[[0-9;]*m//g')
-    left_len=$(printf "%s" "$left_plain" | wc -m | tr -d ' ')
-    right_len=$(printf "%s" "$seg_right_text" | wc -m | tr -d ' ')
-    term_width=$(tput cols 2>/dev/null || echo 80)
-    pad=$((term_width - left_len - right_len))
-    if [ "$pad" -lt 1 ]; then
-        pad=1
-    fi
-    padding=$(printf "%${pad}s" "")
-    printf "%b\n" "${seg1}${seg2}${seg3}${seg4}${seg5}${RESET}${padding}${seg_right}${RESET}"
-else
-    printf "%b\n" "${seg1}${seg2}${seg3}${seg4}${seg5}${RESET}"
+if [ -n "$effort" ]; then
+    left="${left}${SEP}${BAR}${FG_RED}${EFFORT_ICON} ${effort}"
 fi
+
+printf "%b\n" "${left}${RESET}"
