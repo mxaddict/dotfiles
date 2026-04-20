@@ -1,4 +1,5 @@
 {
+  "includeCoAuthoredBy": false,
   "permissions": {
     "allow": [
       "Bash(cargo build*)",
@@ -34,6 +35,10 @@
       "Bash(git stash*)"
     ]
   },
+  "statusLine": {
+    "type": "command",
+    "command": "bash ~/.claude/statusline-command.sh"
+  },
   "enabledPlugins": {
     "caveman@caveman": true,
     "clangd-lsp@claude-plugins-official": true,
@@ -53,6 +58,5 @@
     }
   },
   "effortLevel": "medium",
-  "includeCoAuthoredBy": false,
   "skipDangerousModePermissionPrompt": true
 }
