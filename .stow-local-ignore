@@ -1,6 +1,8 @@
-.*.md
 .deps.lock
 .git
 .root
-LICENSE
+./AGENTS.md
+./CLAUDE.md
+./GEMINI.md
+./LICENSE
 screenshot.png

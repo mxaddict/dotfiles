@@ -24,7 +24,12 @@ When the user says "**BCTP**", execute in order:
 4. **P**ush the commit and the tag to the remote.
 
 Defaults:
+
 - Patch bump unless the user specifies minor/major.
 - Never skip hooks or force-push.
 - If the project has no version field, ask before proceeding.
 - If CI or a deploy pipeline is triggered by version tags, the push completes the release — do not invoke deploy commands manually.
+
+## Aliases
+
+- **cut** / **cut release** — alias for **BCTP**.
