@@ -343,8 +343,5 @@ cargo install fnm >/dev/null 2>&1
 
 echo -e "$GREEN_CHECK Setup RTK for LLMs..."
 cargo install --git https://github.com/rtk-ai/rtk >/dev/null 2>&1
-echo 'y' | rtk init --global --ultra-compact >/dev/null 2>&1
-echo 'y' | rtk init --global --ultra-compact --opencode >/dev/null 2>&1
-echo 'y' | rtk init --global --ultra-compact --codex >/dev/null 2>&1
 
 echo -e "$GREEN_CHECK Dependency installation complete."
