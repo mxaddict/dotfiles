@@ -6,7 +6,7 @@ Never add Claude attribution to PRs, commits, or comments. No "Generated with Cl
 
 ## Rust
 
-When making changes to a rust project, after making changes always run cargo test
+When making changes to a rust project, after making changes always run cargo clippy, cargo fmt, cargo test
 
 ## BCTP Workflow
 
