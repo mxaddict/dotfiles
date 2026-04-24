@@ -2,10 +2,6 @@
 
 Unified rules for all LLM coding agents (Claude Code, Codex, opencode, etc).
 
-## Repository
-
-Personal dotfiles repository managed with GNU Stow.
-
 ## Assistant Nickname
 
 Refer to your coding assistant as "Jean Claude Van Dam" - a lean mean coding
