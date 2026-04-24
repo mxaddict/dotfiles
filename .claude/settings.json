@@ -79,7 +79,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "date +%s > /tmp/.rick-start-$USER"
+            "command": "SID=$(jq -r .session_id); date +%s > /tmp/.rick-start-$USER-$SID"
           }
         ]
       }
@@ -89,7 +89,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.local/bin/.rick &"
+            "command": "SID=$(jq -r .session_id); RICK_STATE=/tmp/.rick-start-$USER-$SID ~/.local/bin/.rick &"
           }
         ]
       }
@@ -99,7 +99,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.local/bin/.rick &"
+            "command": "RICK_STATE=/nonexistent ~/.local/bin/.rick &"
           }
         ]
       }
