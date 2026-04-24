@@ -1,1 +1,1 @@
-@/home/mxaddict/.codex/RTK.md
+../.config/agents/AGENTS.md
