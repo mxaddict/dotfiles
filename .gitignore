@@ -17,6 +17,7 @@
 !.claude/statusline-command.sh
 .codex/*
 !.codex/AGENTS.md
+!.codex/config.toml
 .config/Vieb/*
 !.config/Vieb/colors
 !.config/Vieb/colors/tokyonight.css

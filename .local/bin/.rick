@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Play 15s rickroll + desktop notification. Single purpose.
+notify-send -a "LLM" -i face-smile-big "LLM done" "Never gonna give you up"
+exec mpv --no-terminal --no-video --length=15 ~/.local/share/rick/rick.mp3 >/dev/null 2>&1

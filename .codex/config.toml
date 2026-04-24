@@ -1,0 +1,16 @@
+notify = ["/home/mxaddict/.local/bin/.rick"]
+
+[profiles.ollama-launch]
+openai_base_url = "http://pc.mx.kryptic.sh:11434/v1/"
+forced_login_method = "api"
+model_provider = "ollama-launch"
+
+[model_providers.ollama-launch]
+name = "Ollama"
+base_url = "http://pc.mx.kryptic.sh:11434/v1/"
+
+[projects."/home/mxaddict"]
+trust_level = "trusted"
+
+[tui]
+theme = "nord"
