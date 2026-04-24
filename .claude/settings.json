@@ -74,6 +74,16 @@
         ]
       }
     ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "date +%s > /tmp/.rick-start-$USER"
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [

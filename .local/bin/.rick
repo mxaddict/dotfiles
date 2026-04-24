@@ -1,8 +1,21 @@
 #!/usr/bin/env bash
 # Play 15s rickroll + desktop notification. Single purpose. Linux + macOS + WSL.
+# Threshold: if state file exists with start timestamp, only play if elapsed >= RICK_THRESHOLD (default 30s).
 AUDIO="$HOME/.local/share/rick/rick.mp3"
 TITLE="LLM done"
 MSG="Never gonna give you up"
+STATE="${RICK_STATE:-/tmp/.rick-start-$USER}"
+THRESHOLD="${RICK_THRESHOLD:-30}"
+
+if [[ -r "$STATE" ]]; then
+  START=$(cat "$STATE" 2>/dev/null)
+  rm -f "$STATE"
+  if [[ "$START" =~ ^[0-9]+$ ]]; then
+    NOW=$(date +%s)
+    ELAPSED=$((NOW - START))
+    [[ "$ELAPSED" -lt "$THRESHOLD" ]] && exit 0
+  fi
+fi
 
 is_wsl() {
   [[ -n "${WSL_DISTRO_NAME:-}" ]] || grep -qiE "(microsoft|wsl)" /proc/version 2>/dev/null
