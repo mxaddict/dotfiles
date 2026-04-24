@@ -4,8 +4,10 @@ import type { Plugin } from '@opencode-ai/plugin';
 // Only fires if prompt took >= 30s (threshold enforced inside .rick).
 // State file scoped per session to avoid cross-session collisions.
 export const RickPlugin: Plugin = async ({ $ }) => {
-    const statePath = (sid: string) =>
-        `/tmp/.rick-start-${process.env.USER}-${sid}`;
+    const home = process.env.HOME ?? '';
+    const user = process.env.USER ?? 'user';
+    const rickBin = `${home}/.local/bin/.rick`;
+    const statePath = (sid: string) => `/tmp/.rick-start-${user}-${sid}`;
 
     return {
         'chat.params': async (input: any) => {
@@ -15,7 +17,7 @@ export const RickPlugin: Plugin = async ({ $ }) => {
         event: async ({ event }: { event: any }) => {
             if (event.type === 'session.idle') {
                 const sid = event.properties?.sessionID ?? 'default';
-                $`sh -c ${`RICK_STATE=${statePath(sid)} /home/mxaddict/.local/bin/.rick`}`
+                $`sh -c ${`RICK_STATE=${statePath(sid)} ${rickBin}`}`
                     .quiet()
                     .nothrow();
             }

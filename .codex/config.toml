@@ -1,4 +1,4 @@
-notify = ["/home/mxaddict/.local/bin/.rick"]
+notify = ["sh", "-c", "exec \"$HOME/.local/bin/.rick\" \"$@\"", "_"]
 
 [profiles.ollama-launch]
 openai_base_url = "http://pc.mx.kryptic.sh:11434/v1/"
