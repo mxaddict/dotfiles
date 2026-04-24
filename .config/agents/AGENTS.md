@@ -4,67 +4,60 @@ Unified rules for all LLM coding agents (Claude Code, Codex, opencode, etc).
 
 ## Assistant Nickname
 
-Refer to your coding assistant as "Jean Claude Van Dam" - a lean mean coding
-machine that does splits!
+Call assistant "Jean Claude Van Dam" - lean mean coding machine do splits!
 
 ## Attribution
 
-Never add Claude attribution to PRs, commits, or comments. No "Generated with
+Never add Claude attribution to PRs, commits, comments. No "Generated with
 Claude Code" footer. No "Co-Authored-By: Claude" lines.
 
 ## Commit Messages
 
-When working on this repository, always use `git commit -m "$(quoty)"` for
-commit messages.
+Always use `git commit -m "$(quoty)"` for commits.
 
 ## Prettier for all
 
-If the project has prettier setup, we need to run it whenever we make changes
+Project has prettier setup → run on changes.
 
 ## Formatting for all
 
-If the project has a command for formatting IE: `npm run format` we need to run
-it for all files changed
+Project has format command (e.g. `npm run format`) → run on all changed files.
 
 ## Updating markdown files
 
-When updating markdown files always run
-`prettier --write {path_to_markdown_file}`
+Updating markdown → run `prettier --write {path_to_markdown_file}`.
 
 ## Rust
 
-When making changes to a rust project, after making changes always run cargo
-clippy, cargo fmt, cargo test
+Rust project changes → always run cargo clippy, cargo fmt, cargo test after.
 
 ## BCTP Workflow
 
-When the user says "**BCTP**", execute in order:
+User says "**BCTP**", execute in order:
 
-1. **B**ump the patch version (semver) in the project's manifest. Detect the
-   manifest automatically:
+1. **B**ump patch version (semver) in manifest. Detect automatically:
    - Rust: `Cargo.toml` (regenerate `Cargo.lock` with `cargo generate-lockfile`)
    - Node: `package.json` (regenerate lockfile:
      `npm install --package-lock-only`, `pnpm install --lockfile-only`, or
-     `yarn install --mode=update-lockfile`, matching the project's package
-     manager)
+     `yarn install --mode=update-lockfile`, match project's package manager)
    - Python: `pyproject.toml` / `setup.py` / `setup.cfg` (regenerate `uv.lock` /
      `poetry.lock` if present)
-   - Go: module `version` tag (no manifest bump; tag alone suffices)
+   - Go: module `version` tag (no manifest bump; tag suffices)
    - PHP: `composer.json` (regenerate `composer.lock` with
      `composer update --lock`)
-   - Generic: `VERSION` file or language-specific equivalent
-2. **C**ommit the version bump with message `chore: bump version`. Stage only
-   the manifest and lockfile.
-3. **T**ag the commit as `vX.Y.Z` matching the new version.
-4. **P**ush the commit and the tag to the remote.
+   - Generic: `VERSION` file or language equivalent
+2. **C**ommit version bump with message `chore: bump version`. Stage only
+   manifest and lockfile.
+3. **T**ag commit as `vX.Y.Z` matching new version.
+4. **P**ush commit and tag to remote.
 
 Defaults:
 
-- Patch bump unless the user specifies minor/major.
+- Patch bump unless user says minor/major.
 - Never skip hooks or force-push.
-- If the project has no version field, ask before proceeding.
-- If CI or a deploy pipeline is triggered by version tags, the push completes
-  the release — do not invoke deploy commands manually.
+- No version field → ask before proceeding.
+- CI/deploy triggered by version tags → push completes release. No manual
+  deploy.
 
 ## Aliases
 
