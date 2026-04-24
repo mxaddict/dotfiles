@@ -251,10 +251,12 @@ if command -v dnf >/dev/null; then
         fish \
         fzf \
         git \
+        mpv \
         neovim \
         nodejs \
         npm \
         opencode \
+        libnotify \
         ripgrep \
         stow \
         tealdeer \
@@ -308,7 +310,9 @@ if command -v apt-get >/dev/null; then
         fish \
         fzf \
         git \
+        libnotify-bin \
         libssl-dev \
+        mpv \
         neovim \
         nodejs \
         npm \
