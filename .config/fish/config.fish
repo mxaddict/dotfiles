@@ -80,15 +80,20 @@ function cat
     bat --plain $argv
 end
 
+# Claude default: skip perms
+function claude
+    command claude --dangerously-skip-permissions $argv
+end
+
 # Claude continue alias
 function c
-    claude --dangerously-skip-permissions --continue $argv || claude --dangerously-skip-permissions
+    claude --continue $argv || claude
 end
 
 # Claude work account (separate config dir)
 function cw
     set -lx CLAUDE_CONFIG_DIR $HOME/.claude-work
-    claude --dangerously-skip-permissions --continue $argv || claude --dangerously-skip-permissions
+    claude --continue $argv || claude
 end
 
 # Opencode continue alias
