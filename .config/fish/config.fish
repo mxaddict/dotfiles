@@ -82,13 +82,13 @@ end
 
 # Claude continue alias
 function c
-    claude --continue $argv || claude
+    claude --dangerously-skip-permissions --continue $argv || claude --dangerously-skip-permissions
 end
 
 # Claude work account (separate config dir)
 function cw
     set -lx CLAUDE_CONFIG_DIR $HOME/.claude-work
-    claude --continue $argv || claude
+    claude --dangerously-skip-permissions --continue $argv || claude --dangerously-skip-permissions
 end
 
 # Opencode continue alias
