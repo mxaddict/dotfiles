@@ -17,6 +17,15 @@ Claude Code" footer. No "Co-Authored-By: Claude" lines.
 When working on this repository, always use `git commit -m "$(quoty)"` for
 commit messages.
 
+## Prettier for all
+
+If the project has prettier setup, we need to run it whenever we make changes
+
+## Formatting for all
+
+If the project has a command for formatting IE: `npm run format` we need to run
+it for all files changed
+
 ## Updating markdown files
 
 When updating markdown files always run
