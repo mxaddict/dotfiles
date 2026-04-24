@@ -1,4 +1,16 @@
 #!/usr/bin/env bash
-# Play 15s rickroll + desktop notification. Single purpose.
-notify-send -a "LLM" -i face-smile-big "LLM done" "Never gonna give you up"
-exec mpv --no-terminal --no-video --length=15 ~/.local/share/rick/rick.mp3 >/dev/null 2>&1
+# Play 15s rickroll + desktop notification. Single purpose. Linux + macOS.
+AUDIO="$HOME/.local/share/rick/rick.mp3"
+TITLE="LLM done"
+MSG="Never gonna give you up"
+
+if [[ "$(uname)" == "Darwin" ]]; then
+  osascript -e "display notification \"$MSG\" with title \"$TITLE\"" >/dev/null 2>&1
+  afplay "$AUDIO" >/dev/null 2>&1 &
+  PID=$!
+  ( sleep 15 && kill "$PID" 2>/dev/null ) &
+  wait "$PID" 2>/dev/null
+else
+  notify-send -a "LLM" -i face-smile-big "$TITLE" "$MSG"
+  exec mpv --no-terminal --no-video --length=15 "$AUDIO" >/dev/null 2>&1
+fi
