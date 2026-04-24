@@ -13,7 +13,11 @@ Claude Code" footer. No "Co-Authored-By: Claude" lines.
 
 ## Commit Messages
 
-Always use `git commit -m "$(quoty)"` for commits.
+Use `git commit -m "$(quoty)"` only in the `.files` repo. All other repos:
+Conventional Commits format — `type(scope): message` (e.g.
+`feat(auth): add OAuth flow`, `fix(api): handle null token`,
+`docs: update README`). Scope optional. Types: feat, fix, docs, style, refactor,
+test, chore, perf, ci, build.
 
 ## Prettier for all
 
