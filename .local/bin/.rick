@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
-# Play 15s rickroll + desktop notification. Single purpose. Linux + macOS.
+# Play 15s rickroll + desktop notification. Single purpose. Linux + macOS + WSL.
 AUDIO="$HOME/.local/share/rick/rick.mp3"
 TITLE="LLM done"
 MSG="Never gonna give you up"
+
+is_wsl() {
+  [[ -n "${WSL_DISTRO_NAME:-}" ]] || grep -qiE "(microsoft|wsl)" /proc/version 2>/dev/null
+}
 
 if [[ "$(uname)" == "Darwin" ]]; then
   osascript -e "display notification \"$MSG\" with title \"$TITLE\"" >/dev/null 2>&1
@@ -10,6 +14,23 @@ if [[ "$(uname)" == "Darwin" ]]; then
   PID=$!
   ( sleep 15 && kill "$PID" 2>/dev/null ) &
   wait "$PID" 2>/dev/null
+elif is_wsl && command -v powershell.exe >/dev/null 2>&1; then
+  WIN_AUDIO=$(wslpath -w "$AUDIO" | sed 's/\\/\\\\/g')
+  powershell.exe -NoProfile -WindowStyle Hidden -Command "
+    Add-Type -AssemblyName System.Windows.Forms;
+    Add-Type -AssemblyName System.Drawing;
+    \$b = New-Object System.Windows.Forms.NotifyIcon;
+    \$b.Icon = [System.Drawing.SystemIcons]::Information;
+    \$b.Visible = \$true;
+    \$b.ShowBalloonTip(5000, '$TITLE', '$MSG', 'Info');
+    Add-Type -AssemblyName presentationCore;
+    \$p = New-Object System.Windows.Media.MediaPlayer;
+    \$p.Open([Uri]'file:///$WIN_AUDIO');
+    \$p.Play();
+    Start-Sleep -Seconds 15;
+    \$p.Stop();
+    \$b.Dispose();
+  " >/dev/null 2>&1
 else
   notify-send -a "LLM" -i face-smile-big "$TITLE" "$MSG"
   exec mpv --no-terminal --no-video --length=15 "$AUDIO" >/dev/null 2>&1
