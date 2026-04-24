@@ -31,6 +31,7 @@ done
 mkdir -p "$config/hypr" >/dev/null 2>&1
 touch "$config/hypr/monitors.conf" >/dev/null 2>&1
 touch "$config/hypr/workspaces.conf" >/dev/null 2>&1
+[ -f "$config/hypr/hyprpaper.conf" ] || cp "$dotfiles/.config/hypr/hyprpaper.conf.template" "$config/hypr/hyprpaper.conf" >/dev/null 2>&1
 
 echo -e "$GREEN_CHECK Updating dotfiles repository..."
 [ -d "$dotfiles" ] || git clone https://github.com/mxaddict/dotfiles.git "$dotfiles" >/dev/null 2>&1
