@@ -4,6 +4,7 @@
 set -euo pipefail
 
 GREEN_CHECK="\e[32m  ✅\e[0m"
+WARN_CHECK="\e[38;5;208m  ✅\e[0m"
 
 if command -v pacman >/dev/null; then
     if ! command -v paru >/dev/null; then
@@ -19,7 +20,7 @@ if command -v pacman >/dev/null; then
     fi
 
     echo -e "$GREEN_CHECK Updating Arch Linux system packages..."
-    paru -Syu --noconfirm >/dev/null 2>&1
+    paru -Syu --noconfirm >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to update Arch Linux system packages"
     echo -e "$GREEN_CHECK Installing core system packages (Arch Linux)..."
     paru -S --needed --noconfirm \
         adw-gtk-theme \
@@ -152,7 +153,7 @@ if command -v pacman >/dev/null; then
         xdg-desktop-portal-hyprland \
         yt-dlp \
         zerotier-one \
-        zoxide >/dev/null 2>&1
+        zoxide >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to install core system packages (Arch Linux)"
 
     export DOTROOT="$HOME/.files/.root"
     declare -a FILES=(
@@ -177,67 +178,67 @@ if command -v pacman >/dev/null; then
     done
 
     echo -e "$GREEN_CHECK Regenerating initramfs..."
-    sudo mkinitcpio -P >/dev/null 2>&1
+    sudo mkinitcpio -P >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to regenerate initramfs"
     echo -e "$GREEN_CHECK Synchronizing filesystem..."
     sudo sync >/dev/null 2>&1
 
     echo -e "$GREEN_CHECK Reloading udev rules..."
-    sudo udevadm control --reload-rules >/dev/null 2>&1
+    sudo udevadm control --reload-rules >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to reload udev rules"
     echo -e "$GREEN_CHECK Triggering udev events..."
-    sudo udevadm trigger >/dev/null 2>&1
+    sudo udevadm trigger >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to trigger udev events"
 
     echo -e "$GREEN_CHECK Disabling display-manager.service..."
     sudo systemctl disable display-manager.service >/dev/null 2>&1 || true
 
     echo -e "$GREEN_CHECK Enabling ly@tty2.service..."
-    sudo systemctl enable ly@tty2.service >/dev/null 2>&1
+    sudo systemctl enable ly@tty2.service >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to enable ly@tty2.service"
 
     echo -e "$GREEN_CHECK Enabling NetworkManager.service..."
-    sudo systemctl enable NetworkManager.service >/dev/null 2>&1
+    sudo systemctl enable NetworkManager.service >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to enable NetworkManager.service"
 
     echo -e "$GREEN_CHECK Enabling NetworkManager-dispatcher.service..."
-    sudo systemctl enable NetworkManager-dispatcher.service >/dev/null 2>&1
+    sudo systemctl enable NetworkManager-dispatcher.service >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to enable NetworkManager-dispatcher.service"
 
     echo -e "$GREEN_CHECK Enabling avahi-daemon.service..."
-    sudo systemctl enable avahi-daemon.service >/dev/null 2>&1
+    sudo systemctl enable avahi-daemon.service >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to enable avahi-daemon.service"
 
     echo -e "$GREEN_CHECK Enabling bluetooth.service..."
-    sudo systemctl enable bluetooth.service >/dev/null 2>&1
+    sudo systemctl enable bluetooth.service >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to enable bluetooth.service"
 
     echo -e "$GREEN_CHECK Enabling kanata.service..."
-    sudo systemctl enable kanata.service >/dev/null 2>&1
+    sudo systemctl enable kanata.service >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to enable kanata.service"
 
     echo -e "$GREEN_CHECK Enabling power-check.timer..."
-    sudo systemctl enable power-check.timer >/dev/null 2>&1
+    sudo systemctl enable power-check.timer >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to enable power-check.timer"
 
     echo -e "$GREEN_CHECK Enabling power-profiles-daemon.service..."
-    sudo systemctl enable power-profiles-daemon.service >/dev/null 2>&1
+    sudo systemctl enable power-profiles-daemon.service >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to enable power-profiles-daemon.service"
 
     echo -e "$GREEN_CHECK Enabling ufw.service..."
-    sudo systemctl enable ufw.service >/dev/null 2>&1
+    sudo systemctl enable ufw.service >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to enable ufw.service"
 
     echo -e "$GREEN_CHECK Enabling fwupd.service..."
-    sudo systemctl enable fwupd.service >/dev/null 2>&1
+    sudo systemctl enable fwupd.service >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to enable fwupd.service"
 
     echo -e "$GREEN_CHECK Restarting fwupd.service..."
-    sudo systemctl restart fwupd.service >/dev/null 2>&1
+    sudo systemctl restart fwupd.service >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to restart fwupd.service"
 
     echo -e "$GREEN_CHECK Generating fwupdx64.efi.signed"
-    sudo sbctl sign -s -o /usr/lib/fwupd/efi/fwupdx64.efi.signed /usr/lib/fwupd/efi/fwupdx64.efi >/dev/null 2>&1
+    sudo sbctl sign -s -o /usr/lib/fwupd/efi/fwupdx64.efi.signed /usr/lib/fwupd/efi/fwupdx64.efi >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to sign fwupdx64.efi"
 
     echo -e "$GREEN_CHECK Configuring UFW firewall rules..."
-    sudo ufw allow http >/dev/null 2>&1
-    sudo ufw allow https >/dev/null 2>&1
-    sudo ufw allow ssh >/dev/null 2>&1
-    sudo ufw allow mdns >/dev/null 2>&1
-    sudo ufw allow 42069 >/dev/null 2>&1                                      # COT
-    sudo ufw allow 9993/udp >/dev/null 2>&1                                   # zerotier port
-    sudo ufw allow 11434 >/dev/null 2>&1                                      # ollama
-    sudo ufw allow proto udp from any to any port 27031:27036 >/dev/null 2>&1 # steam
-    sudo ufw allow proto tcp from any to any port 27040 >/dev/null 2>&1       # steam
+    sudo ufw allow http >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to allow UFW http"
+    sudo ufw allow https >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to allow UFW https"
+    sudo ufw allow ssh >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to allow UFW ssh"
+    sudo ufw allow mdns >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to allow UFW mdns"
+    sudo ufw allow 42069 >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to allow UFW 42069 (COT)"
+    sudo ufw allow 9993/udp >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to allow UFW 9993/udp (zerotier)"
+    sudo ufw allow 11434 >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to allow UFW 11434 (ollama)"
+    sudo ufw allow proto udp from any to any port 27031:27036 >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to allow UFW 27031:27036/udp (steam)"
+    sudo ufw allow proto tcp from any to any port 27040 >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to allow UFW 27040/tcp (steam)"
 
     echo -e "$GREEN_CHECK Enabling UFW..."
-    echo "y" | sudo ufw enable >/dev/null 2>&1
+    echo "y" | sudo ufw enable >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to enable UFW"
 fi
 
 if command -v dnf >/dev/null; then
@@ -262,7 +263,7 @@ if command -v dnf >/dev/null; then
         tealdeer \
         tmux \
         unzip \
-        zoxide >/dev/null 2>&1
+        zoxide >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to install core system packages (Fedora)"
 fi
 
 if command -v brew >/dev/null; then
@@ -290,12 +291,12 @@ if command -v brew >/dev/null; then
         tealdeer \
         tmux \
         unzip \
-        zoxide >/dev/null 2>&1
+        zoxide >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to install core system packages (macOS/Homebrew)"
 fi
 
 if command -v apt-get >/dev/null; then
     echo -e "$GREEN_CHECK Updating APT package lists..."
-    sudo apt-get update >/dev/null 2>&1
+    sudo apt-get update >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to update APT package lists"
 
     echo -e "$GREEN_CHECK Installing core system packages (APT)..."
     sudo apt-get install -y \
@@ -326,26 +327,26 @@ if command -v apt-get >/dev/null; then
         tealdeer \
         tmux \
         unzip \
-        zoxide >/dev/null 2>&1
+        zoxide >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to install core system packages (APT)"
 fi
 
 if command -v nvim >/dev/null; then
     echo -e "$GREEN_CHECK Setting up Neovim symlinks..."
-    sudo ln -sf "$(which nvim)" "/usr/local/bin/vi" >/dev/null 2>&1
-    sudo ln -sf "$(which nvim)" "/usr/local/bin/vim" >/dev/null 2>&1
-    sudo ln -sf "$(which nvim)" "/usr/local/bin/v" >/dev/null 2>&1
+    sudo ln -sf "$(which nvim)" "/usr/local/bin/vi" >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to symlink nvim → vi"
+    sudo ln -sf "$(which nvim)" "/usr/local/bin/vim" >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to symlink nvim → vim"
+    sudo ln -sf "$(which nvim)" "/usr/local/bin/v" >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to symlink nvim → v"
 fi
 
 echo -e "$GREEN_CHECK Installing Rust stable toolchain..."
-rustup install stable >/dev/null 2>&1
-rustup default stable >/dev/null 2>&1
+rustup install stable >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to install Rust stable toolchain"
+rustup default stable >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to set Rust stable as default"
 
 echo -e "$GREEN_CHECK Installing Rust tools (quoty)..."
-cargo install quoty >/dev/null 2>&1
+cargo install quoty >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to install quoty"
 echo -e "$GREEN_CHECK Installing Rust tools (fnm)..."
-cargo install fnm >/dev/null 2>&1
+cargo install fnm >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to install fnm"
 
 echo -e "$GREEN_CHECK Setup RTK for LLMs..."
-cargo install --git https://github.com/rtk-ai/rtk >/dev/null 2>&1
+cargo install --git https://github.com/rtk-ai/rtk >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to install rtk"
 
 echo -e "$GREEN_CHECK Dependency installation complete."

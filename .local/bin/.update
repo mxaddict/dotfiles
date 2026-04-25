@@ -4,6 +4,7 @@
 set -euo pipefail
 
 GREEN_CHECK="\e[32m✅\e[0m"
+WARN_CHECK="\e[38;5;208m✅\e[0m"
 
 dotfiles="$HOME/.files"
 config="$HOME/.config"
@@ -31,7 +32,10 @@ done
 mkdir -p "$config/hypr" >/dev/null 2>&1
 touch "$config/hypr/monitors.conf" >/dev/null 2>&1
 touch "$config/hypr/workspaces.conf" >/dev/null 2>&1
-[ -f "$config/hypr/hyprpaper.conf" ] || cp "$dotfiles/.config/hypr/hyprpaper.template.conf" "$config/hypr/hyprpaper.conf" >/dev/null 2>&1
+[ -f "$config/hypr/hyprpaper.conf" ] || (
+    rm "$config/hypr/hyprpaper.conf"
+    cp "$dotfiles/.config/hypr/hyprpaper.template.conf" "$config/hypr/hyprpaper.conf" >/dev/null 2>&1
+)
 
 echo -e "$GREEN_CHECK Updating dotfiles repository..."
 [ -d "$dotfiles" ] || git clone https://github.com/mxaddict/dotfiles.git "$dotfiles" >/dev/null 2>&1
@@ -66,12 +70,12 @@ echo -e "$GREEN_CHECK Checking dependencies..."
 "$HOME/.files/.local/bin/.deps"
 
 echo -e "$GREEN_CHECK Stowing dotfiles..."
-stow --adopt . >/dev/null 2>&1
+stow --adopt . >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to stow dotfiles"
 cd "$pwd" || exit
 
 if command -v dconf >/dev/null; then
     echo -e "$GREEN_CHECK Loading dconf settings..."
-    dconf load / <~/.config/dconf/user.ini >/dev/null 2>&1
+    dconf load / <~/.config/dconf/user.ini >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to load dconf settings"
 fi
 
 if command -v batcat >/dev/null; then
@@ -79,25 +83,25 @@ if command -v batcat >/dev/null; then
 fi
 if command -v bat >/dev/null; then
     echo -e "$GREEN_CHECK Building bat cache..."
-    bat cache --build >/dev/null 2>&1
+    bat cache --build >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to build bat cache"
 fi
 
 echo -e "$GREEN_CHECK Updating tldr cache..."
-tldr --update >/dev/null 2>&1
+tldr --update >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to update tldr cache"
 echo -e "$GREEN_CHECK Updating Fish shell plugins..."
-fish -c "curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish > /tmp/fisher.fish" >/dev/null 2>&1
-fish -c "source /tmp/fisher.fish && fisher update" >/dev/null 2>&1
+fish -c "curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish > /tmp/fisher.fish" >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to download fisher.fish"
+fish -c "source /tmp/fisher.fish && fisher update" >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to update Fish plugins via fisher"
 echo -e "$GREEN_CHECK Updating Neovim plugins..."
-nvim --headless "+Lazy! install all" "+Lazy! update all" +TSUpdate +qa >/dev/null 2>&1
+nvim --headless "+Lazy! install all" "+Lazy! update all" +TSUpdate +qa >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to update Neovim plugins"
 
 echo -e "$GREEN_CHECK Updating Tmux plugins..."
 [ -d "$tpm" ] || git clone https://github.com/tmux-plugins/tpm "$tpm" >/dev/null 2>&1
 cd "$tpm" || exit
-git pull >/dev/null 2>&1
+git pull >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to pull tpm repo"
 tmux source "$config/tmux/tmux.conf" 2>/dev/null || true
-"$tpm/bin/install_plugins" >/dev/null 2>&1
-"$tpm/bin/update_plugins" all >/dev/null 2>&1
-"$tpm/bin/clean_plugins" >/dev/null 2>&1
+"$tpm/bin/install_plugins" >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to install Tmux plugins"
+"$tpm/bin/update_plugins" all >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to update Tmux plugins"
+"$tpm/bin/clean_plugins" >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to clean Tmux plugins"
 cd "$pwd" || exit
 
 echo -e "$GREEN_CHECK Dotfiles update complete."
