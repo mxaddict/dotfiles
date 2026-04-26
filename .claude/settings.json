@@ -73,7 +73,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "RICK_STATE=/nonexistent ~/.local/bin/.rick &"
+            "command": "SID=$(jq -r .session_id); RICK_STATE=/tmp/.rick-start-$USER-$SID ~/.local/bin/.rick &"
           }
         ]
       }
