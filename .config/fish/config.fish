@@ -171,6 +171,28 @@ function q
     kweri $argv
 end
 
+# Alias for hjkl
+function h
+    hjkl $argv
+end
+function hj
+    hjkl $argv
+end
+function hjk
+    hjkl $argv
+end
+
+# Alias for sqeel
+function s
+    sqeel $argv
+end
+function sq
+    sqeel $argv
+end
+function sql
+    sqeel $argv
+end
+
 # Add navcoin alias
 function nav
     navcoin-cli $argv
