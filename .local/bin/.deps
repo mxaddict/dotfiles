@@ -348,6 +348,10 @@ rustup default stable >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to set Rust
 
 echo -e "$GREEN_CHECK Installing Rust tools (quoty)..."
 cargo install quoty >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to install quoty"
+echo -e "$GREEN_CHECK Installing Rust tools (hjkl)..."
+cargo install hjkl >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to install hjkl"
+echo -e "$GREEN_CHECK Installing Rust tools (sqeel)..."
+cargo install sqeel >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to install sqeel"
 echo -e "$GREEN_CHECK Installing Rust tools (fnm)..."
 cargo install fnm >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to install fnm"
 
