@@ -5,7 +5,7 @@ MODES=("auth" "user" "pass" "otp")
 PASSWORD_STORE_DIR="${PASSWORD_STORE_DIR:-$HOME/.password-store/}"
 MODE=${1:-pass}
 FILTER=${2:""}
-WTYPE="wtype -s 100 -d 20"
+WTYPE="wtype -s 250 -d 50"
 
 if [[ ! " ${MODES[*]} " =~ \ ${MODE}\  ]]; then
     echo "Unsupported mode: $MODE" >&2
@@ -49,4 +49,5 @@ elif [[ "$MODE" == "otp" ]]; then
 fi
 
 $WTYPE "$token"
+sleep 0.5
 $WTYPE -k Return
