@@ -38,6 +38,7 @@ if command -v pacman >/dev/null; then
         breeze \
         brightnessctl \
         btop \
+        buffr-bin \
         chromium \
         cmatrix \
         cronie \
@@ -71,6 +72,8 @@ if command -v pacman >/dev/null; then
         gst-plugins-base \
         gst-plugins-good \
         gst-plugins-ugly \
+        hjkl-bin \
+        hodl-bin \
         hypridle \
         hyprland \
         hyprlock \
@@ -79,6 +82,7 @@ if command -v pacman >/dev/null; then
         hyprpolkitagent \
         hyprqt6engine \
         imv \
+        inbx-bin \
         jq \
         kanata \
         kooha \
@@ -123,6 +127,7 @@ if command -v pacman >/dev/null; then
         snapshot \
         sof-firmware \
         speedtest-cli \
+        sqeel-bin \
         starship \
         stow \
         swaync \
@@ -348,10 +353,6 @@ rustup default stable >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to set Rust
 
 echo -e "$GREEN_CHECK Installing Rust tools (quoty)..."
 cargo install quoty >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to install quoty"
-echo -e "$GREEN_CHECK Installing Rust tools (hjkl)..."
-cargo install hjkl >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to install hjkl"
-echo -e "$GREEN_CHECK Installing Rust tools (sqeel)..."
-cargo install sqeel >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to install sqeel"
 echo -e "$GREEN_CHECK Installing Rust tools (fnm)..."
 cargo install fnm >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to install fnm"
 
