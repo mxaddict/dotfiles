@@ -41,8 +41,8 @@ User says "**BCTP**", execute in order:
 
 1. **B**ump patch version (semver) in manifest. Detect automatically:
    - Rust: `Cargo.toml` (regenerate `Cargo.lock` with `cargo generate-lockfile`
-     if `Cargo.lock` is tracked; library crates that gitignore `Cargo.lock`
-     skip the regen)
+     if `Cargo.lock` is tracked; library crates that gitignore `Cargo.lock` skip
+     the regen)
    - Node: `package.json` (regenerate lockfile:
      `npm install --package-lock-only`, `pnpm install --lockfile-only`, or
      `yarn install --mode=update-lockfile`, match project's package manager)
@@ -52,20 +52,18 @@ User says "**BCTP**", execute in order:
    - PHP: `composer.json` (regenerate `composer.lock` with
      `composer update --lock`)
    - Generic: `VERSION` file or language equivalent
-2. **Update CHANGELOG** before committing. If `CHANGELOG.md` (or
-   equivalent: `CHANGES.md`, `HISTORY.md`, `RELEASES.md`) exists in the
-   repo:
+2. **Update CHANGELOG** before committing. If `CHANGELOG.md` (or equivalent:
+   `CHANGES.md`, `HISTORY.md`, `RELEASES.md`) exists in the repo:
    - Move entries under `## [Unreleased]` to a new `## [X.Y.Z] - YYYY-MM-DD`
      heading, keeping `## [Unreleased]` empty above it.
-   - If `Unreleased` is empty or missing, draft entries from the
-     unreleased commit log (`git log $(git describe --tags --abbrev=0)..HEAD`)
-     using Keep-a-Changelog sections (`Added` / `Changed` / `Fixed` /
-     `Removed` / `Deprecated` / `Breaking`). Be specific — name the
-     APIs / files / behaviors that changed; don't just rephrase commit
-     subjects.
+   - If `Unreleased` is empty or missing, draft entries from the unreleased
+     commit log (`git log $(git describe --tags --abbrev=0)..HEAD`) using
+     Keep-a-Changelog sections (`Added` / `Changed` / `Fixed` / `Removed` /
+     `Deprecated` / `Breaking`). Be specific — name the APIs / files / behaviors
+     that changed; don't just rephrase commit subjects.
    - Run `prettier --write` on the file per the markdown rule below.
-   - Stage `CHANGELOG.md` alongside the manifest in step 3.
-   If no changelog file exists, skip — don't create one unless asked.
+   - Stage `CHANGELOG.md` alongside the manifest in step 3. If no changelog file
+     exists, skip — don't create one unless asked.
 3. **C**ommit version bump with message `chore: bump version`. Stage only
    manifest, lockfile, and changelog.
 4. **T**ag commit as `vX.Y.Z` matching new version.
@@ -82,6 +80,14 @@ Defaults:
 ## Aliases
 
 - **cut** / **cut release** — alias for **BCTP**.
+
+## Delegate
+
+User says "**delegate**" → spawn subagent on cheaper model than current (Opus →
+Sonnet, Sonnet → Haiku). Use Agent tool with `model` param. Always review
+subagent output after — read changed files, verify diff matches intent, run
+tests/lints. Fix issues found yourself. Ask user clarifying questions if scope
+ambiguous before delegating.
 
 ## Caveman
 
