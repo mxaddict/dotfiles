@@ -1,10 +1,10 @@
 
 [Default Applications]
-text/html=vieb.desktop
-x-scheme-handler/http=vieb.desktop
-x-scheme-handler/https=vieb.desktop
-x-scheme-handler/about=vieb.desktop
-x-scheme-handler/unknown=vieb.desktop
+text/html=buffr.desktop
+x-scheme-handler/http=buffr.desktop
+x-scheme-handler/https=buffr.desktop
+x-scheme-handler/about=buffr.desktop
+x-scheme-handler/unknown=buffr.desktop
 x-scheme-handler/terminal=Alacritty.desktop
 image/jpeg=imv.desktop
 image/png=imv.desktop
