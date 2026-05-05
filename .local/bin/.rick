@@ -18,30 +18,70 @@ is_wsl() {
   [[ -n "${WSL_DISTRO_NAME:-}" ]] || grep -qiE "(microsoft|wsl)" /proc/version 2>/dev/null
 }
 
+is_dnd() {
+  if [[ "$(uname)" == "Darwin" ]]; then
+    local f="$HOME/Library/DoNotDisturb/DB/Assertions.json"
+    [[ -r "$f" ]] || return 1
+    plutil -extract data.0.storeAssertionRecords raw -o - "$f" 2>/dev/null | grep -q "assertionDetailsModeIdentifier"
+  elif is_wsl && command -v powershell.exe >/dev/null 2>&1; then
+    local out
+    out=$(powershell.exe -NoProfile -Command "(Get-ItemProperty -Path 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Notifications\\Settings' -Name 'NOC_GLOBAL_SETTING_TOASTS_ENABLED' -ErrorAction SilentlyContinue).NOC_GLOBAL_SETTING_TOASTS_ENABLED" 2>/dev/null | tr -d '\r\n[:space:]')
+    [[ "$out" == "0" ]]
+  else
+    if command -v gdbus >/dev/null 2>&1; then
+      local out
+      out=$(gdbus call --session --dest org.freedesktop.Notifications --object-path /org/freedesktop/Notifications --method org.freedesktop.DBus.Properties.Get org.freedesktop.Notifications Inhibited 2>/dev/null)
+      [[ "$out" == *"true"* ]] && return 0
+    fi
+    if command -v gsettings >/dev/null 2>&1; then
+      [[ "$(gsettings get org.gnome.desktop.notifications show-banners 2>/dev/null)" == "false" ]] && return 0
+    fi
+    return 1
+  fi
+}
+
+DND=0
+is_dnd && DND=1
+
 if [[ "$(uname)" == "Darwin" ]]; then
   osascript -e "display notification \"$MSG\" with title \"$TITLE\"" >/dev/null 2>&1
+  [[ "$DND" == "1" ]] && exit 0
   afplay "$AUDIO" >/dev/null 2>&1 &
   PID=$!
   ( sleep 15 && kill "$PID" 2>/dev/null ) &
   wait "$PID" 2>/dev/null
 elif is_wsl && command -v powershell.exe >/dev/null 2>&1; then
   WIN_AUDIO=$(wslpath -w "$AUDIO" | sed 's/\\/\\\\/g')
-  powershell.exe -NoProfile -WindowStyle Hidden -Command "
-    Add-Type -AssemblyName System.Windows.Forms;
-    Add-Type -AssemblyName System.Drawing;
-    \$b = New-Object System.Windows.Forms.NotifyIcon;
-    \$b.Icon = [System.Drawing.SystemIcons]::Information;
-    \$b.Visible = \$true;
-    \$b.ShowBalloonTip(5000, '$TITLE', '$MSG', 'Info');
-    Add-Type -AssemblyName presentationCore;
-    \$p = New-Object System.Windows.Media.MediaPlayer;
-    \$p.Open([Uri]'file:///$WIN_AUDIO');
-    \$p.Play();
-    Start-Sleep -Seconds 15;
-    \$p.Stop();
-    \$b.Dispose();
-  " >/dev/null 2>&1
+  if [[ "$DND" == "1" ]]; then
+    powershell.exe -NoProfile -WindowStyle Hidden -Command "
+      Add-Type -AssemblyName System.Windows.Forms;
+      Add-Type -AssemblyName System.Drawing;
+      \$b = New-Object System.Windows.Forms.NotifyIcon;
+      \$b.Icon = [System.Drawing.SystemIcons]::Information;
+      \$b.Visible = \$true;
+      \$b.ShowBalloonTip(5000, '$TITLE', '$MSG', 'Info');
+      Start-Sleep -Seconds 5;
+      \$b.Dispose();
+    " >/dev/null 2>&1
+  else
+    powershell.exe -NoProfile -WindowStyle Hidden -Command "
+      Add-Type -AssemblyName System.Windows.Forms;
+      Add-Type -AssemblyName System.Drawing;
+      \$b = New-Object System.Windows.Forms.NotifyIcon;
+      \$b.Icon = [System.Drawing.SystemIcons]::Information;
+      \$b.Visible = \$true;
+      \$b.ShowBalloonTip(5000, '$TITLE', '$MSG', 'Info');
+      Add-Type -AssemblyName presentationCore;
+      \$p = New-Object System.Windows.Media.MediaPlayer;
+      \$p.Open([Uri]'file:///$WIN_AUDIO');
+      \$p.Play();
+      Start-Sleep -Seconds 15;
+      \$p.Stop();
+      \$b.Dispose();
+    " >/dev/null 2>&1
+  fi
 else
   notify-send -a "LLM" -i face-smile-big "$TITLE" "$MSG"
+  [[ "$DND" == "1" ]] && exit 0
   exec mpv --no-terminal --no-video --length=15 "$AUDIO" >/dev/null 2>&1
 fi
