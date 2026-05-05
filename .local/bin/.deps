@@ -108,6 +108,7 @@ if command -v pacman >/dev/null; then
         papirus-icon-theme \
         pass \
         pass-otp \
+        pass-secret-service \
         pipewire \
         pipewire-alsa \
         pipewire-jack \
@@ -245,6 +246,9 @@ if command -v pacman >/dev/null; then
 
     echo -e "$GREEN_CHECK Enabling UFW..."
     echo "y" | sudo ufw enable >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to enable UFW"
+
+    echo -e "$GREEN_CHECK Enabling pass-secret-service.service (user)..."
+    systemctl --user enable --now pass-secret-service.service >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to enable pass-secret-service.service"
 fi
 
 if command -v dnf >/dev/null; then
