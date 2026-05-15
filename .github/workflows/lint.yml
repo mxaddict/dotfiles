@@ -81,16 +81,7 @@ jobs:
             jq empty "$f" || fail=1
           done < <(git ls-files '*.json')
           exit "$fail"
-      - name: Validate JSONC files
-        run: |
-          # JSONC allows comments — strip before validating.
-          fail=0
-          while IFS= read -r f; do
-            [ -f "$f" ] || { echo "== skip (missing) $f =="; continue; }
-            echo "== jsonc $f =="
-            sed -E 's://[^"]*$::' "$f" | jq empty || fail=1
-          done < <(git ls-files '*.jsonc')
-          exit "$fail"
+      # JSONC (.jsonc) is parsed by the prettier job — no separate step here.
       - name: Validate TOML files
         run: |
           fail=0
