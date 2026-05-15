@@ -4,8 +4,6 @@
 	excludesfile = ~/.gitignore
 [pull]
 	rebase = false
-[commit]
-	gpgsign = true
 [push]
 	autoSetupRemote = true
 [fetch]

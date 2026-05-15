@@ -24,6 +24,19 @@ color scheme is based on the popular
   installs.
 - **Recommended**: Familiarity with Vim keybindings (Neovim, Vieb, tmux).
 
+### Runtime assets
+
+`.deps` installs these on Arch. On other distros, install equivalents manually
+or glyphs / cursors / icons will render as boxes:
+
+- **Font**: [Hack Nerd Font](https://www.nerdfonts.com/) — used by Alacritty,
+  Waybar, Rofi. Arch package: `ttf-hack-nerd`.
+- **Cursor theme**: `Breeze_Light` — set via `HYPRCURSOR_THEME` /
+  `XCURSOR_THEME` in `hyprland.conf`. Arch package: `breeze`.
+- **GTK theme**: `adw-gtk-theme`.
+- **Icon theme**: whatever your distro ships; Nautilus + Waybar both rely on the
+  default GTK icon theme.
+
 ## Core Components
 
 - **Window Manager**: [Hyprland](https://hyprland.org/) — dynamic tiling Wayland
@@ -84,16 +97,30 @@ curl -SsL https://raw.github.com/mxaddict/dotfiles/main/.local/bin/.deps | sh
 
 ## First-run customization
 
-Two files you almost certainly want to edit immediately after install:
+### Template seeding
 
-1. **`~/.gitconfig.local`** — copy from `.gitconfig.local.template` and fill in
-   your name, email, and (optional) GPG signing key. `~/.gitconfig` includes it
-   automatically.
-2. **`~/.config/hypr/monitors.conf`** — `.update` seeds this from
-   `monitors.template.conf` on first run. Run `hyprctl monitors` to find your
-   display names and edit accordingly.
+User-specific files live as `*.template.*` in the repo and are **copied to
+`$HOME` on first run** by `.update`. The destinations are gitignored and ignored
+by `stow`, so your local edits never get clobbered by a `git pull`.
 
-Other common edits:
+| Template (repo)                        | Destination                     | Purpose                                |
+| -------------------------------------- | ------------------------------- | -------------------------------------- |
+| `.gitconfig.local.template`            | `~/.gitconfig.local`            | Name, email, GPG signing               |
+| `.config/hypr/apps.template.conf`      | `~/.config/hypr/apps.conf`      | `$terminal`, `$browser`, `$lock`, etc. |
+| `.config/hypr/input.template.conf`     | `~/.config/hypr/input.conf`     | Keyboard layout, touchpad              |
+| `.config/hypr/monitors.template.conf`  | `~/.config/hypr/monitors.conf`  | Monitor positions                      |
+| `.config/hypr/hyprpaper.template.conf` | `~/.config/hypr/hyprpaper.conf` | Wallpaper                              |
+
+Re-running `.update` is safe — it only seeds files that don't exist yet.
+
+### Files you almost certainly want to edit
+
+1. `~/.gitconfig.local` — name, email, optional GPG key, optional signing.
+2. `~/.config/hypr/monitors.conf` — run `hyprctl monitors` for display names.
+3. `~/.config/hypr/apps.conf` — swap terminal, browser, file manager defaults.
+4. `~/.config/hypr/input.conf` — change `kb_layout` if you're not on US.
+
+### Optional edits
 
 - `~/.config/hypr/workspaces.conf` — pin workspaces to monitors.
 - `~/.config/hypr/hyprpaper.conf` — change wallpaper path.

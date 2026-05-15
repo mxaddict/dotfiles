@@ -54,18 +54,32 @@ for DIR in "${DIRS[@]}"; do
 done
 
 mkdir -p "$config/hypr" >/dev/null 2>&1
-touch "$config/hypr/monitors.conf" >/dev/null 2>&1
 touch "$config/hypr/workspaces.conf" >/dev/null 2>&1
-if [ ! -f "$config/hypr/hyprpaper.conf" ] && [ -f "$dotfiles/.config/hypr/hyprpaper.template.conf" ]; then
-    cp "$dotfiles/.config/hypr/hyprpaper.template.conf" "$config/hypr/hyprpaper.conf" >/dev/null 2>&1
-fi
-if [ ! -s "$config/hypr/monitors.conf" ] && [ -f "$dotfiles/.config/hypr/monitors.template.conf" ]; then
-    cp "$dotfiles/.config/hypr/monitors.template.conf" "$config/hypr/monitors.conf" >/dev/null 2>&1
-fi
 
-if [ ! -f "$HOME/.gitconfig.local" ] && [ -f "$dotfiles/.gitconfig.local.template" ]; then
-    echo -e "$WARN_CHECK ~/.gitconfig.local missing — copy from .gitconfig.local.template and fill in identity."
-fi
+# Seed user-configurable files from templates if they don't exist yet.
+# Format: "template-path-in-repo => destination-path-in-home"
+# Destinations are gitignored so stow leaves them alone.
+declare -a TEMPLATES=(
+    ".config/hypr/hyprpaper.template.conf => $config/hypr/hyprpaper.conf"
+    ".config/hypr/monitors.template.conf  => $config/hypr/monitors.conf"
+    ".config/hypr/apps.template.conf      => $config/hypr/apps.conf"
+    ".config/hypr/input.template.conf     => $config/hypr/input.conf"
+    ".gitconfig.local.template            => $HOME/.gitconfig.local"
+)
+
+for entry in "${TEMPLATES[@]}"; do
+    src="${entry%% =>*}"
+    dst="${entry##*=> }"
+    src="${src% }"
+    dst="${dst# }"
+    src_path="$dotfiles/$src"
+    [ -f "$src_path" ] || continue
+    if [ ! -s "$dst" ]; then
+        mkdir -p "$(dirname "$dst")" >/dev/null 2>&1
+        cp "$src_path" "$dst"
+        echo -e "$GREEN_CHECK Seeded $dst from $src"
+    fi
+done
 
 echo -e "$GREEN_CHECK Updating dotfiles repository..."
 [ -d "$dotfiles" ] || git clone "$DOTFILES_REPO" "$dotfiles" >/dev/null 2>&1

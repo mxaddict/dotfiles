@@ -1,6 +1,15 @@
-.deps.lock
 .git
+.github
 .root
+^/CONTRIBUTING.md
 ^/LICENSE
 ^/README.md
+^/\.gitconfig\.local\.template
+^/\.prettierignore
+^/\.prettierrc
+^/\.editorconfig
+^/\.clang-format
+^/\.gitignore
+^/\.stow-local-ignore
+.*\.template\.conf
 screenshot.png

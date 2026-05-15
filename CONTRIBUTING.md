@@ -59,9 +59,32 @@ and PR (see `.github/workflows/lint.yml`).
    !.config/<app>/<file-to-track>
    .config/<app>/*
    ```
-3. If the app needs first-run scaffolding, mirror the `hyprpaper.template.conf`
-   pattern: ship a `*.template.*` file, have `.local/bin/.update` copy it on
-   first install.
+3. If the config has user-specific content (paths, credentials, hardware names,
+   identity), follow the **template pattern** below.
+
+## Template pattern (user-configurable files)
+
+Anything a user is expected to edit should live as a `*.template.*` file in the
+repo and be copied to `$HOME` on first run. The real file lives at the
+destination and is **not tracked** by git or touched by `stow`.
+
+To add a new templated file:
+
+1. Create `<path>.template.<ext>` in the repo with sensible defaults + comments
+   explaining what to change.
+2. Add the destination path to `.gitignore` (so the file can never leak back
+   into the repo if a user accidentally copies it).
+3. The `*.template.conf` glob is already excluded by `.stow-local-ignore`, so
+   stow won't symlink templates. If your template uses a different suffix (e.g.
+   `*.template.toml`), add it to `.stow-local-ignore`.
+4. Add an entry to the `TEMPLATES` array in `.local/bin/.update`:
+   ```bash
+   "<repo-path>.template.ext => $HOME/<dest-path>.ext"
+   ```
+5. Document the new file in the README's "Template seeding" table.
+
+Re-running `.update` only seeds files that are missing or empty — it never
+overwrites a user's existing customizations.
 
 ## Not in scope
 
