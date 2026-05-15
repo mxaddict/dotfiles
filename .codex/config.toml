@@ -1,16 +1,16 @@
 notify = ["sh", "-c", "exec \"$HOME/.local/bin/.rick\" \"$@\"", "_"]
 
+# Ollama profile — change base_url to point at your Ollama host.
+# Default assumes Ollama running on localhost:11434. For a remote box, set
+# something like "http://your-host.lan:11434/v1/".
 [profiles.ollama-launch]
-openai_base_url = "http://pc.mx.kryptic.sh:11434/v1/"
+openai_base_url = "http://localhost:11434/v1/"
 forced_login_method = "api"
 model_provider = "ollama-launch"
 
 [model_providers.ollama-launch]
 name = "Ollama"
-base_url = "http://pc.mx.kryptic.sh:11434/v1/"
-
-[projects."/home/mxaddict"]
-trust_level = "trusted"
+base_url = "http://localhost:11434/v1/"
 
 [tui]
 theme = "nord"

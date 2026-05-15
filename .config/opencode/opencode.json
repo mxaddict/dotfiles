@@ -3,9 +3,9 @@
   "provider": {
     "ollama": {
       "npm": "@ai-sdk/openai-compatible",
-      "name": "Ollama @ Home",
+      "name": "Ollama",
       "options": {
-        "baseURL": "http://pc.mx.kryptic.sh:11434/v1"
+        "baseURL": "http://localhost:11434/v1"
       },
       "models": {
         "qwen3-coder:30b": {

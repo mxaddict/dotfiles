@@ -1,7 +1,3 @@
-[user]
-	name = mxaddict
-	email = mxaddict@kryptic.sh
-	signingkey = mxaddict@kryptic.sh
 [color]
 	ui = true
 [core]
@@ -24,3 +20,5 @@
 [credential "https://gist.github.com"]
 	helper =
 	helper = !/usr/bin/gh auth git-credential
+[include]
+	path = ~/.gitconfig.local

@@ -1,0 +1,99 @@
+name: lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  shellcheck:
+    name: shellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+      - name: Run shellcheck
+        run: |
+          shopt -s nullglob
+          fail=0
+          for f in .local/bin/.* .local/bin/*; do
+            [ -f "$f" ] || continue
+            [ -x "$f" ] || continue
+            # Skip binaries and non-shell scripts
+            head -n1 "$f" | grep -qE '^#!.*(bash|sh)\b' || continue
+            echo "== shellcheck $f =="
+            shellcheck -x "$f" || fail=1
+          done
+          exit "$fail"
+
+  prettier:
+    name: prettier
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install prettier
+        run: npm install --global prettier@3
+      - name: Check formatting
+        run: |
+          prettier --check \
+            "**/*.md" \
+            "**/*.json" \
+            "**/*.jsonc" \
+            "**/*.yaml" \
+            "**/*.yml" \
+            "**/*.ts" \
+            "**/*.tsx" \
+            "**/*.js" \
+            "**/*.jsx" \
+            --ignore-path .gitignore \
+            --ignore-path .prettierignore 2>/dev/null || prettier --check \
+              "**/*.md" \
+              "**/*.json" \
+              "**/*.jsonc" \
+              "**/*.yaml" \
+              "**/*.yml" \
+              "**/*.ts" \
+              "**/*.tsx" \
+              "**/*.js" \
+              "**/*.jsx" \
+              --ignore-path .gitignore
+
+  validate-configs:
+    name: validate JSON / TOML
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install validators
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3 python3-pip jq
+          pip3 install --user tomli
+      - name: Validate JSON files
+        run: |
+          fail=0
+          while IFS= read -r f; do
+            echo "== json $f =="
+            jq empty "$f" || fail=1
+          done < <(git ls-files '*.json')
+          exit "$fail"
+      - name: Validate JSONC files
+        run: |
+          # JSONC allows comments — strip them before validating.
+          fail=0
+          while IFS= read -r f; do
+            echo "== jsonc $f =="
+            sed -E 's://[^"]*$::' "$f" | jq empty || fail=1
+          done < <(git ls-files '*.jsonc')
+          exit "$fail"
+      - name: Validate TOML files
+        run: |
+          fail=0
+          while IFS= read -r f; do
+            echo "== toml $f =="
+            python3 -c "import tomli, sys; tomli.loads(open('$f','rb').read().decode())" || fail=1
+          done < <(git ls-files '*.toml')
+          exit "$fail"

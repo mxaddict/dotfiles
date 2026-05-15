@@ -23,6 +23,7 @@
 *.log
 *~
 .base16*
+.gitconfig.local
 .cache
 .claude-work/*
 .claude/*

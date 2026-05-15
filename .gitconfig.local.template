@@ -1,0 +1,9 @@
+; Copy to ~/.gitconfig.local and fill in your details.
+; This file is loaded via [include] from ~/.gitconfig.
+; Keep it out of version control — it holds personal identity.
+
+[user]
+	name = Your Name
+	email = you@example.com
+	; signingkey only needed if commit.gpgsign = true in ~/.gitconfig
+	; signingkey = you@example.com

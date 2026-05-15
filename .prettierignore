@@ -1,0 +1,16 @@
+# Vendored skills (upstream, don't reformat)
+.agents/**
+
+# Vendored / generated
+.config/nvim/lazy-lock.json
+.config/opencode/package-lock.json
+.config/opencode/bun.lock
+**/node_modules/**
+
+# Long-form caches not meant to be re-formatted
+.claude/**
+.claude-work/**
+.codex/projects/**
+
+# Vieb tracked colors only — leave upstream untouched
+.config/Vieb/colors/**

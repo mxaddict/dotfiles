@@ -6,9 +6,33 @@ set -euo pipefail
 GREEN_CHECK="\e[32m✅\e[0m"
 WARN_CHECK="\e[38;5;208m✅\e[0m"
 
-dotfiles="$HOME/.files"
+DOTFILES_REPO="${DOTFILES_REPO:-https://github.com/mxaddict/dotfiles.git}"
+dotfiles="${DOTFILES_DIR:-$HOME/.files}"
 config="$HOME/.config"
 tpm="$config/tmux/plugins/tpm"
+
+DRY_RUN=false
+NO_STASH=false
+for arg in "$@"; do
+    case "$arg" in
+        --dry-run) DRY_RUN=true ;;
+        --no-stash) NO_STASH=true ;;
+        -h|--help)
+            cat <<EOF
+Usage: $(basename "$0") [--dry-run] [--no-stash]
+
+  --dry-run   Pull updates but skip dep install, stow, and plugin updates.
+  --no-stash  Fail instead of auto-stashing local changes before pull.
+
+Env:
+  DOTFILES_REPO  Repo URL to clone if \$DOTFILES_DIR missing.
+                 Default: https://github.com/mxaddict/dotfiles.git
+  DOTFILES_DIR   Target directory. Default: \$HOME/.files
+EOF
+            exit 0
+            ;;
+    esac
+done
 
 echo -e "$GREEN_CHECK Creating essential user directories..."
 declare -a DIRS=(
@@ -32,13 +56,19 @@ done
 mkdir -p "$config/hypr" >/dev/null 2>&1
 touch "$config/hypr/monitors.conf" >/dev/null 2>&1
 touch "$config/hypr/workspaces.conf" >/dev/null 2>&1
-[ -f "$config/hypr/hyprpaper.conf" ] || (
-    rm "$config/hypr/hyprpaper.conf"
+if [ ! -f "$config/hypr/hyprpaper.conf" ] && [ -f "$dotfiles/.config/hypr/hyprpaper.template.conf" ]; then
     cp "$dotfiles/.config/hypr/hyprpaper.template.conf" "$config/hypr/hyprpaper.conf" >/dev/null 2>&1
-)
+fi
+if [ ! -s "$config/hypr/monitors.conf" ] && [ -f "$dotfiles/.config/hypr/monitors.template.conf" ]; then
+    cp "$dotfiles/.config/hypr/monitors.template.conf" "$config/hypr/monitors.conf" >/dev/null 2>&1
+fi
+
+if [ ! -f "$HOME/.gitconfig.local" ] && [ -f "$dotfiles/.gitconfig.local.template" ]; then
+    echo -e "$WARN_CHECK ~/.gitconfig.local missing — copy from .gitconfig.local.template and fill in identity."
+fi
 
 echo -e "$GREEN_CHECK Updating dotfiles repository..."
-[ -d "$dotfiles" ] || git clone https://github.com/mxaddict/dotfiles.git "$dotfiles" >/dev/null 2>&1
+[ -d "$dotfiles" ] || git clone "$DOTFILES_REPO" "$dotfiles" >/dev/null 2>&1
 SELF_PATH="$(readlink -f "$0")"
 ORIGINAL_ARGS=("$@")
 
@@ -47,6 +77,10 @@ cd "$dotfiles" || exit
 
 STASHED_CHANGES=false
 if ! git diff --quiet --exit-code; then
+    if [ "$NO_STASH" = true ]; then
+        echo -e "$WARN_CHECK Local changes present and --no-stash set. Aborting." >&2
+        exit 1
+    fi
     echo -e "$GREEN_CHECK Stashing local changes before update..."
     git stash push --include-untracked -m "Pre-update stash by self-update script" >/dev/null 2>&1
     STASHED_CHANGES=true
@@ -66,8 +100,13 @@ if [ "$STASHED_CHANGES" = true ]; then
     git stash pop >/dev/null 2>&1 || true
 fi
 
+if [ "$DRY_RUN" = true ]; then
+    echo -e "$GREEN_CHECK Dry run — skipping deps, stow, and plugin updates."
+    exit 0
+fi
+
 echo -e "$GREEN_CHECK Checking dependencies..."
-"$HOME/.files/.local/bin/.deps"
+"$dotfiles/.local/bin/.deps"
 
 echo -e "$GREEN_CHECK Stowing dotfiles..."
 stow --adopt . >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to stow dotfiles"

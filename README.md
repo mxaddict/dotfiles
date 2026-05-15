@@ -12,89 +12,184 @@ of carefully selected tools that enhance productivity and user experience. The
 color scheme is based on the popular
 [TokyoNight](https://github.com/folke/tokyonight.nvim) theme.
 
+## Prerequisites
+
+- **Distro**: Arch Linux (or an Arch derivative). `.deps` uses `pacman` + `paru`
+  exclusively — other distros are unsupported out of the box.
+- **Display server**: Wayland (Hyprland). X11 will not work.
+- **GPU**: Any modern GPU with a working Wayland driver. Tested on AMD; NVIDIA
+  may need additional Hyprland config tweaks.
+- **CPU**: x86_64. ARM is untested.
+- **Required CLI**: `git`, `bash`, `curl`, `stow`. Everything else `.deps`
+  installs.
+- **Recommended**: Familiarity with Vim keybindings (Neovim, Vieb, tmux).
+
 ## Core Components
 
-- **Window Manager**: [Hyprland](https://hyprland.org/) - A dynamic tiling
-  Wayland compositor with a focus on animations and smooth user experience.
-- **Shell**: [Fish](https://fishshell.com/) - A smart and user-friendly
-  command-line shell.
-- **Terminal**: [Alacritty](https://alacritty.org/) - A fast, GPU-accelerated
-  terminal emulator.
-- **Editor**: [Neovim](https://neovim.io/) - A highly extensible, Vim-based text
-  editor, configured with [LazyVim](https://www.lazyvim.org/).
-- **Bar**: [Waybar](https://github.com/Alexays/Waybar) - A highly customizable
-  Wayland bar for Sway and Wlroots based compositors.
-- **Application Launcher**: [Rofi](https://github.com/davatorium/rofi) - A
-  versatile application launcher and window switcher.
-- **Notification Daemon**: [swaync](https://github.com/Lentera/swaync) - A
-  simple notification daemon for Wayland.
-- **File Manager**: [Nautilus](https://help.gnome.org/users/nautilus/) - The
-  default GNOME file manager
-- **Browser**: [Vieb](https://github.com/LunarNathan/vieb) - A vim-like browser
-- **Screenshot Tool**: [Grimblast](https://github.com/hyprwm/grimblast) - For
-  taking screenshots and screen recording
-- **System Monitoring**: [Btop](https://github.com/aristocratos/btop) - A modern
-  replacement for htop
-- **Keybindings**: Intuitive keybindings are configured in `hyprland.conf` for
-  efficient window management and application launching.
-- **Fish Shell**: The fish shell is configured with useful aliases, functions,
-  and a [Starship](https://starship.rs/) prompt. It also integrates with `fzf`
-  and `zoxide`.
-- **Neovim**: A full-featured Neovim setup based on LazyVim with plugins for
-  LSP, linting, formatting, and more.
-
-## Key Features
-
-- **Consistent Theming**: A consistent TokyoNight theme is applied across all
-  applications, including Alacritty, Neovim, Waybar, and Rofi.
-- **Custom Scripts**: A collection of useful scripts are available in
-  `.local/bin` to automate common tasks like:
-  - Application launchers (browser, file manager, etc.)
-  - System controls (power menu, audio, brightness)
-  - Developer tools (git commits with location, tmux sessions, etc.)
-  - Network management and more
-- **Keybindings**: Intuitive keybindings are configured in `hyprland.conf` for
-  efficient window management and application launching.
-- **Fish Shell**: The fish shell is configured with useful aliases, functions,
-  and a [Starship](https://starship.rs/) prompt. It also integrates with `fzf`
-  and `zoxide`.
-- **Neovim**: A full-featured Neovim setup based on LazyVim with plugins for
-  LSP, linting, formatting, and more.
-
-## Required packages
-
-Required packages are installed on first run of `.update` script but if you want
-to run it manually you can just run the following:
-
-### Short URL (.deps)
-
-```sh
-curl -SsL https://ba.sh/zNcw | sh
-```
-
-### Raw URL (.deps)
-
-```sh
-curl -SsL https://raw.github.com/mxaddict/dotfiles/main/.local/bin/.deps | sh
-```
+- **Window Manager**: [Hyprland](https://hyprland.org/) — dynamic tiling Wayland
+  compositor.
+- **Shell**: [Fish](https://fishshell.com/) — friendly interactive shell.
+- **Terminal**: [Alacritty](https://alacritty.org/) — GPU-accelerated terminal.
+- **Editor**: [Neovim](https://neovim.io/) with
+  [LazyVim](https://www.lazyvim.org/).
+- **Bar**: [Waybar](https://github.com/Alexays/Waybar).
+- **Launcher**: [Rofi](https://github.com/davatorium/rofi).
+- **Notifications**: [swaync](https://github.com/Lentera/swaync).
+- **File Manager**: [Nautilus](https://help.gnome.org/users/nautilus/).
+- **Browser**: [Vieb](https://github.com/Jelmerro/Vieb) — vim-like browser.
+- **Screenshot**: [Grimblast](https://github.com/hyprwm/contrib).
+- **System monitor**: [btop](https://github.com/aristocratos/btop).
+- **Prompt**: [Starship](https://starship.rs/).
 
 ## Installation
 
-Just run this to setup the dotfiles:
+> ⚠ The install scripts assume Arch Linux and will install many packages via
+> `paru`. Read `.local/bin/.deps` before running.
 
-### Short URL (.update)
+### Quick install (curl pipe)
 
 ```sh
 curl -SsL https://ba.sh/yar3 | sh
 ```
 
-### Raw URL (.update)
+Raw URL:
 
 ```sh
 curl -SsL https://raw.github.com/mxaddict/dotfiles/main/.local/bin/.update | sh
 ```
 
+### Manual install (recommended for skeptics)
+
+```sh
+git clone https://github.com/mxaddict/dotfiles.git ~/.files
+~/.files/.local/bin/.update --dry-run     # pull only, no changes applied
+~/.files/.local/bin/.update               # full install
+```
+
+### Forking
+
+Replace the repo URL via env var so `.update` clones your fork:
+
+```sh
+DOTFILES_REPO="https://github.com/you/dotfiles.git" ~/.files/.local/bin/.update
+```
+
+### Just install deps
+
+```sh
+curl -SsL https://ba.sh/zNcw | sh
+# or
+curl -SsL https://raw.github.com/mxaddict/dotfiles/main/.local/bin/.deps | sh
+```
+
+## First-run customization
+
+Two files you almost certainly want to edit immediately after install:
+
+1. **`~/.gitconfig.local`** — copy from `.gitconfig.local.template` and fill in
+   your name, email, and (optional) GPG signing key. `~/.gitconfig` includes it
+   automatically.
+2. **`~/.config/hypr/monitors.conf`** — `.update` seeds this from
+   `monitors.template.conf` on first run. Run `hyprctl monitors` to find your
+   display names and edit accordingly.
+
+Other common edits:
+
+- `~/.config/hypr/workspaces.conf` — pin workspaces to monitors.
+- `~/.config/hypr/hyprpaper.conf` — change wallpaper path.
+- `.codex/config.toml` and `.config/opencode/opencode.json` — point Ollama at
+  your host (default: `localhost:11434`).
+
+## Keybinding Cheatsheet (Hyprland)
+
+`$mod` = **Super** (Windows key).
+
+### Apps & menus
+
+| Bind                  | Action                         |
+| --------------------- | ------------------------------ |
+| `$mod + return` / `c` | Terminal (Alacritty)           |
+| `$mod + b`            | Browser                        |
+| `$mod + e`            | File manager (Nautilus)        |
+| `$mod + space`        | App launcher                   |
+| `$mod + r`            | Calculator                     |
+| `$mod + .`            | Emoji picker                   |
+| `$mod + w`            | WiFi menu                      |
+| `$mod + a`            | Audio menu                     |
+| `$mod + u`            | Bluetooth menu                 |
+| `$mod + t`            | Time menu                      |
+| `$mod + escape`       | Top processes menu             |
+| `$mod + shift + m`    | Power menu                     |
+| `$mod + n` / `+S+n`   | Toggle / dismiss notifications |
+
+### Screen
+
+| Bind                 | Action                |
+| -------------------- | --------------------- |
+| `$mod + p` / `Print` | Screenshot region     |
+| `$mod + shift + p`   | Screen record (kooha) |
+| `$mod + ctrl + p`    | Color picker          |
+| `$mod + m`           | Lock screen           |
+
+### Window management
+
+| Bind                     | Action                   |
+| ------------------------ | ------------------------ |
+| `$mod + q`               | Close active window      |
+| `$mod + f`               | Maximize (fullscreen-1)  |
+| `$mod + shift + f`       | True fullscreen          |
+| `$mod + v`               | Toggle floating          |
+| `$mod + s`               | Toggle split direction   |
+| `$mod + h/j/k/l`         | Focus left/down/up/right |
+| `$mod + shift + h/j/k/l` | Move window              |
+| `ctrl + arrows`          | Resize active window     |
+| `$mod + tab`             | Cycle windows            |
+
+### Workspaces
+
+| Bind                  | Action                    |
+| --------------------- | ------------------------- |
+| `$mod + 1..9,0`       | Switch to workspace 1..10 |
+| `$mod + shift + 1..0` | Move window to workspace  |
+| `$mod + LMB drag`     | Move window               |
+| `$mod + RMB drag`     | Resize window             |
+
+### Autofill (password manager menu)
+
+| Bind              | Action   |
+| ----------------- | -------- |
+| `$mod + ctrl + j` | Auth     |
+| `$mod + ctrl + k` | Username |
+| `$mod + ctrl + l` | Password |
+| `$mod + ctrl + ;` | OTP      |
+
+### Audio / brightness
+
+`XF86Audio*` and `XF86MonBrightness*` keys are wired via `swayosd-client`.
+`$mod + up/down/left/right` doubles as volume +/-/mute. Add `shift` for mic.
+
+## Convention: dotfile-prefixed scripts
+
+Scripts in `.local/bin/` are intentionally named with a leading `.` (e.g.
+`.menu-apps`, `.update`). They are hidden from a plain `ls` but show up with
+`ls -A`. This keeps the user's "real" PATH visually clean. Use
+`ls -A ~/.local/bin/` to discover them.
+
+## Update workflow
+
+```sh
+~/.local/bin/.update              # update repo + deps + plugins
+~/.local/bin/.update --dry-run    # pull only
+~/.local/bin/.update --no-stash   # fail instead of auto-stashing
+```
+
+Env vars: `DOTFILES_REPO`, `DOTFILES_DIR`.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for commit style, naming conventions, and
+lint expectations.
+
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
-for details.
+MIT — see [LICENSE](LICENSE).
