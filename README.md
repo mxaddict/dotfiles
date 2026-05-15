@@ -79,6 +79,21 @@ git clone https://github.com/mxaddict/dotfiles.git ~/.files
 ~/.files/.local/bin/.update               # full install
 ```
 
+### First-run wizard (recommended for fresh installs)
+
+After cloning, run the interactive setup. It collects your identity + key
+defaults up front, then runs `.update` and patches the seeded templates with
+your answers — single hands-on pass for a fresh install.
+
+```sh
+~/.files/.local/bin/.setup            # interactive
+~/.files/.local/bin/.setup -y         # accept all defaults, no prompts
+~/.files/.local/bin/.setup --no-update  # only prompt + patch, skip .update
+```
+
+Re-running is safe: every prompt shows the current value as its default; press
+Enter to keep it.
+
 ### Forking
 
 Replace the repo URL via env var so `.update` clones your fork:

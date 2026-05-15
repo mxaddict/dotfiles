@@ -82,9 +82,14 @@ To add a new templated file:
    "<repo-path>.template.ext => $HOME/<dest-path>.ext"
    ```
 5. Document the new file in the README's "Template seeding" table.
+6. (Optional) If the file has high-signal user values, add a prompt for it in
+   `.local/bin/.setup` and patch the relevant lines after `.update` runs. Keep
+   prompts to the minimum a user needs answered on a fresh install — everything
+   else stays editable by hand.
 
 Re-running `.update` only seeds files that are missing or empty — it never
-overwrites a user's existing customizations.
+overwrites a user's existing customizations. `.setup` overwrites prompt targets
+but uses the current value as the default, so pressing Enter preserves it.
 
 ## Not in scope
 
