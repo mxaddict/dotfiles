@@ -1,5 +1,3 @@
-notify = ["sh", "-c", "exec \"$HOME/.local/bin/.rick\" \"$@\"", "_"]
-
 # Ollama profile — change base_url to point at your Ollama host.
 # Default assumes Ollama running on localhost:11434. For a remote box, set
 # something like "http://your-host.lan:11434/v1/".
