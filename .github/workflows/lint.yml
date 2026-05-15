@@ -16,11 +16,18 @@ jobs:
       - name: Run shellcheck
         run: |
           shopt -s nullglob
+          # Third-party scripts we ship as-is — don't lint upstream.
+          skip=(".local/bin/grimblast" ".local/bin/t")
+          is_skipped() {
+            local f="$1"
+            for s in "${skip[@]}"; do [ "$f" = "$s" ] && return 0; done
+            return 1
+          }
           fail=0
           for f in .local/bin/.* .local/bin/*; do
             [ -f "$f" ] || continue
             [ -x "$f" ] || continue
-            # Skip binaries and non-shell scripts
+            is_skipped "$f" && { echo "== skip (upstream) $f =="; continue; }
             head -n1 "$f" | grep -qE '^#!.*(bash|sh)\b' || continue
             echo "== shellcheck $f =="
             shellcheck -x "$f" || fail=1
@@ -40,27 +47,18 @@ jobs:
       - name: Check formatting
         run: |
           prettier --check \
+            --no-error-on-unmatched-pattern \
+            --ignore-path .gitignore \
+            --ignore-path .prettierignore \
             "**/*.md" \
             "**/*.json" \
             "**/*.jsonc" \
-            "**/*.yaml" \
             "**/*.yml" \
+            "**/*.yaml" \
             "**/*.ts" \
             "**/*.tsx" \
             "**/*.js" \
-            "**/*.jsx" \
-            --ignore-path .gitignore \
-            --ignore-path .prettierignore 2>/dev/null || prettier --check \
-              "**/*.md" \
-              "**/*.json" \
-              "**/*.jsonc" \
-              "**/*.yaml" \
-              "**/*.yml" \
-              "**/*.ts" \
-              "**/*.tsx" \
-              "**/*.js" \
-              "**/*.jsx" \
-              --ignore-path .gitignore
+            "**/*.jsx"
 
   validate-configs:
     name: validate JSON / TOML
@@ -76,15 +74,19 @@ jobs:
         run: |
           fail=0
           while IFS= read -r f; do
+            # git ls-files may list paths not present on disk (symlinks,
+            # ignored content). Skip if missing.
+            [ -f "$f" ] || { echo "== skip (missing) $f =="; continue; }
             echo "== json $f =="
             jq empty "$f" || fail=1
           done < <(git ls-files '*.json')
           exit "$fail"
       - name: Validate JSONC files
         run: |
-          # JSONC allows comments — strip them before validating.
+          # JSONC allows comments — strip before validating.
           fail=0
           while IFS= read -r f; do
+            [ -f "$f" ] || { echo "== skip (missing) $f =="; continue; }
             echo "== jsonc $f =="
             sed -E 's://[^"]*$::' "$f" | jq empty || fail=1
           done < <(git ls-files '*.jsonc')
@@ -93,6 +95,7 @@ jobs:
         run: |
           fail=0
           while IFS= read -r f; do
+            [ -f "$f" ] || { echo "== skip (missing) $f =="; continue; }
             echo "== toml $f =="
             python3 -c "import tomli, sys; tomli.loads(open('$f','rb').read().decode())" || fail=1
           done < <(git ls-files '*.toml')
