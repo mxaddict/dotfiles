@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # vi: ft=bash
 
-pkill rofi && exit
+pkill pikr && exit
 
-timezone=$(sudo timedatectl list-timezones | rofi -dmenu -i -p "Time Zone")
+timezone=$(sudo timedatectl list-timezones | pikr -d -p "Time Zone")
 
 if [[ $timezone != "" ]]; then
     sudo timedatectl set-timezone "$timezone"

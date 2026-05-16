@@ -29,7 +29,7 @@ if [[ -n "$FILTER" ]]; then
     done
 fi
 
-selection=$(echo "$entries" | rofi -dmenu -p "[$MODE]" -i)
+selection=$(echo "$entries" | pikr -d -p "[$MODE]")
 [[ -z "$selection" ]] && exit 1
 
 if [[ "$MODE" == "auth" ]]; then

@@ -7,7 +7,7 @@ Hibernate
 Shutdown
 Logout
 Reboot"
-action=$(pkill rofi || echo "$actions" | rofi -case-smart -dmenu -p Action -l 6 -theme-str "window { width: 300; }")
+action=$(pkill pikr || echo "$actions" | pikr -d -p Action)
 
 cmd="echo Zzz"
 

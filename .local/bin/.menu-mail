@@ -2,7 +2,7 @@
 # vi: ft=sh
 
 count=$(himalaya account list | wc -l)
-account=$(himalaya account list | cut -d '|' -f2 | tail -n "$((count - 3))" | rofi -dmenu)
+account=$(himalaya account list | cut -d '|' -f2 | tail -n "$((count - 3))" | pikr -d -p Mail)
 
 if [ -n "$account" ]; then
     alacritty -e nvim "+Himalaya $account"

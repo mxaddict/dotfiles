@@ -3,18 +3,13 @@
 
 pkill -9 nmcli
 
-rofi_kill() {
-    pkill -9 rofi
+pikr_kill() {
+    pkill -9 pikr
 }
 
-rofi_kill && exit 0
+pikr_kill && exit 0
 
-lock=
-
-width=600
-rofi_cmd="rofi -case-smart -dmenu -theme-str 'window { width: $width; }'"
-
-rofi -e "Sniffing Wi-Fi..." -theme-str "window { width: $width; }" &
+lock=
 
 ssids=$(nmcli -g ssid device wifi list | sort | uniq)
 ssid_active=$(nmcli -g active,ssid dev wifi | grep '^yes' | cut -d: -f2)
@@ -36,7 +31,7 @@ list=$(
 )
 
 list=$(echo "$list" | sort -k1 -nr | cut -d : -f2- | column -t -s :)
-wifi=$(rofi_kill && echo "$list" | eval "$rofi_cmd -p Wi-Fi")
+wifi=$(echo "$list" | pikr -d -p Wi-Fi)
 ssid=$(echo "$wifi" | cut -d '"' -f2)
 security=$(echo "$wifi" | cut -d '"' -f3 | awk '{print $3}')
 
@@ -55,7 +50,7 @@ if [[ $security == "" ]]; then
     exit
 fi
 
-password=$(echo "" | eval "$rofi_cmd -p Password -password -l 0 -theme-str 'window { width: $width; children: [inputbar]; }'" | xargs)
+password=$(echo "" | pikr -d -p Password | xargs)
 if [[ -z $password ]]; then
     exit
 fi
