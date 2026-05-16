@@ -320,3 +320,6 @@ end
 if command -v -q fnm
     fnm env --shell fish | source
 end
+
+# Cap cargo at half the system threads to keep desktop responsive
+set -gx CARGO_BUILD_JOBS (math (.nproc) / 2)
