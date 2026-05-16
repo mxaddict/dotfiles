@@ -97,4 +97,8 @@ synonyms. Code unchanged. Pattern: [thing] [action] [reason]. [next step].
 ACTIVE EVERY RESPONSE. No revert after many turns. No filler drift.
 Code/commits/PRs: normal. Off: "stop caveman" / "normal mode".
 
+## Agents
+
+When running sub-agents only run max 2 at a time.
+
 @RTK.md
