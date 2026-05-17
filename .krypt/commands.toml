@@ -180,17 +180,23 @@ steps = [
 [[command]]
 group       = "env"
 name        = "up"
-description = "Upload .env.* files for the current project to a GCS bucket"
+description = "Upload .env.{dev,stage,main} + .env.gs.*.json to gs://${BUCKET:-env-pmi}/<cwd-basename>/"
 steps = [
-    { run = ["bash", "${HOME}/.local/bin/.envup"] },
+    # Inline absorb of ~/.local/bin/.envup — parallel cp via `&` + `wait`
+    # is preserved (gcloud upload is the slow path; serializing six
+    # uploads would noticeably hurt).  Bucket and envs match the bash
+    # script byte-for-byte.  Per-step `if` gates on gcloud presence.
+    { if = "command_exists:gcloud", run = ["bash", "-c", "bucket=\"${BUCKET:-env-pmi}\"; project=$(basename \"$(pwd)\"); for env in dev stage main; do gcloud storage cp \".env.${env}\" \"gs://${bucket}/${project}/\" & gcloud storage cp \".env.gs.${env}.json\" \"gs://${bucket}/${project}/\" & done; wait"] },
 ]
 
 [[command]]
 group       = "env"
 name        = "down"
-description = "Download .env.* files for the current project from a GCS bucket"
+description = "Download .env.{dev,stage,main} + .env.gs.*.json from gs://${BUCKET:-env-pmi}/<cwd-basename>/"
 steps = [
-    { run = ["bash", "${HOME}/.local/bin/.envdown"] },
+    # Inline absorb of ~/.local/bin/.envdown — see `env up` note about the
+    # parallel cp pattern.
+    { if = "command_exists:gcloud", run = ["bash", "-c", "bucket=\"${BUCKET:-env-pmi}\"; project=$(basename \"$(pwd)\"); for env in dev stage main; do gcloud storage cp \"gs://${bucket}/${project}/.env.${env}\" . & gcloud storage cp \"gs://${bucket}/${project}/.env.gs.${env}.json\" . & done; wait"] },
 ]
 
 # ---------------------------------------------------------------------------
