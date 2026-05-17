@@ -129,33 +129,9 @@ steps = [
     { run = ["bash", "${HOME}/.local/bin/.menu-mail"], ignore_failure = true },
 ]
 
-# ---------------------------------------------------------------------------
-# battery group
-# ---------------------------------------------------------------------------
-
-[[command]]
-group       = "battery"
-name        = "report"
-description = "Live battery history report with discharge-rate analysis (updates every 60 s)"
-steps = [
-    { run = ["bash", "${HOME}/.local/bin/.batrep"] },
-]
-
-[[command]]
-group       = "battery"
-name        = "log"
-description = "Run background battery capacity logger (appends to ~/.local/log/bathist.log)"
-steps = [
-    { run = ["bash", "${HOME}/.local/bin/.batlog"] },
-]
-
-[[command]]
-group       = "battery"
-name        = "clear"
-description = "Delete the battery history log file"
-steps = [
-    { run = ["bash", "${HOME}/.local/bin/.batclear"] },
-]
+# Battery scripts (.batrep, .batlog, .batclear) absorbed into the native
+# `krypt battery {report,log,clear}` builtin (#28). No [[command]] entry
+# needed — invoke the builtin directly.
 
 # ---------------------------------------------------------------------------
 # kanata group
