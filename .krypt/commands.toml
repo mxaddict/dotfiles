@@ -164,11 +164,13 @@ steps = [
 [[command]]
 group       = "kanata"
 name        = "toggle"
-description = "Toggle the kanata keyboard remapping service on/off"
+description = "Toggle the kanata.service systemd unit (keyboard remapper)"
 platform    = "linux"
 steps = [
-    # sudo systemctl + notify-send — kept as single shell step.
-    { run = ["bash", "${HOME}/.local/bin/.kanata"], ignore_failure = true },
+    # Conditional toggle — bash if/else stays inline so notify-send pairs
+    # with the matching systemctl action.  Trivial enough to absorb here
+    # and lets #34 delete ~/.local/bin/.kanata.
+    { run = ["bash", "-c", "if systemctl is-active --quiet kanata.service; then sudo systemctl stop kanata.service && notify-send -u low -t 2000 'Keyboard' 'Kanata: OFF (Native Mode)'; else sudo systemctl start kanata.service && notify-send -u normal -t 2000 'Keyboard' 'Kanata: ON (Layer Mode)'; fi"], ignore_failure = true },
 ]
 
 # ---------------------------------------------------------------------------
