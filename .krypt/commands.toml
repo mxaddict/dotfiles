@@ -206,9 +206,13 @@ steps = [
 [[command]]
 group       = "tmux"
 name        = "open"
-description = "Open (or attach to) a tmux session named after the current directory"
+description = "Open (or attach to) a tmux session named after the current directory (3 windows seeded at $PWD)"
 steps = [
-    { run = ["bash", "${HOME}/.local/bin/t"] },
+    # Inline absorb of ~/.local/bin/t.  bash `exec tmux attach` replaces
+    # the bash wrapper in the ps tree so signal handling and TTY ownership
+    # belong to tmux directly.  `.` → `_` in session name because tmux
+    # treats `.` as a separator in target specifiers.
+    { if = "command_exists:tmux", run = ["bash", "-c", "set -euo pipefail; SESSION_NAME=$(basename \"$PWD\" | tr '.' '_'); if tmux has-session -t \"$SESSION_NAME\" 2>/dev/null; then exec tmux attach-session -t \"$SESSION_NAME\"; fi; tmux new-session -d -s \"$SESSION_NAME\" -c \"$PWD\"; tmux new-window -t \"$SESSION_NAME\" -c \"$PWD\"; tmux new-window -t \"$SESSION_NAME\" -c \"$PWD\"; tmux select-window -t \"$SESSION_NAME:0\"; exec tmux attach-session -t \"$SESSION_NAME\""] },
 ]
 
 # ---------------------------------------------------------------------------
