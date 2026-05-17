@@ -167,10 +167,7 @@ name        = "toggle"
 description = "Toggle the kanata.service systemd unit (keyboard remapper)"
 platform    = "linux"
 steps = [
-    # Conditional toggle — bash if/else stays inline so notify-send pairs
-    # with the matching systemctl action.  Trivial enough to absorb here
-    # and lets #34 delete ~/.local/bin/.kanata.
-    { run = ["bash", "-c", "if systemctl is-active --quiet kanata.service; then sudo systemctl stop kanata.service && notify-send -u low -t 2000 'Keyboard' 'Kanata: OFF (Native Mode)'; else sudo systemctl start kanata.service && notify-send -u normal -t 2000 'Keyboard' 'Kanata: ON (Layer Mode)'; fi"], ignore_failure = true },
+    { run = ["bash", "${HOME}/.local/bin/.kanata"], ignore_failure = true },
 ]
 
 # ---------------------------------------------------------------------------
@@ -180,23 +177,17 @@ steps = [
 [[command]]
 group       = "env"
 name        = "up"
-description = "Upload .env.{dev,stage,main} + .env.gs.*.json to gs://${BUCKET:-env-pmi}/<cwd-basename>/"
+description = "Upload .env.* files for the current project to a GCS bucket"
 steps = [
-    # Inline absorb of ~/.local/bin/.envup — parallel cp via `&` + `wait`
-    # is preserved (gcloud upload is the slow path; serializing six
-    # uploads would noticeably hurt).  Bucket and envs match the bash
-    # script byte-for-byte.  Per-step `if` gates on gcloud presence.
-    { if = "command_exists:gcloud", run = ["bash", "-c", "bucket=\"${BUCKET:-env-pmi}\"; project=$(basename \"$(pwd)\"); for env in dev stage main; do gcloud storage cp \".env.${env}\" \"gs://${bucket}/${project}/\" & gcloud storage cp \".env.gs.${env}.json\" \"gs://${bucket}/${project}/\" & done; wait"] },
+    { if = "command_exists:gcloud", run = ["bash", "${HOME}/.local/bin/.envup"] },
 ]
 
 [[command]]
 group       = "env"
 name        = "down"
-description = "Download .env.{dev,stage,main} + .env.gs.*.json from gs://${BUCKET:-env-pmi}/<cwd-basename>/"
+description = "Download .env.* files for the current project from a GCS bucket"
 steps = [
-    # Inline absorb of ~/.local/bin/.envdown — see `env up` note about the
-    # parallel cp pattern.
-    { if = "command_exists:gcloud", run = ["bash", "-c", "bucket=\"${BUCKET:-env-pmi}\"; project=$(basename \"$(pwd)\"); for env in dev stage main; do gcloud storage cp \"gs://${bucket}/${project}/.env.${env}\" . & gcloud storage cp \"gs://${bucket}/${project}/.env.gs.${env}.json\" . & done; wait"] },
+    { if = "command_exists:gcloud", run = ["bash", "${HOME}/.local/bin/.envdown"] },
 ]
 
 # ---------------------------------------------------------------------------
@@ -206,13 +197,9 @@ steps = [
 [[command]]
 group       = "tmux"
 name        = "open"
-description = "Open (or attach to) a tmux session named after the current directory (3 windows seeded at $PWD)"
+description = "Open (or attach to) a tmux session named after the current directory"
 steps = [
-    # Inline absorb of ~/.local/bin/t.  bash `exec tmux attach` replaces
-    # the bash wrapper in the ps tree so signal handling and TTY ownership
-    # belong to tmux directly.  `.` → `_` in session name because tmux
-    # treats `.` as a separator in target specifiers.
-    { if = "command_exists:tmux", run = ["bash", "-c", "set -euo pipefail; SESSION_NAME=$(basename \"$PWD\" | tr '.' '_'); if tmux has-session -t \"$SESSION_NAME\" 2>/dev/null; then exec tmux attach-session -t \"$SESSION_NAME\"; fi; tmux new-session -d -s \"$SESSION_NAME\" -c \"$PWD\"; tmux new-window -t \"$SESSION_NAME\" -c \"$PWD\"; tmux new-window -t \"$SESSION_NAME\" -c \"$PWD\"; tmux select-window -t \"$SESSION_NAME:0\"; exec tmux attach-session -t \"$SESSION_NAME\""] },
+    { if = "command_exists:tmux", run = ["bash", "${HOME}/.local/bin/t"] },
 ]
 
 # ---------------------------------------------------------------------------
