@@ -60,11 +60,10 @@ steps = [
 [[command]]
 group       = "menu"
 name        = "calc"
-description = "Interactive qalculate history picker via pikr"
+description = "Reactive expression evaluator (pikr calc mode)"
 platform    = "linux"
 steps = [
-    # while loop + regex state — kept as single shell step.
-    { run = ["bash", "${HOME}/.local/bin/.menu-calc"], ignore_failure = true },
+    { run = ["pikr", "--show", "calc"], ignore_failure = true },
 ]
 
 [[command]]
