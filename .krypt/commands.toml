@@ -100,7 +100,7 @@ name        = "autofill"
 description = "Autofill password for the active window title using pass"
 platform    = "linux"
 steps = [
-    { run = ["bash", "${HOME}/.local/bin/.menu-autofill"], ignore_failure = true },
+    { run = ["bash", "${HOME}/.local/bin/.menu-autofill", "{0}"], ignore_failure = true },
 ]
 
 [[command]]
