@@ -111,8 +111,8 @@ brew = []
 group = "aur-tools"
 required_platforms = ["linux"]
 pacman = [
-    "buffr-bin", "hjkl-bin", "hodl-bin", "inbx-bin", "pikr-bin", "sqeel-bin",
-    "gemini-cli",
+    "buffr-bin", "hjkl-bin", "hodl-bin", "inbx-bin", "krypt-bin", "pikr-bin",
+    "sqeel-bin", "gemini-cli",
 ]
 apt = []
 dnf = []

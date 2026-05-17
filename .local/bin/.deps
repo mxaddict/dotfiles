@@ -85,6 +85,7 @@ if command -v pacman >/dev/null; then
         inbx-bin \
         jq \
         kanata \
+        krypt-bin \
         kooha \
         lazygit \
         libadwaita \
