@@ -85,8 +85,8 @@ if command -v pacman >/dev/null; then
         inbx-bin \
         jq \
         kanata \
-        krypt-bin \
         kooha \
+        krypt-bin \
         lazygit \
         libadwaita \
         libnotify \
@@ -166,6 +166,7 @@ if command -v pacman >/dev/null; then
     export DOTROOT="$HOME/.files/.root"
     declare -a FILES=(
         "etc/fwupd/fwupd.conf"
+        "etc/gai.conf"
         "etc/kanata.kbd"
         "etc/ly/config.ini"
         "etc/mkinitcpio.conf"
