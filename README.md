@@ -1,190 +1,195 @@
 # .files
 
-My personal dotfiles for a consistent and productive Linux environment.
+Personal dotfiles for an Arch + Hyprland workstation. Managed by
+[krypt](https://github.com/kryptic-sh/krypt) — every install / update /
+template-seed / hook is declared in `.krypt.toml` instead of a tangle of bash.
 
 ![Desktop Screenshot](screenshot.png)
 
 ## Philosophy
 
-These dotfiles are curated to provide a sleek, modern, and efficient workflow.
-The setup is based on Hyprland, a dynamic tiling Wayland compositor, and a set
-of carefully selected tools that enhance productivity and user experience. The
-color scheme is based on the popular
-[TokyoNight](https://github.com/folke/tokyonight.nvim) theme.
+Sleek modern Wayland setup. Hyprland tiling, Fish shell, Neovim + LazyVim,
+TokyoNight throughout. Config is data: `.krypt.toml` and its included files
+describe what lives where, what packages to install, and what commands the user
+can invoke. krypt does the work; bash scripts only exist when the logic is
+genuinely shell-shaped.
 
 ## Prerequisites
 
-- **Distro**: Arch Linux (or an Arch derivative). `.deps` uses `pacman` + `paru`
-  exclusively — other distros are unsupported out of the box.
-- **Display server**: Wayland (Hyprland). X11 will not work.
-- **GPU**: Any modern GPU with a working Wayland driver. Tested on AMD; NVIDIA
-  may need additional Hyprland config tweaks.
-- **CPU**: x86_64. ARM is untested.
-- **Required CLI**: `git`, `bash`, `curl`, `stow`. Everything else `.deps`
+- **Distro**: Arch Linux (or derivative). Cross-distro deps are stubbed — expand
+  `[[deps]] apt = […]` / `dnf = […]` in `.krypt/deps.toml` to extend.
+- **Display server**: Wayland (Hyprland). X11 unsupported.
+- **CPU/GPU**: x86_64, any modern Wayland-capable GPU (tested on AMD).
+- **CLI bootstrap**: `git`, `bash`, `curl`. Everything else `krypt setup`
   installs.
-- **Recommended**: Familiarity with Vim keybindings (Neovim, Vieb, tmux).
 
-### Runtime assets
+### Runtime assets (installed via `krypt update`'s deps step)
 
-`.deps` installs these on Arch. On other distros, install equivalents manually
-or glyphs / cursors / icons will render as boxes:
-
-- **Font**: [Hack Nerd Font](https://www.nerdfonts.com/) — used by Alacritty,
-  Waybar, Rofi. Arch package: `ttf-hack-nerd`.
-- **Cursor theme**: `Breeze_Light` — set via `HYPRCURSOR_THEME` /
-  `XCURSOR_THEME` in `hyprland.conf`. Arch package: `breeze`.
+- **Font**: [Hack Nerd Font](https://www.nerdfonts.com/) (`ttf-hack-nerd`).
+- **Cursor**: `Breeze_Light` (`breeze`).
 - **GTK theme**: `adw-gtk-theme`.
-- **Icon theme**: whatever your distro ships; Nautilus + Waybar both rely on the
-  default GTK icon theme.
+- **Icon theme**: system default.
 
 ## Core Components
 
-- **Window Manager**: [Hyprland](https://hyprland.org/) — dynamic tiling Wayland
-  compositor.
-- **Shell**: [Fish](https://fishshell.com/) — friendly interactive shell.
-- **Terminal**: [Alacritty](https://alacritty.org/) — GPU-accelerated terminal.
-- **Editor**: [Neovim](https://neovim.io/) with
+- **WM**: [Hyprland](https://hyprland.org/) — Wayland tiling compositor.
+- **Shell**: [Fish](https://fishshell.com/).
+- **Terminal**: [Alacritty](https://alacritty.org/).
+- **Editor**: [Neovim](https://neovim.io/) +
   [LazyVim](https://www.lazyvim.org/).
 - **Bar**: [Waybar](https://github.com/Alexays/Waybar).
-- **Launcher**: [Rofi](https://github.com/davatorium/rofi).
+- **Launcher**: [pikr](https://github.com/kryptic-sh/pikr) — vim-like fuzzy
+  picker.
 - **Notifications**: [swaync](https://github.com/Lentera/swaync).
 - **File Manager**: [Nautilus](https://help.gnome.org/users/nautilus/).
-- **Browser**: [Vieb](https://github.com/Jelmerro/Vieb) — vim-like browser.
+- **Browser**: [Vieb](https://github.com/Jelmerro/Vieb).
 - **Screenshot**: [Grimblast](https://github.com/hyprwm/contrib).
 - **System monitor**: [btop](https://github.com/aristocratos/btop).
 - **Prompt**: [Starship](https://starship.rs/).
 
-## Installation
+## Install
 
-> ⚠ The install scripts assume Arch Linux and will install many packages via
-> `paru`. Read `.local/bin/.deps` before running.
+### 1. Install krypt
 
-### Quick install (curl pipe)
+| Platform | Command                                                                        |
+| -------- | ------------------------------------------------------------------------------ |
+| Arch     | `paru -S krypt-bin`                                                            |
+| macOS    | `brew install kryptic-sh/tap/krypt`                                            |
+| Any      | `cargo install krypt-cli`                                                      |
+| Manual   | grab a binary from [GH Releases](https://github.com/kryptic-sh/krypt/releases) |
 
-```sh
-curl -SsL https://ba.sh/yar3 | sh
-```
+Verify: `krypt --version` should report `0.2.0` or newer.
 
-Raw URL:
-
-```sh
-curl -SsL https://raw.github.com/mxaddict/dotfiles/main/.local/bin/.update | sh
-```
-
-### Manual install (recommended for skeptics)
+### 2. Clone + link
 
 ```sh
-git clone https://github.com/mxaddict/dotfiles.git ~/.files
-~/.files/.local/bin/.update --dry-run     # pull only, no changes applied
-~/.files/.local/bin/.update               # full install
+krypt init https://github.com/mxaddict/dotfiles
+krypt setup    # interactive: seeds templates, prompts for identity, installs deps
+krypt link     # symlink the tree into $HOME
 ```
 
-### First-run wizard (recommended for fresh installs)
+`krypt setup` is the wizard pass — runs the `[prompts.*]` blocks defined in
+`.krypt.toml` (git identity, hypr defaults, keyboard layout), seeds templates,
+then triggers `krypt deps` to install packages.
 
-After cloning, run the interactive setup. It collects your identity + key
-defaults up front, then runs `.update` and patches the seeded templates with
-your answers — single hands-on pass for a fresh install.
+### 3. Daily updates
 
 ```sh
-~/.files/.local/bin/.setup            # interactive
-~/.files/.local/bin/.setup -y         # accept all defaults, no prompts
-~/.files/.local/bin/.setup --no-update  # only prompt + patch, skip .update
+krypt update          # pull repo, install missing deps, run post-update hooks
+krypt update --dry-run         # show plan, change nothing
+krypt update --skip-hooks      # skip nvim/tmux/dconf/bat/etc. plugin syncs
 ```
 
-Re-running is safe: every prompt shows the current value as its default; press
-Enter to keep it.
+Hooks declared in `.krypt.toml` (`[[hook]] when = "post-update"`) cover:
+
+- mkdir essential `$HOME` dirs + `~/.local/log`
+- fisher / nvim Lazy / tpm plugin syncs
+- bat cache rebuild, tldr cache refresh
+- dconf load from `dconf/user.ini`
+- `hyprctl reload` (gated on hyprland running)
 
 ### Forking
 
-Replace the repo URL via env var so `.update` clones your fork:
+`krypt init` accepts any HTTPS / SSH git URL. Point it at your fork.
 
-```sh
-DOTFILES_REPO="https://github.com/you/dotfiles.git" ~/.files/.local/bin/.update
-```
+## Migration from the old stow-bash version
 
-### Just install deps
+If you used `.files` before krypt landed (`.update` / `.setup` bash scripts):
 
-```sh
-curl -SsL https://ba.sh/zNcw | sh
-# or
-curl -SsL https://raw.github.com/mxaddict/dotfiles/main/.local/bin/.deps | sh
-```
+1. `paru -S krypt-bin` (or your platform's install)
+2. `git -C ~/.files pull`
+3. `krypt update` — replaces the old `.update` chain; reloads hyprland if active
+4. Existing `~/.config/hypr/{apps,input,monitors,hyprpaper}.conf` etc. stay
+   untouched (gitignored, krypt does not overwrite seeded files)
 
-## First-run customization
+Bash scripts in `.local/bin/.*` (e.g. `.menu-power`, `.kanata`, `t`) **stay on
+disk** — krypt invokes them via `[[command]]` entries. They get full
+`shellcheck` + `ft=bash` treatment instead of being inlined into TOML strings.
 
-### Template seeding
+The Hyprland keybinds in `hyprland.conf` now invoke `krypt menu <name>` instead
+of the scripts directly. Same for waybar `on-click` handlers.
 
-User-specific files live as `*.template.*` in the repo and are **copied to
-`$HOME` on first run** by `.update`. The destinations are gitignored and ignored
-by `stow`, so your local edits never get clobbered by a `git pull`.
+## Templates (user-specific, gitignored)
 
-| Template (repo)                        | Destination                     | Purpose                                |
-| -------------------------------------- | ------------------------------- | -------------------------------------- |
-| `.gitconfig.local.template`            | `~/.gitconfig.local`            | Name, email, GPG signing               |
-| `.config/hypr/apps.template.conf`      | `~/.config/hypr/apps.conf`      | `$terminal`, `$browser`, `$lock`, etc. |
-| `.config/hypr/input.template.conf`     | `~/.config/hypr/input.conf`     | Keyboard layout, touchpad              |
-| `.config/hypr/monitors.template.conf`  | `~/.config/hypr/monitors.conf`  | Monitor positions                      |
-| `.config/hypr/hyprpaper.template.conf` | `~/.config/hypr/hyprpaper.conf` | Wallpaper                              |
+`krypt setup` seeds these from `*.template.*` files on first run. Re-running is
+safe — krypt only seeds files that don't exist yet.
 
-Re-running `.update` is safe — it only seeds files that don't exist yet.
+| Template (repo)                        | Destination                     | Purpose                          |
+| -------------------------------------- | ------------------------------- | -------------------------------- |
+| `.gitconfig.local.template`            | `~/.gitconfig.local`            | Name, email, GPG                 |
+| `.config/hypr/apps.template.conf`      | `~/.config/hypr/apps.conf`      | `$terminal`, `$browser`, `$lock` |
+| `.config/hypr/input.template.conf`     | `~/.config/hypr/input.conf`     | Keyboard layout                  |
+| `.config/hypr/monitors.template.conf`  | `~/.config/hypr/monitors.conf`  | Monitor positions                |
+| `.config/hypr/hyprpaper.template.conf` | `~/.config/hypr/hyprpaper.conf` | Wallpaper                        |
 
-### Files you almost certainly want to edit
+### Files to edit per-machine
 
-1. `~/.gitconfig.local` — name, email, optional GPG key, optional signing.
-2. `~/.config/hypr/monitors.conf` — run `hyprctl monitors` for display names.
-3. `~/.config/hypr/apps.conf` — swap terminal, browser, file manager defaults.
-4. `~/.config/hypr/input.conf` — change `kb_layout` if you're not on US.
+1. `~/.gitconfig.local` — identity + signing.
+2. `~/.config/hypr/monitors.conf` — `hyprctl monitors` to discover names.
+3. `~/.config/hypr/apps.conf` — terminal / browser / file manager defaults.
+4. `~/.config/hypr/input.conf` — change `kb_layout` if not US.
 
-### Optional edits
+Optional:
 
 - `~/.config/hypr/workspaces.conf` — pin workspaces to monitors.
-- `~/.config/hypr/hyprpaper.conf` — change wallpaper path.
-- `.codex/config.toml` and `.config/opencode/opencode.json` — point Ollama at
-  your host (default: `localhost:11434`).
+- `~/.config/hypr/hyprpaper.conf` — wallpaper path.
+- `.codex/config.toml`, `.config/opencode/opencode.json` — Ollama host.
 
-## Keybinding Cheatsheet (Hyprland)
+## Keybinding cheatsheet (Hyprland)
 
-`$mod` = **Super** (Windows key).
+`$mod` = **Super** (Windows key). Every menu binding invokes `krypt menu <name>`
+or another krypt subcommand — see `.krypt/commands.toml` for the underlying
+step.
 
 ### Apps & menus
 
-| Bind                  | Action                         |
-| --------------------- | ------------------------------ |
-| `$mod + return` / `c` | Terminal (Alacritty)           |
-| `$mod + b`            | Browser                        |
-| `$mod + e`            | File manager (Nautilus)        |
-| `$mod + space`        | App launcher                   |
-| `$mod + r`            | Calculator                     |
-| `$mod + .`            | Emoji picker                   |
-| `$mod + w`            | WiFi menu                      |
-| `$mod + a`            | Audio menu                     |
-| `$mod + u`            | Bluetooth menu                 |
-| `$mod + t`            | Time menu                      |
-| `$mod + escape`       | Top processes menu             |
-| `$mod + shift + m`    | Power menu                     |
-| `$mod + n` / `+S+n`   | Toggle / dismiss notifications |
+| Bind                  | krypt invocation       | Action                  |
+| --------------------- | ---------------------- | ----------------------- |
+| `$mod + return` / `c` | —                      | Alacritty               |
+| `$mod + b`            | —                      | Browser                 |
+| `$mod + e`            | —                      | Nautilus                |
+| `$mod + space`        | `krypt menu apps`      | App launcher            |
+| `$mod + r`            | `krypt menu calc`      | qalculate picker        |
+| `$mod + .`            | `krypt menu emoji`     | Emoji picker            |
+| `$mod + w`            | `krypt menu wifi`      | WiFi picker             |
+| `$mod + a`            | `krypt menu audio`     | wiremix                 |
+| `$mod + u`            | `krypt menu bluetooth` | bluetui                 |
+| `$mod + t`            | `krypt menu time`      | Timezone picker         |
+| `$mod + escape`       | `krypt menu top`       | btop                    |
+| `$mod + shift + m`    | `krypt menu power`     | Power picker            |
+| `$mod + n` / `+S+n`   | —                      | swaync toggle / dismiss |
+| `ctrl + shift + k`    | `krypt kanata toggle`  | Toggle kanata.service   |
+
+### Autofill (pass + wtype)
+
+| Bind              | krypt invocation              |
+| ----------------- | ----------------------------- |
+| `$mod + ctrl + j` | `krypt menu autofill -- auth` |
+| `$mod + ctrl + k` | `krypt menu autofill -- user` |
+| `$mod + ctrl + l` | `krypt menu autofill -- pass` |
+| `$mod + ctrl + ;` | `krypt menu autofill -- otp`  |
 
 ### Screen
 
-| Bind                 | Action                |
-| -------------------- | --------------------- |
-| `$mod + p` / `Print` | Screenshot region     |
-| `$mod + shift + p`   | Screen record (kooha) |
-| `$mod + ctrl + p`    | Color picker          |
-| `$mod + m`           | Lock screen           |
+| Bind                 | Action                        |
+| -------------------- | ----------------------------- |
+| `$mod + p` / `Print` | Screenshot region (grimblast) |
+| `$mod + shift + p`   | Screen record (kooha)         |
+| `$mod + ctrl + p`    | Color picker                  |
+| `$mod + m`           | Lock screen                   |
 
 ### Window management
 
 | Bind                     | Action                   |
 | ------------------------ | ------------------------ |
-| `$mod + q`               | Close active window      |
-| `$mod + f`               | Maximize (fullscreen-1)  |
+| `$mod + q`               | Close active             |
+| `$mod + f`               | Maximize                 |
 | `$mod + shift + f`       | True fullscreen          |
 | `$mod + v`               | Toggle floating          |
 | `$mod + s`               | Toggle split direction   |
 | `$mod + h/j/k/l`         | Focus left/down/up/right |
 | `$mod + shift + h/j/k/l` | Move window              |
-| `ctrl + arrows`          | Resize active window     |
+| `ctrl + arrows`          | Resize                   |
 | `$mod + tab`             | Cycle windows            |
 
 ### Workspaces
@@ -196,41 +201,42 @@ Re-running `.update` is safe — it only seeds files that don't exist yet.
 | `$mod + LMB drag`     | Move window               |
 | `$mod + RMB drag`     | Resize window             |
 
-### Autofill (password manager menu)
-
-| Bind              | Action   |
-| ----------------- | -------- |
-| `$mod + ctrl + j` | Auth     |
-| `$mod + ctrl + k` | Username |
-| `$mod + ctrl + l` | Password |
-| `$mod + ctrl + ;` | OTP      |
-
 ### Audio / brightness
 
-`XF86Audio*` and `XF86MonBrightness*` keys are wired via `swayosd-client`.
+`XF86Audio*` and `XF86MonBrightness*` wired via `swayosd-client`.
 `$mod + up/down/left/right` doubles as volume +/-/mute. Add `shift` for mic.
+
+## `.krypt.toml` layout
+
+Top-level `.krypt.toml` declares `[meta]`, `[paths]`, `[prompts.*]`, and
+`[[template]]` entries, and includes three sub-files:
+
+| File                   | Holds                                                                  |
+| ---------------------- | ---------------------------------------------------------------------- |
+| `.krypt/links.toml`    | `[[link]]` symlink rules (`stow` replacement)                          |
+| `.krypt/deps.toml`     | `[[deps]]` groups: cross-distro package mappings                       |
+| `.krypt/commands.toml` | `[[command]] group=… name=…` — every `krypt <group> <name>` invocation |
+
+`[[hook]] when = "post-update"` entries live in the top-level `.krypt.toml`.
+
+To add a new menu (e.g. `krypt menu screenshot`):
+
+1. Add `[[command]] group = "menu" name = "screenshot" steps = […]` to
+   `.krypt/commands.toml`.
+2. (Optional) Add the Hyprland bind in `.config/hypr/hyprland.conf`:
+   `bind = $mod shift, s, exec, krypt menu screenshot`.
+3. `krypt validate` — fail fast on config errors.
 
 ## Convention: dotfile-prefixed scripts
 
 Scripts in `.local/bin/` are intentionally named with a leading `.` (e.g.
-`.menu-apps`, `.update`). They are hidden from a plain `ls` but show up with
-`ls -A`. This keeps the user's "real" PATH visually clean. Use
-`ls -A ~/.local/bin/` to discover them.
-
-## Update workflow
-
-```sh
-~/.local/bin/.update              # update repo + deps + plugins
-~/.local/bin/.update --dry-run    # pull only
-~/.local/bin/.update --no-stash   # fail instead of auto-stashing
-```
-
-Env vars: `DOTFILES_REPO`, `DOTFILES_DIR`.
+`.menu-apps`, `.kanata`). Hidden from `ls` but show with `ls -A`. Keeps the
+user's interactive PATH visually clean while still being invocable from
+`.krypt.toml`.
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for commit style, naming conventions, and
-lint expectations.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for commit style, naming, lint.
 
 ## License
 
