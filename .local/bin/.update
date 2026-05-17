@@ -126,6 +126,11 @@ echo -e "$GREEN_CHECK Stowing dotfiles..."
 stow --adopt . >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to stow dotfiles"
 cd "$pwd" || exit
 
+if command -v hyprctl >/dev/null && hyprctl version >/dev/null 2>&1; then
+    echo -e "$GREEN_CHECK Reloading Hyprland config..."
+    hyprctl reload >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to reload Hyprland"
+fi
+
 if command -v dconf >/dev/null; then
     echo -e "$GREEN_CHECK Loading dconf settings..."
     dconf load / <~/.config/dconf/user.ini >/dev/null 2>&1 || echo -e "$WARN_CHECK Failed to load dconf settings"

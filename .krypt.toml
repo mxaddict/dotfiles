@@ -185,3 +185,13 @@ when           = "post-update"
 if             = "command_exists:dconf,file_exists:${XDG_CONFIG}/dconf/user.ini"
 run            = ["bash", "-c", "dconf load / < ${XDG_CONFIG}/dconf/user.ini"]
 ignore_failure = true
+
+# Reload Hyprland after the config tree was rewritten. Predicate gates on
+# hyprctl presence; ignore_failure handles the "hypr not running" case
+# (e.g. running update from TTY or SSH outside a Hyprland session).
+[[hook]]
+name           = "hyprctl-reload"
+when           = "post-update"
+if             = "command_exists:hyprctl"
+run            = ["hyprctl", "reload"]
+ignore_failure = true
