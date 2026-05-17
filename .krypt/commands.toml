@@ -1,0 +1,303 @@
+# Custom commands — krypt <group> <name> subcommands.
+# Included by .krypt.toml
+#
+# Migration note: scripts with complex bash control flow (loops, case
+# statements, associative arrays, btrfs logic) are wrapped as a single
+# `run = ["bash", "<script>"]` step rather than being transposed into native
+# step primitives.  That is intentional — zero-bash purity is #34's scope.
+
+# ---------------------------------------------------------------------------
+# menu group
+# ---------------------------------------------------------------------------
+
+[[command]]
+group       = "menu"
+name        = "apps"
+description = "Application launcher (drun via pikr)"
+platform    = "linux"
+steps = [
+    { run = ["bash", "-c", "pkill pikr || pikr -s drun -p Apps"], ignore_failure = true },
+]
+
+[[command]]
+group       = "menu"
+name        = "power"
+description = "Power action picker (lock/sleep/hibernate/shutdown/logout/reboot)"
+platform    = "linux"
+steps = [
+    # case-statement control flow — kept as single shell step.
+    { run = ["bash", "${HOME}/.local/bin/.menu-power"], ignore_failure = true },
+]
+
+[[command]]
+group       = "menu"
+name        = "wifi"
+description = "Wi-Fi network picker via nmcli + pikr"
+platform    = "linux"
+steps = [
+    # nmcli parsing + conditional connect flow — kept as single shell step.
+    { run = ["bash", "${HOME}/.local/bin/.menu-wifi"], ignore_failure = true },
+]
+
+[[command]]
+group       = "menu"
+name        = "audio"
+description = "Audio mixer (wiremix) in a floating alacritty window"
+platform    = "linux"
+steps = [
+    { run = ["alacritty", "--class", "floating", "-e", "wiremix", "--tab", "output"] },
+]
+
+[[command]]
+group       = "menu"
+name        = "bluetooth"
+description = "Bluetooth TUI (bluetui) in a floating alacritty window"
+platform    = "linux"
+steps = [
+    { run = ["alacritty", "--class", "floating", "-e", "bluetui"] },
+]
+
+[[command]]
+group       = "menu"
+name        = "calc"
+description = "Interactive qalculate history picker via pikr"
+platform    = "linux"
+steps = [
+    # while loop + regex state — kept as single shell step.
+    { run = ["bash", "${HOME}/.local/bin/.menu-calc"], ignore_failure = true },
+]
+
+[[command]]
+group       = "menu"
+name        = "emoji"
+description = "Emoji picker — copies selection to clipboard and types it"
+platform    = "linux"
+steps = [
+    { run = ["bash", "${HOME}/.local/bin/.menu-emoji"], ignore_failure = true },
+]
+
+[[command]]
+group       = "menu"
+name        = "emoji-update"
+description = "Re-download emoji database from emojilib v4"
+steps = [
+    { run = ["bash", "${HOME}/.local/bin/.menu-emoji-update"] },
+]
+
+[[command]]
+group       = "menu"
+name        = "pass"
+description = "Password store picker — type password / user / otp / auth"
+platform    = "linux"
+steps = [
+    # Multi-mode + wtype automation — kept as single shell step.
+    { run = ["bash", "${HOME}/.local/bin/.menu-pass"], ignore_failure = true },
+]
+
+[[command]]
+group       = "menu"
+name        = "autofill"
+description = "Autofill password for the active window title using pass"
+platform    = "linux"
+steps = [
+    { run = ["bash", "${HOME}/.local/bin/.menu-autofill"], ignore_failure = true },
+]
+
+[[command]]
+group       = "menu"
+name        = "time"
+description = "Timezone picker — updates system timezone and restarts waybar"
+platform    = "linux"
+steps = [
+    { run = ["bash", "${HOME}/.local/bin/.menu-time"], ignore_failure = true },
+]
+
+[[command]]
+group       = "menu"
+name        = "top"
+description = "System monitor (btop) in a floating alacritty window"
+platform    = "linux"
+steps = [
+    { run = ["alacritty", "--class", "bloating", "-e", "btop"] },
+]
+
+[[command]]
+group       = "menu"
+name        = "mail"
+description = "Email account picker → opens Himalaya in Neovim"
+steps = [
+    { run = ["bash", "${HOME}/.local/bin/.menu-mail"], ignore_failure = true },
+]
+
+# ---------------------------------------------------------------------------
+# battery group
+# ---------------------------------------------------------------------------
+
+[[command]]
+group       = "battery"
+name        = "report"
+description = "Live battery history report with discharge-rate analysis (updates every 60 s)"
+steps = [
+    { run = ["bash", "${HOME}/.local/bin/.batrep"] },
+]
+
+[[command]]
+group       = "battery"
+name        = "log"
+description = "Run background battery capacity logger (appends to ~/.local/log/bathist.log)"
+steps = [
+    { run = ["bash", "${HOME}/.local/bin/.batlog"] },
+]
+
+[[command]]
+group       = "battery"
+name        = "clear"
+description = "Delete the battery history log file"
+steps = [
+    { run = ["bash", "${HOME}/.local/bin/.batclear"] },
+]
+
+# ---------------------------------------------------------------------------
+# kanata group
+# ---------------------------------------------------------------------------
+
+[[command]]
+group       = "kanata"
+name        = "toggle"
+description = "Toggle the kanata keyboard remapping service on/off"
+platform    = "linux"
+steps = [
+    # sudo systemctl + notify-send — kept as single shell step.
+    { run = ["bash", "${HOME}/.local/bin/.kanata"], ignore_failure = true },
+]
+
+# ---------------------------------------------------------------------------
+# env group
+# ---------------------------------------------------------------------------
+
+[[command]]
+group       = "env"
+name        = "up"
+description = "Upload .env.* files for the current project to a GCS bucket"
+steps = [
+    { run = ["bash", "${HOME}/.local/bin/.envup"] },
+]
+
+[[command]]
+group       = "env"
+name        = "down"
+description = "Download .env.* files for the current project from a GCS bucket"
+steps = [
+    { run = ["bash", "${HOME}/.local/bin/.envdown"] },
+]
+
+# ---------------------------------------------------------------------------
+# tmux group
+# ---------------------------------------------------------------------------
+
+[[command]]
+group       = "tmux"
+name        = "open"
+description = "Open (or attach to) a tmux session named after the current directory"
+steps = [
+    { run = ["bash", "${HOME}/.local/bin/t"] },
+]
+
+# ---------------------------------------------------------------------------
+# system group
+# ---------------------------------------------------------------------------
+
+[[command]]
+group       = "system"
+name        = "mirror"
+description = "Refresh Arch mirrorlist — fastest 20 HTTPS mirrors via reflector"
+platform    = "linux"
+steps = [
+    { run = ["bash", "${HOME}/.local/bin/.mirror"] },
+]
+
+[[command]]
+group       = "system"
+name        = "firmup"
+description = "Update firmware via fwupdmgr"
+platform    = "linux"
+steps = [
+    { run = ["bash", "${HOME}/.local/bin/.firmup"] },
+]
+
+[[command]]
+group       = "system"
+name        = "swap"
+description = "Create/resize swap file and update hibernation kernel params (requires root)"
+platform    = "linux"
+steps = [
+    # btrfs/filefrag/mkinitcpio/cmdline manipulation — kept as single shell step.
+    { run = ["bash", "${HOME}/.local/bin/.swap"] },
+]
+
+[[command]]
+group       = "system"
+name        = "clear"
+description = "Purge caches (bash equiv: rm ~/.cache + /var/cache; rebuild bat + tldr)"
+steps = [
+    { run = ["bash", "${HOME}/.local/bin/.clear"] },
+]
+
+[[command]]
+group       = "system"
+name        = "start"
+description = "Launch daily-driver apps (vieb, thunderbird, steam, Telegram, Discord, Teams, Spotify)"
+platform    = "linux"
+steps = [
+    { run = ["bash", "${HOME}/.local/bin/.start"] },
+]
+
+[[command]]
+group       = "system"
+name        = "clearkeys"
+description = "Delete all GitLab deploy keys across accessible projects (interactive)"
+steps = [
+    # Requires interactive stdin confirm + associative arrays — kept as bash.
+    { run = ["bash", "${HOME}/.local/bin/.clearkeys"] },
+]
+
+[[command]]
+group       = "system"
+name        = "nproc"
+description = "Print CPU core count (nproc on Linux, sysctl on macOS)"
+steps = [
+    { run = ["bash", "${HOME}/.local/bin/.nproc"] },
+]
+
+[[command]]
+group       = "system"
+name        = "swaync-test"
+description = "Restart swaync and fire a suite of test notifications"
+platform    = "linux"
+steps = [
+    { run = ["bash", "${HOME}/.local/bin/.swaync-test"], ignore_failure = true },
+]
+
+# ---------------------------------------------------------------------------
+# ollama group
+# ---------------------------------------------------------------------------
+
+[[command]]
+group       = "ollama"
+name        = "pull-all"
+description = "Pull all Ollama models listed in opencode.json"
+steps = [
+    { run = ["bash", "${HOME}/.local/bin/.pull-all-models"] },
+]
+
+# ---------------------------------------------------------------------------
+# browser group
+# ---------------------------------------------------------------------------
+
+[[command]]
+group       = "browser"
+name        = "open"
+description = "Launch the system default browser (resolved via xdg-settings)"
+steps = [
+    { run = ["bash", "${HOME}/.local/bin/.browser"] },
+]

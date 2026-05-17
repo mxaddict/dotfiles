@@ -1,0 +1,119 @@
+# Dependency groups — cross-distro package mappings.
+# Included by .krypt.toml
+
+[[deps]]
+group = "core"
+pacman = [
+    "alacritty", "bat", "btop", "curl", "eza", "fastfetch", "fd", "fish",
+    "fzf", "git", "jq", "neovim", "ripgrep", "starship", "stow", "tealdeer",
+    "tmux", "unzip", "wget", "zoxide",
+]
+apt = [
+    "alacritty", "bat", "btop", "curl", "eza", "fastfetch", "fd-find", "fish",
+    "fzf", "git", "jq", "neovim", "ripgrep", "stow", "tealdeer", "tmux",
+    "unzip", "wget", "zoxide",
+]
+dnf = [
+    "alacritty", "bat", "eza", "fastfetch", "fd-find", "fish", "fzf", "git",
+    "jq", "neovim", "ripgrep", "stow", "tealdeer", "tmux", "unzip", "zoxide",
+]
+brew = [
+    "alacritty", "bat", "btop", "eza", "fastfetch", "fd", "fish", "fzf",
+    "git", "jq", "neovim", "ripgrep", "starship", "stow", "tealdeer", "tmux",
+    "unzip", "wget", "zoxide",
+]
+
+[[deps]]
+group = "dev"
+pacman = [
+    "bear", "doctl", "github-cli", "glab", "lazygit", "nodejs", "npm",
+    "opencode", "python-tldextract", "rustup",
+]
+apt = [
+    "libssl-dev", "nodejs", "npm", "opencode", "pkg-config", "python3",
+    "python3-venv", "rustup",
+]
+dnf = [
+    "nodejs", "npm", "opencode",
+]
+brew = [
+    "bear", "doctl", "lazygit", "nodejs", "npm", "opencode", "rustup",
+]
+
+[[deps]]
+group = "fonts"
+pacman = [
+    "gnu-free-fonts", "gsfonts", "noto-fonts-cjk", "noto-fonts-emoji",
+    "terminus-font", "ttf-hack", "ttf-hack-nerd", "ttf-noto-nerd", "ttf-roboto",
+    "ttf-roboto-mono", "ttf-roboto-mono-nerd", "woff2-font-awesome",
+]
+apt = []
+dnf = []
+brew = []
+
+[[deps]]
+group = "hyprland"
+required_platforms = ["linux"]
+pacman = [
+    "brightnessctl", "dex", "grim", "hypridle", "hyprland", "hyprlock",
+    "hyprpaper", "hyprpicker", "hyprpolkitagent", "hyprqt6engine",
+    "libnotify", "nwg-displays", "nwg-look", "pikr-bin", "qt5-wayland",
+    "qt6-wayland", "slurp", "swaync", "swayosd", "waybar", "wl-clipboard",
+    "wtype", "xdg-desktop-portal-gtk", "xdg-desktop-portal-hyprland",
+]
+apt = []
+dnf = []
+brew = []
+
+[[deps]]
+group = "media"
+pacman = [
+    "ardour", "alsa-firmware", "alsa-utils", "gst-libav", "gst-plugin-va",
+    "gst-plugins-bad", "gst-plugins-base", "gst-plugins-good",
+    "gst-plugins-ugly", "imv", "kooha", "mpv", "pipewire", "pipewire-alsa",
+    "pipewire-jack", "pipewire-pulse", "snapshot", "sof-firmware", "wiremix",
+    "wireplumber", "yt-dlp",
+]
+apt = [
+    "mpv",
+]
+dnf = [
+    "mpv",
+]
+brew = []
+
+[[deps]]
+group = "system"
+required_platforms = ["linux"]
+pacman = [
+    "avahi", "bind", "bluez", "bluez-utils", "bluetui", "cronie", "cups",
+    "cups-pdf", "ethtool", "fprintd", "fwupd", "ghostscript", "kanata", "ly",
+    "man-db", "mtr", "networkmanager", "nmap", "nss-mdns", "power-profiles-daemon",
+    "reflector", "rsync", "sbctl", "speedtest-cli", "traceroute", "ufw",
+    "usbutils", "wireless-regdb", "zerotier-one",
+]
+apt = []
+dnf = []
+brew = []
+
+[[deps]]
+group = "apps"
+pacman = [
+    "adw-gtk-theme", "breeze", "chromium", "cmatrix", "duf", "dysk", "firefox",
+    "libadwaita", "nautilus", "papirus-icon-theme", "pass", "pass-otp",
+    "pass-secret-service", "qalculate-qt", "thunderbird", "vieb-bin",
+]
+apt = []
+dnf = []
+brew = []
+
+[[deps]]
+group = "aur-tools"
+required_platforms = ["linux"]
+pacman = [
+    "buffr-bin", "hjkl-bin", "hodl-bin", "inbx-bin", "pikr-bin", "sqeel-bin",
+    "gemini-cli",
+]
+apt = []
+dnf = []
+brew = []

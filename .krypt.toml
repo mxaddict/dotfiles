@@ -1,0 +1,187 @@
+# mxaddict dotfiles — krypt declarative config
+# Replaces .update / .setup / .menu-* bash scripts.
+# Issue: kryptic-sh/krypt#32
+#
+# Sub-files (links, deps, commands) are split out because the total config
+# exceeds 600 lines.  All are in .krypt/.
+
+include = [
+    ".krypt/links.toml",
+    ".krypt/deps.toml",
+    ".krypt/commands.toml",
+]
+
+[meta]
+name           = "mxaddict dotfiles"
+description    = "Arch-first dotfiles for Hyprland, Neovim, Fish, Tmux, and friends."
+krypt_min      = "0.1.0"
+notify_backend = "auto"
+
+# ---------------------------------------------------------------------------
+# [[template]] — user-local files seeded from templates; never committed.
+# ---------------------------------------------------------------------------
+
+[[template]]
+src     = ".gitconfig.local.template"
+dst     = "${HOME}/.gitconfig.local"
+prompts = ["git"]
+
+[[template]]
+src      = ".config/hypr/apps.template.conf"
+dst      = "${XDG_CONFIG}/hypr/apps.conf"
+prompts  = ["hypr_apps"]
+platform = "linux"
+
+[[template]]
+src      = ".config/hypr/input.template.conf"
+dst      = "${XDG_CONFIG}/hypr/input.conf"
+prompts  = ["hypr_input"]
+platform = "linux"
+
+# Seed wallpaper config from template; user edits by hand after.
+[[template]]
+src      = ".config/hypr/hyprpaper.template.conf"
+dst      = "${XDG_CONFIG}/hypr/hyprpaper.conf"
+prompts  = []
+platform = "linux"
+
+# Seed monitor config from template; hand-curated per machine (no prompts).
+[[template]]
+src      = ".config/hypr/monitors.template.conf"
+dst      = "${XDG_CONFIG}/hypr/monitors.conf"
+prompts  = []
+platform = "linux"
+
+# ---------------------------------------------------------------------------
+# [prompts.*] — wizard sections
+# ---------------------------------------------------------------------------
+
+[prompts.git]
+heading = "Git identity"
+writer  = "gitconfig"
+
+[[prompts.git.fields]]
+key          = "user.name"
+prompt       = "Your full name"
+default_from = "git:user.name"
+
+[[prompts.git.fields]]
+key          = "user.email"
+prompt       = "Your email address"
+default_from = "git:user.email"
+
+[[prompts.git.fields]]
+key          = "user.signingkey"
+prompt       = "GPG signing key (blank to skip)"
+optional     = true
+default_from = "git:user.signingkey"
+
+[[prompts.git.fields]]
+key      = "commit.gpgsign"
+prompt   = "Sign all commits with this key?"
+type     = "bool"
+default  = false
+requires = "user.signingkey"
+
+[prompts.hypr_apps]
+heading = "Hyprland application defaults"
+writer  = "hypr_vars"
+
+[[prompts.hypr_apps.fields]]
+key      = "terminal"
+prompt   = "Terminal command"
+default  = "alacritty"
+read_var = "terminal"
+
+[[prompts.hypr_apps.fields]]
+key      = "browser"
+prompt   = "Browser launcher"
+default  = "~/.local/bin/.browser"
+read_var = "browser"
+
+[[prompts.hypr_apps.fields]]
+key      = "filemanager"
+prompt   = "File manager command"
+default  = "nautilus -w"
+read_var = "filemanager"
+
+[[prompts.hypr_apps.fields]]
+key      = "lock"
+prompt   = "Lock screen command"
+default  = "hyprlock"
+read_var = "lock"
+
+[prompts.hypr_input]
+heading = "Hyprland keyboard / input"
+writer  = "hypr_vars"
+
+[[prompts.hypr_input.fields]]
+key     = "kb_layout"
+prompt  = "Keyboard layout (e.g. us, gb, de)"
+default = "us"
+
+# ---------------------------------------------------------------------------
+# [[hook]] — post-update lifecycle hooks
+# ---------------------------------------------------------------------------
+
+[[hook]]
+name           = "ensure-user-dirs"
+when           = "post-update"
+run            = ["bash", "-c", "mkdir -p ${HOME}/Desktop ${HOME}/Documents ${HOME}/Downloads ${HOME}/Music ${HOME}/OSs ${HOME}/Pictures/Screenshots ${HOME}/Projects ${HOME}/Public ${HOME}/Templates ${HOME}/Videos ${HOME}/.local/log"]
+ignore_failure = true
+
+[[hook]]
+name           = "ensure-hypr-workspaces"
+when           = "post-update"
+if             = "platform:linux"
+run            = ["bash", "-c", "mkdir -p ${XDG_CONFIG}/hypr && touch ${XDG_CONFIG}/hypr/workspaces.conf"]
+ignore_failure = true
+
+[[hook]]
+name           = "fisher-update"
+when           = "post-update"
+if             = "command_exists:fish"
+run            = ["fish", "-c", "curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish > /tmp/fisher.fish && source /tmp/fisher.fish && fisher update"]
+ignore_failure = true
+
+[[hook]]
+name           = "nvim-plugin-sync"
+when           = "post-update"
+if             = "command_exists:nvim"
+run            = ["nvim", "--headless", "+Lazy! install all", "+Lazy! update all", "+TSUpdate", "+qa"]
+ignore_failure = true
+
+[[hook]]
+name           = "tpm-install"
+when           = "post-update"
+if             = "command_exists:tmux,file_exists:${XDG_CONFIG}/tmux/plugins/tpm/bin/install_plugins"
+run            = ["bash", "-c", "${XDG_CONFIG}/tmux/plugins/tpm/bin/install_plugins"]
+ignore_failure = true
+
+[[hook]]
+name           = "tpm-update"
+when           = "post-update"
+if             = "command_exists:tmux,file_exists:${XDG_CONFIG}/tmux/plugins/tpm/bin/update_plugins"
+run            = ["bash", "-c", "${XDG_CONFIG}/tmux/plugins/tpm/bin/update_plugins all"]
+ignore_failure = true
+
+[[hook]]
+name           = "bat-cache"
+when           = "post-update"
+if             = "command_exists:bat"
+run            = ["bat", "cache", "--build"]
+ignore_failure = true
+
+[[hook]]
+name           = "tldr-update"
+when           = "post-update"
+if             = "command_exists:tldr"
+run            = ["tldr", "--update"]
+ignore_failure = true
+
+[[hook]]
+name           = "dconf-load"
+when           = "post-update"
+if             = "command_exists:dconf,file_exists:${XDG_CONFIG}/dconf/user.ini"
+run            = ["bash", "-c", "dconf load / < ${XDG_CONFIG}/dconf/user.ini"]
+ignore_failure = true

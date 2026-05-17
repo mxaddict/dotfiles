@@ -1,0 +1,302 @@
+# Links — deploy files / dirs from the repo into $HOME
+# Included by .krypt.toml
+
+# --- Root dotfiles ---
+[[link]]
+src = ".gitconfig"
+dst = "${HOME}/.gitconfig"
+
+[[link]]
+src = ".gtkrc-2.0"
+dst = "${HOME}/.gtkrc-2.0"
+
+[[link]]
+src = ".clang-format"
+dst = "${HOME}/.clang-format"
+
+[[link]]
+src = ".editorconfig"
+dst = "${HOME}/.editorconfig"
+
+[[link]]
+src = ".prettierrc"
+dst = "${HOME}/.prettierrc"
+
+[[link]]
+src = ".prettierignore"
+dst = "${HOME}/.prettierignore"
+
+# --- .config subdirs (glob per subdir) ---
+
+[[link]]
+src_glob = ".config/alacritty/**/*"
+dst = "${XDG_CONFIG}/alacritty/"
+
+[[link]]
+src_glob = ".config/bat/**/*"
+dst = "${XDG_CONFIG}/bat/"
+
+[[link]]
+src_glob = ".config/cargo/**/*"
+dst = "${XDG_CONFIG}/cargo/"
+
+[[link]]
+src_glob = ".config/dconf/**/*"
+dst = "${XDG_CONFIG}/dconf/"
+
+[[link]]
+src_glob = ".config/fish/**/*"
+dst = "${XDG_CONFIG}/fish/"
+
+[[link]]
+src_glob = ".config/gh/**/*"
+dst = "${XDG_CONFIG}/gh/"
+
+[[link]]
+src_glob = ".config/gtk-3.0/**/*"
+dst = "${XDG_CONFIG}/gtk-3.0/"
+
+[[link]]
+src_glob = ".config/gtk-4.0/**/*"
+dst = "${XDG_CONFIG}/gtk-4.0/"
+
+# Hyprland: only versioned files; the live *.conf (apps.conf, input.conf,
+# monitors.conf, hyprpaper.conf, workspaces.conf) are gitignored and managed
+# via [[template]] entries in .krypt.toml.
+[[link]]
+src = ".config/hypr/hyprland.conf"
+dst = "${XDG_CONFIG}/hypr/hyprland.conf"
+
+[[link]]
+src = ".config/hypr/hypridle.conf"
+dst = "${XDG_CONFIG}/hypr/hypridle.conf"
+
+[[link]]
+src = ".config/hypr/hyprlock.conf"
+dst = "${XDG_CONFIG}/hypr/hyprlock.conf"
+
+[[link]]
+src = ".config/hypr/hyprqt6engine.conf"
+dst = "${XDG_CONFIG}/hypr/hyprqt6engine.conf"
+
+[[link]]
+src = ".config/hypr/exfil.png"
+dst = "${XDG_CONFIG}/hypr/exfil.png"
+
+[[link]]
+src_glob = ".config/lazygit/**/*"
+dst = "${XDG_CONFIG}/lazygit/"
+
+[[link]]
+src_glob = ".config/MangoHud/**/*"
+dst = "${XDG_CONFIG}/MangoHud/"
+
+[[link]]
+src_glob = ".config/mpv/**/*"
+dst = "${XDG_CONFIG}/mpv/"
+
+[[link]]
+src_glob = ".config/nushell/**/*"
+dst = "${XDG_CONFIG}/nushell/"
+
+[[link]]
+src_glob = ".config/nvim/**/*"
+dst = "${XDG_CONFIG}/nvim/"
+
+[[link]]
+src_glob = ".config/nwg-look/**/*"
+dst = "${XDG_CONFIG}/nwg-look/"
+
+[[link]]
+src_glob = ".config/rofi/**/*"
+dst = "${XDG_CONFIG}/rofi/"
+
+[[link]]
+src_glob = ".config/swaync/**/*"
+dst = "${XDG_CONFIG}/swaync/"
+
+[[link]]
+src_glob = ".config/tealdeer/**/*"
+dst = "${XDG_CONFIG}/tealdeer/"
+
+[[link]]
+src_glob = ".config/tmux/**/*"
+dst = "${XDG_CONFIG}/tmux/"
+
+[[link]]
+src_glob = ".config/waybar/**/*"
+dst = "${XDG_CONFIG}/waybar/"
+
+[[link]]
+src_glob = ".config/xsettingsd/**/*"
+dst = "${XDG_CONFIG}/xsettingsd/"
+
+[[link]]
+src = ".config/chromium-flags.conf"
+dst = "${XDG_CONFIG}/chromium-flags.conf"
+
+[[link]]
+src = ".config/mimeapps.list"
+dst = "${XDG_CONFIG}/mimeapps.list"
+
+[[link]]
+src = ".config/starship.toml"
+dst = "${XDG_CONFIG}/starship.toml"
+
+[[link]]
+src = ".config/user-dirs.dirs"
+dst = "${XDG_CONFIG}/user-dirs.dirs"
+
+[[link]]
+src = ".config/user-dirs.locale"
+dst = "${XDG_CONFIG}/user-dirs.locale"
+
+[[link]]
+src_glob = ".config/opencode/**/*"
+dst = "${XDG_CONFIG}/opencode/"
+
+# --- .local/bin utility + menu scripts ---
+[[link]]
+src = ".local/bin/.batrep"
+dst = "${LOCAL_BIN}/.batrep"
+
+[[link]]
+src = ".local/bin/.batlog"
+dst = "${LOCAL_BIN}/.batlog"
+
+[[link]]
+src = ".local/bin/.batclear"
+dst = "${LOCAL_BIN}/.batclear"
+
+[[link]]
+src = ".local/bin/.browser"
+dst = "${LOCAL_BIN}/.browser"
+
+[[link]]
+src = ".local/bin/.clear"
+dst = "${LOCAL_BIN}/.clear"
+
+[[link]]
+src = ".local/bin/.clearkeys"
+dst = "${LOCAL_BIN}/.clearkeys"
+
+[[link]]
+src = ".local/bin/.deps"
+dst = "${LOCAL_BIN}/.deps"
+
+[[link]]
+src = ".local/bin/.envdown"
+dst = "${LOCAL_BIN}/.envdown"
+
+[[link]]
+src = ".local/bin/.envup"
+dst = "${LOCAL_BIN}/.envup"
+
+[[link]]
+src = ".local/bin/.firmup"
+dst = "${LOCAL_BIN}/.firmup"
+
+[[link]]
+src = ".local/bin/.kanata"
+dst = "${LOCAL_BIN}/.kanata"
+
+[[link]]
+src = ".local/bin/.menu-apps"
+dst = "${LOCAL_BIN}/.menu-apps"
+
+[[link]]
+src = ".local/bin/.menu-audio"
+dst = "${LOCAL_BIN}/.menu-audio"
+
+[[link]]
+src = ".local/bin/.menu-autofill"
+dst = "${LOCAL_BIN}/.menu-autofill"
+
+[[link]]
+src = ".local/bin/.menu-bluetooth"
+dst = "${LOCAL_BIN}/.menu-bluetooth"
+
+[[link]]
+src = ".local/bin/.menu-calc"
+dst = "${LOCAL_BIN}/.menu-calc"
+
+[[link]]
+src = ".local/bin/.menu-emoji"
+dst = "${LOCAL_BIN}/.menu-emoji"
+
+[[link]]
+src = ".local/bin/.menu-emoji-update"
+dst = "${LOCAL_BIN}/.menu-emoji-update"
+
+[[link]]
+src = ".local/bin/.menu-mail"
+dst = "${LOCAL_BIN}/.menu-mail"
+
+[[link]]
+src = ".local/bin/.menu-pass"
+dst = "${LOCAL_BIN}/.menu-pass"
+
+[[link]]
+src = ".local/bin/.menu-power"
+dst = "${LOCAL_BIN}/.menu-power"
+
+[[link]]
+src = ".local/bin/.menu-time"
+dst = "${LOCAL_BIN}/.menu-time"
+
+[[link]]
+src = ".local/bin/.menu-top"
+dst = "${LOCAL_BIN}/.menu-top"
+
+[[link]]
+src = ".local/bin/.menu-wifi"
+dst = "${LOCAL_BIN}/.menu-wifi"
+
+[[link]]
+src = ".local/bin/.mirror"
+dst = "${LOCAL_BIN}/.mirror"
+
+[[link]]
+src = ".local/bin/.nproc"
+dst = "${LOCAL_BIN}/.nproc"
+
+[[link]]
+src = ".local/bin/.pull-all-models"
+dst = "${LOCAL_BIN}/.pull-all-models"
+
+[[link]]
+src = ".local/bin/.setup"
+dst = "${LOCAL_BIN}/.setup"
+
+[[link]]
+src = ".local/bin/.start"
+dst = "${LOCAL_BIN}/.start"
+
+[[link]]
+src = ".local/bin/.swap"
+dst = "${LOCAL_BIN}/.swap"
+
+[[link]]
+src = ".local/bin/.swaync-test"
+dst = "${LOCAL_BIN}/.swaync-test"
+
+[[link]]
+src = ".local/bin/.update"
+dst = "${LOCAL_BIN}/.update"
+
+[[link]]
+src = ".local/bin/grimblast"
+dst = "${LOCAL_BIN}/grimblast"
+
+[[link]]
+src = ".local/bin/t"
+dst = "${LOCAL_BIN}/t"
+
+# --- .local/share ---
+[[link]]
+src = ".local/share/emojis"
+dst = "${HOME}/.local/share/emojis"
+
+[[link]]
+src_glob = ".local/share/applications/**/*"
+dst = "${HOME}/.local/share/applications/"
