@@ -24,11 +24,12 @@ If you fork this repo for your own dotfiles, feel free to change the convention
 
 ## Naming convention
 
-Scripts in `.local/bin/` use a leading `.` (e.g. `.menu-apps`, `.update`,
-`.batrep`). This hides them from `ls` while keeping them on `$PATH`. New scripts
-should follow the same pattern.
+Scripts in `.local/bin/` use a leading `.` (e.g. `.menu-apps`, `.kanata`,
+`.envup`). This hides them from `ls` while keeping them invocable from
+`.krypt/commands.toml`. New scripts should follow the same pattern.
 
-Exceptions: third-party binaries (`grimblast`, `t`) keep their upstream name.
+Exceptions: third-party binaries (`grimblast`) and scripts invoked directly from
+the shell (`t` — tmux session-per-cwd) keep their upstream / unprefixed name.
 
 ## Lint / format
 
@@ -42,66 +43,131 @@ prettier --write <file>
 # Shell scripts
 shellcheck .local/bin/.<script>
 
+# .krypt.toml + included sub-files
+krypt validate
+
 # C / C++
 clang-format -i <file>
 ```
 
-CI runs `shellcheck`, `prettier --check`, and JSON/TOML validation on every push
-and PR (see `.github/workflows/lint.yml`).
+CI runs `shellcheck`, `prettier --check`, `krypt validate`, and JSON/TOML
+validation on every push and PR (see `.github/workflows/lint.yml`).
 
 ## Adding a new app config
 
-1. Drop the config under `.config/<app>/` (matches what `stow` expects).
-2. If the app stores per-machine state (caches, lockfiles, history) in the same
+1. Drop the config under `.config/<app>/`.
+2. Add a `[[link]]` entry to `.krypt/links.toml`:
+   ```toml
+   [[link]]
+   src = ".config/<app>"
+   dst = "${XDG_CONFIG}/<app>"
+   ```
+3. If the app stores per-machine state (caches, lockfiles, history) in the same
    directory, add a denylist + allowlist pair in `.gitignore` like the existing
    `.config/Vieb/*` block:
    ```
    !.config/<app>/<file-to-track>
    .config/<app>/*
    ```
-3. If the config has user-specific content (paths, credentials, hardware names,
+4. If the config has user-specific content (paths, credentials, hardware names,
    identity), follow the **template pattern** below.
+5. Run `krypt validate` to catch schema mistakes, then `krypt link --dry-run` to
+   preview the symlink plan.
 
 ## Template pattern (user-configurable files)
 
-Anything a user is expected to edit should live as a `*.template.*` file in the
-repo and be copied to `$HOME` on first run. The real file lives at the
-destination and is **not tracked** by git or touched by `stow`.
+Anything a user is expected to edit lives as a `*.template.*` file in the repo
+and is copied to `$HOME` on first run by `krypt setup`. The real file lives at
+the destination and is **not tracked** by git or symlinked.
 
 To add a new templated file:
 
 1. Create `<path>.template.<ext>` in the repo with sensible defaults + comments
    explaining what to change.
-2. Add the destination path to `.gitignore` (so the file can never leak back
-   into the repo if a user accidentally copies it).
-3. The `*.template.conf` glob is already excluded by `.stow-local-ignore`, so
-   stow won't symlink templates. If your template uses a different suffix (e.g.
-   `*.template.toml`), add it to `.stow-local-ignore`.
-4. Add an entry to the `TEMPLATES` array in `.local/bin/.update`:
-   ```bash
-   "<repo-path>.template.ext => $HOME/<dest-path>.ext"
+2. Add the destination path to `.gitignore` so the file can never leak back into
+   the repo if a user copies it.
+3. Add a `[[template]]` entry to `.krypt.toml`:
+   ```toml
+   [[template]]
+   src     = ".config/foo/bar.template.conf"
+   dst     = "${XDG_CONFIG}/foo/bar.conf"
+   prompts = []     # or ["section-name"] to drive answers from a [prompts.*] block
    ```
-5. Document the new file in the README's "Template seeding" table.
-6. (Optional) If the file has high-signal user values, add a prompt for it in
-   `.local/bin/.setup` and patch the relevant lines after `.update` runs. Keep
-   prompts to the minimum a user needs answered on a fresh install — everything
-   else stays editable by hand.
+4. Document the new file in the README's "Templates" table.
+5. (Optional) If the file has high-signal user values, add a prompt block in
+   `.krypt.toml`:
 
-Re-running `.update` only seeds files that are missing or empty — it never
-overwrites a user's existing customizations. `.setup` overwrites prompt targets
-but uses the current value as the default, so pressing Enter preserves it.
+   ```toml
+   [prompts.foo]
+   heading = "Foo configuration"
+   writer  = "template"
+   src     = ".config/foo/bar.template.conf"
+   dst     = "${XDG_CONFIG}/foo/bar.conf"
+
+   [[prompts.foo.fields]]
+   key     = "$port"
+   prompt  = "Server port"
+   default = "8080"
+   ```
+
+   Add `prompts = ["foo"]` on the `[[template]]` entry so `krypt setup` patches
+   the answers into the seeded file.
+
+`krypt setup` only seeds templates that are missing or empty — it never
+overwrites a user's existing customisations. Prompts use the current value as
+the default, so pressing Enter preserves it.
+
+## Adding a new `krypt <group> <name>` command
+
+Edit `.krypt/commands.toml`:
+
+```toml
+[[command]]
+group       = "menu"
+name        = "screenshot"
+description = "Grimblast region picker"
+platform    = "linux"
+steps = [
+    { run = ["bash", "${HOME}/.local/bin/.menu-screenshot"], ignore_failure = true },
+]
+```
+
+Then `krypt validate` and (optionally) wire a Hyprland bind:
+
+```
+bind = $mod shift, s, exec, krypt menu screenshot
+```
+
+Args after `--` forward as `{0}`..`{9}` into steps — see `menu/autofill` for an
+example.
+
+## Adding a post-update hook
+
+Edit `.krypt.toml` (hooks live at the top level, not in `.krypt/commands.toml`):
+
+```toml
+[[hook]]
+name           = "my-thing"
+when           = "post-update"
+if             = "command_exists:foo"
+run            = ["foo", "sync"]
+ignore_failure = true
+```
+
+`if` predicates: `command_exists:`, `env:VAR`, `env:VAR=value`,
+`platform:linux|macos|windows`, `file_exists:`, `!negation`, comma-separated
+AND.
 
 ## Not in scope
 
-- Distros other than Arch. PRs adding apt/dnf branches to `.deps` are welcome
-  but won't be tested.
+- Distros other than Arch as the primary target. PRs filling in `apt` / `dnf` /
+  `brew` arrays in `.krypt/deps.toml` are welcome but won't be tested.
 - X11 support.
-- macOS / Windows.
 
 ## Reporting issues
 
 GitHub Issues. Include:
 
 - Distro + kernel
-- Hyprland / waybar / fish versions
-- Output of `.update --dry-run`
+- Hyprland / waybar / fish / krypt versions (`krypt --version`)
+- Output of `krypt update --dry-run`
