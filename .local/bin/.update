@@ -68,10 +68,13 @@ declare -a TEMPLATES=(
 )
 
 for entry in "${TEMPLATES[@]}"; do
-    src="${entry%% =>*}"
-    dst="${entry##*=> }"
-    src="${src% }"
-    dst="${dst# }"
+    src="${entry%%=>*}"
+    dst="${entry##*=>}"
+    # Strip leading/trailing whitespace (TEMPLATES uses pretty alignment).
+    src="${src#"${src%%[![:space:]]*}"}"
+    src="${src%"${src##*[![:space:]]}"}"
+    dst="${dst#"${dst%%[![:space:]]*}"}"
+    dst="${dst%"${dst##*[![:space:]]}"}"
     src_path="$dotfiles/$src"
     [ -f "$src_path" ] || continue
     if [ ! -s "$dst" ]; then
