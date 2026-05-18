@@ -1,5 +1,15 @@
 # Dependency groups — cross-distro package mappings.
 # Included by .krypt.toml
+#
+# TODO: paru bootstrap — the bash deps script cloned the AUR paru repo and ran
+# makepkg before any paru -S calls.  This imperative step has no declarative
+# equivalent in krypt yet.  Until krypt gains a pre-deps hook phase, bootstrap
+# paru manually on a fresh Arch install:
+#   sudo pacman -S base-devel rustup git --needed --noconfirm
+#   rustup default stable
+#   git clone https://aur.archlinux.org/paru.git /tmp/paru && cd /tmp/paru
+#   makepkg -si --noconfirm
+# After that `krypt deps` will use paru for subsequent installs.
 
 [[deps]]
 group = "core"
@@ -30,7 +40,7 @@ pacman = [
     "opencode", "python-tldextract", "rustup",
 ]
 apt = [
-    "libssl-dev", "nodejs", "npm", "opencode", "pkg-config", "python3",
+    "bear", "libssl-dev", "nodejs", "npm", "opencode", "pkg-config", "python3",
     "python3-venv", "rustup",
 ]
 dnf = [
@@ -57,12 +67,16 @@ required_platforms = ["linux"]
 pacman = [
     "brightnessctl", "dex", "grim", "hypridle", "hyprland", "hyprlock",
     "hyprpaper", "hyprpicker", "hyprpolkitagent", "hyprqt6engine",
-    "libnotify", "nwg-displays", "nwg-look", "pikr-bin", "qt5-wayland",
+    "libnotify", "nwg-displays", "nwg-look", "qt5-wayland",
     "qt6-wayland", "slurp", "swaync", "swayosd", "waybar", "wl-clipboard",
     "wtype", "xdg-desktop-portal-gtk", "xdg-desktop-portal-hyprland",
 ]
-apt = []
-dnf = []
+apt = [
+    "libnotify-bin",
+]
+dnf = [
+    "libnotify",
+]
 brew = []
 
 [[deps]]
@@ -103,7 +117,9 @@ pacman = [
     "libadwaita", "nautilus", "papirus-icon-theme", "pass", "pass-otp",
     "pass-secret-service", "qalculate-qt", "thunderbird", "vieb-bin",
 ]
-apt = []
+apt = [
+    "duf",
+]
 dnf = []
 brew = []
 
