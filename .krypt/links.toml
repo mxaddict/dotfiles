@@ -172,10 +172,6 @@ src = ".local/bin/.clearkeys"
 dst = "${LOCAL_BIN}/.clearkeys"
 
 [[link]]
-src = ".local/bin/.deps"
-dst = "${LOCAL_BIN}/.deps"
-
-[[link]]
 src = ".local/bin/.envdown"
 dst = "${LOCAL_BIN}/.envdown"
 
@@ -242,10 +238,6 @@ dst = "${LOCAL_BIN}/.nproc"
 [[link]]
 src = ".local/bin/.pull-all-models"
 dst = "${LOCAL_BIN}/.pull-all-models"
-
-[[link]]
-src = ".local/bin/.setup"
-dst = "${LOCAL_BIN}/.setup"
 
 [[link]]
 src = ".local/bin/.start"
