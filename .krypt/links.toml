@@ -156,17 +156,8 @@ src_glob = ".config/opencode/**/*"
 dst = "${XDG_CONFIG}/opencode/"
 
 # --- .local/bin utility + menu scripts ---
-[[link]]
-src = ".local/bin/.batrep"
-dst = "${LOCAL_BIN}/.batrep"
-
-[[link]]
-src = ".local/bin/.batlog"
-dst = "${LOCAL_BIN}/.batlog"
-
-[[link]]
-src = ".local/bin/.batclear"
-dst = "${LOCAL_BIN}/.batclear"
+# Battery scripts (.batrep/.batlog/.batclear) absorbed into the native
+# `krypt battery {report,log,clear}` builtin — no link entries needed.
 
 [[link]]
 src = ".local/bin/.browser"
@@ -200,21 +191,13 @@ dst = "${LOCAL_BIN}/.firmup"
 src = ".local/bin/.kanata"
 dst = "${LOCAL_BIN}/.kanata"
 
-[[link]]
-src = ".local/bin/.menu-apps"
-dst = "${LOCAL_BIN}/.menu-apps"
-
-[[link]]
-src = ".local/bin/.menu-audio"
-dst = "${LOCAL_BIN}/.menu-audio"
+# .menu-apps / .menu-audio / .menu-bluetooth / .menu-top wrappers
+# removed — krypt's `commands.toml` invokes the underlying tools
+# (pikr, wiremix, bluetui, btop) directly.
 
 [[link]]
 src = ".local/bin/.menu-autofill"
 dst = "${LOCAL_BIN}/.menu-autofill"
-
-[[link]]
-src = ".local/bin/.menu-bluetooth"
-dst = "${LOCAL_BIN}/.menu-bluetooth"
 
 [[link]]
 src = ".local/bin/.menu-calc"
@@ -243,10 +226,6 @@ dst = "${LOCAL_BIN}/.menu-power"
 [[link]]
 src = ".local/bin/.menu-time"
 dst = "${LOCAL_BIN}/.menu-time"
-
-[[link]]
-src = ".local/bin/.menu-top"
-dst = "${LOCAL_BIN}/.menu-top"
 
 [[link]]
 src = ".local/bin/.menu-wifi"

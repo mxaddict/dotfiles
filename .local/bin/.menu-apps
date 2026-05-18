@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-# vi: ft=bash
-
-pkill pikr || pikr -s drun -p Apps
