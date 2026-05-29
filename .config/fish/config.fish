@@ -7,6 +7,7 @@ set fish_greeting
 fish_add_path -g /opt/homebrew/bin
 fish_add_path -g /opt/homebrew/opt/llvm/bin
 fish_add_path -g /opt/homebrew/opt/m4/bin
+fish_add_path -g ~.foundry/bin
 fish_add_path -g ~/.cargo/bin
 fish_add_path -g ~/.config/composer/vendor/bin
 fish_add_path -g ~/.dotnet/tools
