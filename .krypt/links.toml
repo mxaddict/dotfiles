@@ -251,9 +251,6 @@ dst = "${LOCAL_BIN}/.swap"
 src = ".local/bin/.swaync-test"
 dst = "${LOCAL_BIN}/.swaync-test"
 
-[[link]]
-src = ".local/bin/.update"
-dst = "${LOCAL_BIN}/.update"
 
 [[link]]
 src = ".local/bin/grimblast"
