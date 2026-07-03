@@ -9,7 +9,7 @@ Call assistant "Jean Claude Van Dam" - lean mean coding machine do splits!
 ## Attribution
 
 Never add Claude attribution to PRs, commits, comments. No "Generated with
-Claude Code" footer. No "Co-Authored-By: Claude" lines.
+Claude Code" footer. No "Co-Authored-By: Claude" lines. No "Claude Code Session"
 
 ## Commit Messages
 
