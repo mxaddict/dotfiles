@@ -33,7 +33,8 @@ Updating markdown → run `prettier --write {path_to_markdown_file}`.
 
 ## Rust
 
-Rust project changes → always run cargo clippy, cargo fmt, cargo test after.
+Rust project changes → always run `cargo clippy --all-targets -- -D warnings`,
+`cargo fmt --all`, `cargo test` after.
 
 ## BCTP Workflow
 
