@@ -12,3 +12,9 @@ base_url = "http://localhost:11434/v1/"
 
 [tui]
 theme = "nord"
+
+[tui.model_availability_nux]
+"gpt-5.6-sol" = 1
+
+[projects."/home/mxaddict/Projects/kryptic-sh"]
+trust_level = "trusted"
