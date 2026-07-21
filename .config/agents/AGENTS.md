@@ -19,6 +19,23 @@ Conventional Commits format — `type(scope): message` (e.g.
 `docs: update README`). Scope optional. Types: feat, fix, docs, style, refactor,
 test, chore, perf, ci, build.
 
+## Staging Commits
+
+Always stage explicit files: `git add {file_name}` per file. Never `git add -A`,
+`git add .`, or `git commit -am`. Stage only the files intended for the commit.
+
+## Shell Escaping
+
+Prefer heredoc (`EOF`) style for multiline or special-char content so no
+escaping needed for backticks, `$(...)`, `$var`, quotes, etc. Quote the
+delimiter (`<<'EOF'`) to disable expansion when literal text wanted.
+
+```bash
+cat > file.md <<'EOF'
+Literal `backticks` and $(command) and $vars, no escaping.
+EOF
+```
+
 ## Prettier for all
 
 Project has prettier setup → run on changes.
