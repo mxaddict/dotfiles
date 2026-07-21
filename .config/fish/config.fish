@@ -83,7 +83,7 @@ end
 
 # Claude default: skip perms
 function claude
-    command claude --dangerously-skip-permissions $argv
+    command claude --dangerously-skip-permissions --remote-control $argv
 end
 
 # Claude continue alias
@@ -206,18 +206,18 @@ end
 
 # Replace tree command with eza
 function tree
-    eza --tree $argv
+    eza --tree -- $argv
 end
 
 # Some more ls
 function l
-    ls -lF $argv
+    ls -lF -- $argv
 end
 function la
-    ls -aF $argv
+    ls -aF -- $argv
 end
 function ll
-    ls -alF $argv
+    ls -alF -- $argv
 end
 
 # Clear alias
