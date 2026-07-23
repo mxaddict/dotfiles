@@ -15,7 +15,7 @@ fish_add_path -g ~/.local/bin
 fish_add_path -g ~/.local/share/nvim/mason/bin
 
 # Set default editor to vim
-set -gx EDITOR nvim
+set -gx EDITOR hjkl
 
 # Disable MANGOHUD by default
 set -gx MANGOHUD 0
@@ -239,22 +239,22 @@ end
 
 # I want v to open vi and vi to open vim
 function n
-    nvim $argv
+    hjkl $argv
 end
 function nv
-    nvim $argv
+    hjkl $argv
 end
 function nvi
-    nvim $argv
+    hjkl $argv
 end
 function v
-    nvim $argv
+    hjkl $argv
 end
 function vi
-    nvim $argv
+    hjkl $argv
 end
 function vim
-    nvim $argv
+    hjkl $argv
 end
 
 # TokyoNight Color Palette
