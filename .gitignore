@@ -16,14 +16,13 @@
 !.config/opencode/plugins
 !.config/opencode/plugins/rtk.ts
 !.config/opencode/tui.json
+!Cargo.lock
 *.cache
 *.gpg
 *.lock
 *.log
-!Cargo.lock
 *~
 .base16*
-.gitconfig.local
 .cache
 .claude-work/*
 .claude/*
@@ -47,6 +46,8 @@
 .config/qutebrowser/bookmarks/urls
 .config/qutebrowser/qsettings/QtProject.conf
 .config/tmux/plugins/
+.gitconfig.local
+.local/bin/acli
 butler
 compile_commands.json
 history.txt
