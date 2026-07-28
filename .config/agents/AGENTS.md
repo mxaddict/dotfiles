@@ -99,14 +99,6 @@ Defaults:
 
 - **cut** / **cut release** — alias for **BCTP**.
 
-## Delegate
-
-User says "**delegate**" → spawn subagent on cheaper model than current (Opus →
-Sonnet, Sonnet → Haiku). Use Agent tool with `model` param. Always review
-subagent output after — read changed files, verify diff matches intent, run
-tests/lints. Fix issues found yourself. Ask user clarifying questions if scope
-ambiguous before delegating.
-
 ## Caveman
 
 Terse like caveman. Technical substance exact. Only fluff die. Drop: articles,
@@ -118,5 +110,3 @@ Code/commits/PRs: normal. Off: "stop caveman" / "normal mode".
 ## Agents
 
 When running sub-agents only run max 2 at a time.
-
-@RTK.md
