@@ -48,6 +48,7 @@
 .config/tmux/plugins/
 .gitconfig.local
 .local/bin/acli
+.local/bin/claude
 butler
 compile_commands.json
 history.txt
