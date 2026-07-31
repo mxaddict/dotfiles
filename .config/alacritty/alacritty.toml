@@ -62,3 +62,8 @@ lines = 32
 
 [selection]
 save_to_clipboard = true
+
+[[keyboard.bindings]]
+key = "Return"
+mods = "Shift"
+chars = "\u001B\r"
