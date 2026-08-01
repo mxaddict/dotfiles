@@ -19,6 +19,13 @@ Conventional Commits format — `type(scope): message` (e.g.
 `docs: update README`). Scope optional. Types: feat, fix, docs, style, refactor,
 test, chore, perf, ci, build.
 
+Respect 50/72: target 50 characters for the subject and never exceed 72, prefix
+included — a subject that will not fit is summarized more tightly or the change
+split. Then one blank line, then a body of 1–3 short paragraphs hard-wrapped at
+72 columns, saying what changed and why (the failure it fixes, the mechanism),
+not restating the diff. Omit the body only when the subject already says
+everything.
+
 ## Staging Commits
 
 Always stage explicit files: `git add {file_name}` per file. Never `git add -A`,
@@ -51,7 +58,21 @@ Updating markdown → run `prettier --write {path_to_markdown_file}`.
 ## Rust
 
 Rust project changes → always run `cargo clippy --all-targets -- -D warnings`,
-`cargo fmt --all`, `cargo test` after.
+`cargo fmt --all`, `cargo test` after. All three, every time — clippy and the
+tests green while `cargo fmt --all` was skipped is a red CI run over whitespace.
+
+Run them on the **workspace**, not just the crate you touched: a change that is
+locally correct while breaking something elsewhere is the whole reason the rest
+of the suite exists.
+
+`cargo` here runs through a wrapper that **indents** its `error:` lines, so
+`grep -E '^error'` reports a false pass. Read the summary line it prints.
+
+Platform-gated code (`#[cfg(windows)]`, `#[cfg(target_os = "macos")]`) is not
+compiled by a local run at all, so a green local pass says nothing about it —
+that verdict only comes from CI, and each round trip is a full run. Expect the
+misses to be constants and types that moved between crate versions; spell a
+known-fixed ABI value out locally rather than importing it.
 
 ## Changelog as you go
 
@@ -110,16 +131,30 @@ User says "**BCTP**", execute in order:
      exists, skip — don't create one unless asked.
 3. **C**ommit version bump with message `chore: bump version`. Stage only
    manifest, lockfile, and changelog.
-4. **T**ag commit as `vX.Y.Z` matching new version.
+4. **T**ag commit as `vX.Y.Z` matching new version. The tree must be green first
+   — a tag is not something you can take back, and never move or reuse one that
+   already exists; cut the next version instead.
 5. **P**ush commit and tag to remote.
+6. **Watch the tag's CI run to completion, and confirm it published.** A push
+   succeeding means the tag exists, nothing more. Release pipelines gate their
+   publish jobs on the build jobs, so one red check does not fail loudly — it
+   **skips** the publish steps and leaves a green-looking push, a tag on the
+   remote, and nothing released. Enumerate the run's jobs rather than trusting
+   its summary, then check the artifact actually landed (the release page, the
+   registry). "Tagged and pushed" is not "released", and only one of them is
+   what was asked.
 
 Defaults:
 
-- Patch bump unless user says minor/major.
+- Patch bump unless user says minor/major — **except** that below 1.0 (`0.y.z`)
+  a breaking change bumps the MINOR. A changed public signature counts, even
+  when the caller is in the same workspace. A minor bump also means updating any
+  internal dependency pins that name the old version, which a patch bump never
+  surfaces.
 - Never skip hooks or force-push.
 - No version field → ask before proceeding.
-- CI/deploy triggered by version tags → push completes release. No manual
-  deploy.
+- CI/deploy triggered by version tags → push starts the release; step 6 is what
+  finishes it. No manual deploy.
 
 ## Aliases
 
@@ -136,3 +171,19 @@ Code/commits/PRs: normal. Off: "stop caveman" / "normal mode".
 ## Agents
 
 When running sub-agents only run max 2 at a time.
+
+They share ONE working tree — no isolation, no hand-back step; every edit is
+immediately live for the others. So:
+
+- **Partition by file, and say so in each brief.** Name the exact paths a task
+  owns and tell it to touch nothing else. If you cannot state the write sets and
+  see that they are disjoint, it is one task, not two — run them in sequence.
+- **Never let two run anything repo-wide.** `cargo fmt --all`, a codemod,
+  `git checkout`/`restore`/`stash`: each rewrites files the other is mid-edit
+  in, and what they discard is not recoverable. Scope the formatter to that
+  task's own files.
+- **Commit each cluster before briefing the next.** Work left uncommitted while
+  the next task runs is work the next task can walk over.
+- **A sub-agent's report is a claim, not evidence.** Read the diff and re-run
+  the verification yourself — a task whose own checks failed can still report
+  success, and reading its report is not checking its work.
