@@ -170,18 +170,32 @@ Code/commits/PRs: normal. Off: "stop caveman" / "normal mode".
 
 ## Agents
 
-When running sub-agents only run max 2 at a time.
+**One write-capable sub-agent at a time. Read-only sub-agents run at max
+concurrency** — fan them out as wide as the work genuinely splits.
 
-They share ONE working tree — no isolation, no hand-back step; every edit is
-immediately live for the others. So:
+The asymmetry is the point: read-only agents change nothing, so they cannot race
+each other. Write-capable ones share the parent's working tree — no isolation,
+no hand-back step, every edit immediately live for the others — so two writers
+are two processes editing the same files with nothing between them, and one's
+formatter run or `git checkout` undoes the other's work mid-flight. Serializing
+writes is the only thing that actually prevents that; a brief saying "touch only
+these paths" is a convention, and a convention is not a lock.
 
-- **Partition by file, and say so in each brief.** Name the exact paths a task
-  owns and tell it to touch nothing else. If you cannot state the write sets and
-  see that they are disjoint, it is one task, not two — run them in sequence.
-- **Never let two run anything repo-wide.** `cargo fmt --all`, a codemod,
-  `git checkout`/`restore`/`stash`: each rewrites files the other is mid-edit
-  in, and what they discard is not recoverable. Scope the formatter to that
-  task's own files.
+Reads are not free even so: each holds a model context, spends tokens, and lands
+a report you have to read and verify. Fan out as wide as the work splits, not
+wider than you will actually review.
+
+Whether one or several are running:
+
+- **Name the exact paths the write agent owns**, and tell it to touch nothing
+  else. The cap serializes writers against each other, not against you — the
+  parent has uncommitted work in that same tree. If you ever raise the cap,
+  disjoint write sets are the precondition: cannot state them and see they do
+  not overlap, it is one task, not two.
+- **A write agent must not run anything repo-wide.** `cargo fmt --all`, a
+  codemod, `git checkout`/`restore`/`stash`: each rewrites files outside its
+  brief, including the parent's work in progress, and what they discard is not
+  recoverable. Scope the formatter to that task's own files.
 - **Commit each cluster before briefing the next.** Work left uncommitted while
   the next task runs is work the next task can walk over.
 - **A sub-agent's report is a claim, not evidence.** Read the diff and re-run
