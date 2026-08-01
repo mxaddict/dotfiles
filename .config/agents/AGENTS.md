@@ -276,6 +276,20 @@ User says "**BCTP**", execute in order:
    `CHANGES.md`, `HISTORY.md`, `RELEASES.md`) exists in the repo:
    - Move entries under `## [Unreleased]` to a new `## [X.Y.Z] - YYYY-MM-DD`
      heading, keeping `## [Unreleased]` empty above it.
+   - **Update the link block at the bottom** — the half that gets forgotten.
+     Where the file keeps reference links, add the new version's **own** compare
+     link and **repoint** `[Unreleased]` at the tag you are about to create:
+
+     ```
+     [Unreleased]: https://…/compare/vX.Y.Z...HEAD     ← now the NEW version
+     [X.Y.Z]:      https://…/compare/vPREV...vX.Y.Z    ← added
+     ```
+
+     Miss the repoint and `[Unreleased]` shows this release's own changes
+     forever; miss the new link and the heading is dead. Before committing,
+     confirm every `## [version]` heading has a matching `[version]:` reference
+     — a release is when they drift and nothing else will flag it.
+
    - If `Unreleased` is empty or missing, draft entries from the unreleased
      commit log (`git log $(git describe --tags --abbrev=0)..HEAD`) using
      Keep-a-Changelog sections (`Added` / `Changed` / `Fixed` / `Removed` /
@@ -286,6 +300,7 @@ User says "**BCTP**", execute in order:
      exists, start one at this release rather than skipping it: the entries for
      THIS version drafted from the commit range, under an empty
      `## [Unreleased]` heading above them.
+
 3. **C**ommit version bump with message `chore: bump version`. Stage only
    manifest, lockfile, and changelog.
 4. **T**ag commit as `vX.Y.Z` matching new version. The tree must be green first
