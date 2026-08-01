@@ -49,6 +49,7 @@
 .gitconfig.local
 .local/bin/acli
 .local/bin/claude
+.local/bin/codex
 butler
 compile_commands.json
 history.txt
