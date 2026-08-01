@@ -53,6 +53,32 @@ Updating markdown → run `prettier --write {path_to_markdown_file}`.
 Rust project changes → always run `cargo clippy --all-targets -- -D warnings`,
 `cargo fmt --all`, `cargo test` after.
 
+## Changelog as you go
+
+Check for a changelog before finishing work: `CHANGELOG.md`, or `CHANGES.md` /
+`HISTORY.md` / `RELEASES.md`. If one exists, add the entry in the **same commit
+as the change**, under `## [Unreleased]` in the matching Keep-a-Changelog
+section (`Added` / `Changed` / `Fixed` / `Removed` / `Deprecated` / `Breaking`).
+Stage it by name.
+
+The point is that `[Unreleased]` is always complete, so **BCTP** step 2 is an
+audit — moving finished entries under a version heading — not the moment the
+changelog gets written. Writing it at release time means reconstructing weeks of
+intent from commit subjects, which is where entries get vague or missed.
+
+- **Name what changed** — the API, file, flag or behavior — and why it matters
+  to someone upgrading. Not a rephrased commit subject: the reader can already
+  run `git log`.
+- **Skip purely internal churn** a release note would not mention: a refactor
+  with no outward effect, a test-only or docs-only change, a fix to unreleased
+  code (fold that into the entry for the feature itself, which has not shipped
+  yet either).
+- **Never create a changelog that isn't there** unless asked.
+- Run `prettier --write` on it, per the markdown rule above.
+
+When a changelog exists and an entry is genuinely warranted, a change is not
+done until it has one — same standing as the formatter and the test suite.
+
 ## BCTP Workflow
 
 User says "**BCTP**", execute in order:
