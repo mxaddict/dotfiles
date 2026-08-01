@@ -100,6 +100,48 @@ intent from commit subjects, which is where entries get vague or missed.
 When a changelog exists and an entry is genuinely warranted, a change is not
 done until it has one — same standing as the formatter and the test suite.
 
+## Backlog
+
+Every repo we work on keeps **one** backlog at `docs/backlog.md`. **Anything
+raised in a session and not finished goes in it before the session ends** —
+otherwise the only record is a chat log nobody will open again, and the next
+session re-derives it from nothing.
+
+Unlike a changelog, **create it if it is not there**. It is for us, not for
+users: a changelog says what shipped, the backlog says what did not and why.
+
+What belongs in it:
+
+- Work deferred or scoped out, and what it would take to finish.
+- Findings not fixed — say which, and why: needs a decision, blocked on
+  something, deliberately out of scope for the task.
+- Decisions that need the user's call, with the options and the actual
+  trade-off, so the question can be answered without re-doing the research.
+- Things **considered and declined**, with the reason. Without these the same
+  idea gets re-proposed and re-argued every few months.
+- Behaviour that surprised us but is not a bug, so the next surprise is cheap.
+- Coverage gaps: what was NOT reviewed, tested or verified, stated plainly as a
+  gap. "Not reviewed" is the honest line and more useful than a reason.
+
+How to write an entry:
+
+- **Symbol and file names, not line numbers** — line numbers rot within weeks,
+  names survive a refactor.
+- Enough context to act on months later without the conversation that produced
+  it. If it only makes sense to someone who was there, it is not written yet.
+- State the evidence: what was actually verified versus what is a guess.
+
+Keeping it honest:
+
+- **When an entry ships, DELETE it** — do not annotate it as done. `git log` is
+  the history; a backlog full of closed items is one nobody reads.
+- Same for whole design docs once the work lands: delete them, and keep only
+  what still binds future work.
+- Re-verify an entry before carrying it forward. Claims about a tree go stale,
+  and a stale backlog is worse than a short one.
+
+Run `prettier --write docs/backlog.md`, per the markdown rule above.
+
 ## BCTP Workflow
 
 User says "**BCTP**", execute in order:
