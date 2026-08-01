@@ -170,20 +170,24 @@ Code/commits/PRs: normal. Off: "stop caveman" / "normal mode".
 
 ## Agents
 
-**One write-capable sub-agent at a time. Read-only sub-agents run at max
-concurrency** — fan them out as wide as the work genuinely splits.
+**At most 2 read-only sub-agents and 1 write-capable at a time** — hrdr's own
+defaults (`max_readonly_subagents` / `max_write_subagents`, raisable by config,
+env or flag). Raising either is a deliberate call, never a default.
 
-The asymmetry is the point: read-only agents change nothing, so they cannot race
-each other. Write-capable ones share the parent's working tree — no isolation,
-no hand-back step, every edit immediately live for the others — so two writers
-are two processes editing the same files with nothing between them, and one's
-formatter run or `git checkout` undoes the other's work mid-flight. Serializing
-writes is the only thing that actually prevents that; a brief saying "touch only
-these paths" is a convention, and a convention is not a lock.
+The two caps are different numbers because they exist for different reasons:
 
-Reads are not free even so: each holds a model context, spends tokens, and lands
-a report you have to read and verify. Fan out as wide as the work splits, not
-wider than you will actually review.
+- **Writes are capped at one because they race.** Every sub-agent shares the
+  parent's working tree — no isolation, no hand-back step, every edit
+  immediately live for the others — so two writers are two processes editing the
+  same files with nothing between them, and one's formatter run or
+  `git checkout` undoes the other's work mid-flight. The cap is the only thing
+  that actually prevents that; a brief saying "touch only these paths" is a
+  convention, and a convention is not a lock.
+- **Reads are capped at two for review burden**, not racing — they change
+  nothing and cannot collide. But each holds a model context, spends tokens, and
+  lands a report you have to read and verify. Five at once is a fan-out too wide
+  to review carefully, which is what makes a wide read fan-out worse than a
+  narrow one.
 
 Whether one or several are running:
 
