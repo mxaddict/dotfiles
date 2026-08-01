@@ -74,6 +74,116 @@ that verdict only comes from CI, and each round trip is a full run. Expect the
 misses to be constants and types that moved between crate versions; spell a
 known-fixed ABI value out locally rather than importing it.
 
+## Verification
+
+**A check that cannot fail is not a check.** Every test, assertion, hash,
+invariant or validator must be shown to go red before you trust it: break the
+thing it guards, confirm it fails, restore. A green light wired to nothing is
+worse than no check, because it stops anyone looking again. The recurring
+shapes:
+
+- A test asserting the value the unfinished code already returns (empty list,
+  zero, `None`) passes identically whether the code is right or never written.
+- A hash, snapshot or digest covering less than it claims — folds in counts and
+  names but not the values that matter, so two wildly different states compare
+  equal.
+- A guard whose scope silently matches nothing: a pattern matching no file, a
+  loop over an empty collection, a branch never entered. Assert the thing RAN.
+- An opt-in hook that defaults to doing nothing, so every type that forgot to
+  implement it reports as covered — "not implemented" arriving as "passed".
+
+**Know which kind of change you are making**, because it decides what counts as
+having checked it. A change of SHAPE — a type, a field, an argument — is
+verified by the compiler: it fits or it does not. A change of MECHANISM —
+whether something _happens_: an eviction, a retry, a cache hit, a guard actually
+rejecting — is verified by nothing at all until something observes it. Name the
+observable first: what value, read where, would differ if this works? Then go
+read it. If you cannot name one, you cannot tell your change from a no-op, and
+neither can the reviewer.
+
+**Make the code pass the test. Never make the test pass the code.** Do not
+weaken an assertion, widen a tolerance, skip a case, swallow the error, or
+delete the test to turn a failure green — a test you defeated still fails,
+silently, in production. If you believe the test itself is wrong, say what it
+asserts and why you think so, and let the user decide.
+
+**Never claim a check you did not run.** Did not run the tests → say so. They
+failed → say they failed and show the output. Do not describe a failing run in
+language that sounds like a passing one.
+
+## Citations and numbers
+
+**Every `file:line` you cite must come from reading THAT location** — not a grep
+summary, not memory of a file read earlier, not what the surrounding code
+implies. A search result gives you a match, not the context. Open it and confirm
+the symbol, the file and the line all say what you are about to claim. Cite less
+rather than guess: a claim with no line number is weaker than one with a line
+number, but a claim with the WRONG line number reads as verified and is not.
+
+**Any number written into a doc, changelog, plan or summary comes from a command
+you just ran**, pasted from its output — test counts, benchmark figures,
+coverage, sizes. Never estimate one, never carry an old number forward by adding
+to it. Take the figure the tool REPORTS (runners print their own totals) rather
+than counting lines of its output: a line count silently picks up headers and
+progress lines, and lands a number close enough to look right and still wrong.
+
+**A factual claim in a comment is checkable, so check it or cut it.** "This is
+atomic", "this canonicalises", "this is thread-safe" — each is confirmable in
+three lines, and each is one the next reader will trust without confirming.
+
+## Dependencies
+
+**Read the installed interface, don't recall it.** Before using a dependency's
+API — and always after a signature/name/type error — read the real definition of
+the version this project actually resolved. It is already on disk: every package
+manager unpacks dependencies somewhere local (`~/.cargo/registry/src/*/`,
+`node_modules/`, a `site-packages` directory, `go env GOMODCACHE`, `vendor/`).
+An API you remember confidently is often from a different major version, and
+reading the wrong copy is the same mistake as recalling it — check the manifest
+and lockfile for what actually resolved.
+
+**Add, upgrade and remove with the project's own package manager**, never by
+hand-editing the manifest. The manager asks the registry what exists right now;
+you would be writing a version number from memory, and your memory of "the
+latest" is a snapshot from training that was already stale when the model
+shipped. Guessing gets a version that never existed, one with a known advisory,
+or one whose API is not the one you are coding against. `cargo add`,
+`npm install`, `uv add`, `go get`, `composer require` — every ecosystem has one.
+
+**Taking on a NEW dependency is the user's decision, not yours.** Solve it with
+what the project already depends on, or the standard library, first. If the task
+genuinely needs something new, say which and why, and ask. Upgrading or removing
+one the project already chose is ordinary work.
+
+## Destructive operations
+
+**Delete by naming files:** `rm file-a.txt file-b.txt`. Never build a delete out
+of a variable, a glob, or command output — `rm -rf "$DIR"`, `rm -rf "$DIR"/*`,
+`rm -rf $(...)`, `find … -delete`, `… | xargs rm`. An unset variable expands to
+nothing, so `rm -rf "$DIR"/*` runs as `rm -rf /*`, and a glob deletes what it
+matches when it runs, not what you checked when you wrote it. **One command must
+never both choose the victims and kill them** — run the `ls`/glob alone, read
+the list, then delete by name.
+
+**Look before you restore.** `git restore -- <file>` restores from the INDEX, so
+a staged edit survives and the file is not back at HEAD;
+`git checkout HEAD -- <file>` destroys it outright. `git diff` alone hides a
+staged change, so read both `git diff -- <file>` and
+`git diff --cached -- <file>` first. A restore is not undoable.
+
+**Never discard work you did not create:** `reset --hard`, `checkout -- .`,
+`restore .`, `clean -f`, `stash drop`/`stash clear`, `branch -D`. Ask first,
+every time.
+
+Same rule for anything else that cannot be undone, whatever the tool: `DROP` /
+`TRUNCATE` / `DELETE` without a `WHERE`, a down-migration,
+`docker system prune`, `kubectl delete`, `terraform destroy`, mass `sed -i`.
+Name the targets; get explicit approval before the first one runs.
+
+**Destroying is never the fix.** A file in the way, a failing test, a refused
+permission — fix the cause or report it. Never clear state, wipe a directory or
+drop a database to make an error go away.
+
 ## Changelog as you go
 
 Check for a changelog before finishing work: `CHANGELOG.md`, or `CHANGES.md` /
