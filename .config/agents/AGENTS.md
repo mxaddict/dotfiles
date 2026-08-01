@@ -204,7 +204,10 @@ intent from commit subjects, which is where entries get vague or missed.
   with no outward effect, a test-only or docs-only change, a fix to unreleased
   code (fold that into the entry for the feature itself, which has not shipped
   yet either).
-- **Never create a changelog that isn't there** unless asked.
+- **Start one if the project has none** and it ships something a user consumes:
+  `CHANGELOG.md` in Keep-a-Changelog form with `## [Unreleased]` at the top. Say
+  in your summary that you created it. A project that was always going to want a
+  changelog is not the same call as a notes file nobody asked for.
 - Run `prettier --write` on it, per the markdown rule above.
 
 When a changelog exists and an entry is genuinely warranted, a change is not
@@ -217,8 +220,8 @@ raised in a session and not finished goes in it before the session ends** —
 otherwise the only record is a chat log nobody will open again, and the next
 session re-derives it from nothing.
 
-Unlike a changelog, **create it if it is not there**. It is for us, not for
-users: a changelog says what shipped, the backlog says what did not and why.
+**Create it if it is not there.** It is for us, not for users: a changelog says
+what shipped, the backlog says what did not and why.
 
 What belongs in it:
 
@@ -280,7 +283,9 @@ User says "**BCTP**", execute in order:
      that changed; don't just rephrase commit subjects.
    - Run `prettier --write` on the file per the markdown rule below.
    - Stage `CHANGELOG.md` alongside the manifest in step 3. If no changelog file
-     exists, skip — don't create one unless asked.
+     exists, start one at this release rather than skipping it: the entries for
+     THIS version drafted from the commit range, under an empty
+     `## [Unreleased]` heading above them.
 3. **C**ommit version bump with message `chore: bump version`. Stage only
    manifest, lockfile, and changelog.
 4. **T**ag commit as `vX.Y.Z` matching new version. The tree must be green first
