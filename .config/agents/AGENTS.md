@@ -131,6 +131,32 @@ progress lines, and lands a number close enough to look right and still wrong.
 atomic", "this canonicalises", "this is thread-safe" — each is confirmable in
 three lines, and each is one the next reader will trust without confirming.
 
+**A comment points AT a value, it never repeats it.** Nothing recomputes prose
+when the code beneath it changes, so a number written into a comment is wrong
+the moment someone edits what it describes — and it goes on reading as verified.
+Two shapes, one rule:
+
+- **A count of code elements** — "four impls", "the three call sites", "a
+  nine-crate workspace" — loses the number entirely. "Every impl", "each call
+  site", "the workspace" all read fine, because the count was decoration.
+- **A value some constant, default or config key already owns** — "capped at
+  1024 lines", "defaults to 30s" — names that item and lets the reader follow
+  it, rather than restating its digits.
+
+If the value has no name to point at, a bare literal sitting in an expression,
+that is the real defect: hoist it to a named constant, document it there, use it
+at the call site. **Needing to write a number into a comment is a signal the
+value belongs in a variable and is not in one yet.**
+
+When a derived total genuinely earns explaining — a retry budget's whole
+duration, a buffer's worst case — put it in an **assertion**, not a sentence. A
+test goes red when its inputs move; a comment never can.
+
+Exempt: numbers fixed outside your code — a wire format's field width, an
+upstream API's cap, an RFC's range, a dated account of what once happened. Those
+cannot drift when you edit. So is a test asserting a specific value: the test is
+the thing that fails when it drifts, which is the whole point.
+
 ## Dependencies
 
 **Read the installed interface, don't recall it.** Before using a dependency's
