@@ -91,6 +91,173 @@ that verdict only comes from CI, and each round trip is a full run. Expect the
 misses to be constants and types that moved between crate versions; spell a
 known-fixed ABI value out locally rather than importing it.
 
+## Scope
+
+**Change what the task needs and nothing else.** No drive-by refactors, no
+renaming things you happened to dislike, no reformatting a file you only came to
+edit two lines of. Every unrelated hunk is something a reviewer has to read and
+decide about.
+
+**Don't create files the task didn't ask for.** Prefer editing what exists;
+never add a README, a docs page or a summary/notes file on your own — a new file
+is a decision the user didn't make. The two exceptions are project bookkeeping
+rather than content, and both have their own sections above: a `CHANGELOG.md`,
+and `docs/backlog.md`.
+
+**Finish what you write.** No stubbed bodies, `TODO`s or
+`unimplemented!`/`panic!` placeholders left behind, and never swallow an error
+to make code run (an empty `catch`, an ignored `Result`, a bare `except: pass`).
+If you genuinely cannot complete a piece, say so — and make the CODE say so too:
+name it for what it is and have its doc comment describe what it actually does,
+never what it is meant to do one day. A stub is acceptable; a stub documented as
+working is a lie that survives you.
+
+**Change a shared interface and you own its callers.** A signature, a struct
+field, an exported API — grep for every use and update them in the same change,
+or the build breaks somewhere you didn't look.
+
+**Don't hand-edit generated files** — lockfiles, build output, generated
+bindings or migrations. Change the source and regenerate with the project's own
+command.
+
+If the task is ambiguous in a way that changes what you would build, ask before
+building it. If it's ambiguous in a way that doesn't, pick the obvious option
+and say which you picked.
+
+## Code style
+
+**Write code that reads like the code around it** — its naming, its idioms, its
+error handling, its comment density. The goal is a diff that looks like the
+project wrote it. Before writing something non-trivial, find how the codebase
+already does the same kind of thing — a similar handler, query, test, error type
+— and follow that pattern. Follow the existing file's conventions exactly: you
+read it before editing, so you already know its indentation, quote style and
+import order; match them, don't impose your own. In a brand-new project with no
+code to follow, use the language's accepted standard (`rustfmt`/`gofmt`
+defaults, PEP 8, Prettier defaults).
+
+**Reach outward in order:** the project's own helper, then the language's
+standard library, then a dependency the project already has — and only then
+something you write yourself. Hand-rolling what the ecosystem already solved is
+where a change goes wrong quietly: it compiles, it reads plausibly, and it is
+wrong in the case you did not think to try. Date arithmetic and time zones,
+parsing a header or URL or version string, encoding and escaping, collation,
+floating point, crypto, randomness — each has an ecosystem answer that has been
+wrong in public and been fixed, and yours has not. When there genuinely is no
+such answer, keep it small, name the algorithm you are transcribing, and test it
+against known values from the specification: a transcription slip in ten lines
+of arithmetic passes review and every existing test, because nothing else in the
+codebase knows what the right answer was. (Adding a NEW dependency is still the
+user's call — see Dependencies.)
+
+**Write what the linter would leave alone.** The project's formatter and linter
+define the idiom; arriving at them with a diff they rewrite means you wrote the
+unidiomatic form first and let a tool find it for you. Reach for the standard
+construction as you type and run the linter to confirm, not to discover. When it
+does flag something, fix what it names — never quiet it with a construct whose
+only purpose is to quiet it, and never reach for a blanket suppression.
+
+**Write the general form, not the one that happens to work here.** A guard,
+path, command, separator or constant that assumes one operating system, one
+shell, one filesystem layout or one vendor's API is wrong on every other one. A
+conditional-compilation arm that exists on only one side is not portability — it
+is a check that silently does not run everywhere else, and "not supported here"
+arriving as "passed" is the same defect as an unimplemented hook that reports
+success. Where behaviour genuinely must differ, implement every side or make the
+missing side fail loudly, and say in the code which platforms you actually
+verified.
+
+**Factor out repetition when it's real, not before — DRY, with YAGNI holding it
+in check.** Don't copy code that already exists: call it. The moment a _second_
+place needs the same logic, pull the shared part into one helper both call, so a
+later fix lands in one place instead of being missed in a forgotten copy. Two
+copies is already the bug: it is where they silently drift apart.
+
+**But don't abstract ahead of need.** Write a helper — or a general,
+configurable, "for later" version — only once something actually uses it in more
+than one place. A function with a single caller, flexibility nothing exercises,
+a parameter every call passes the same value for, an interface with one
+implementation, a hook nothing registers: all just indirection to read through,
+and all shaped by a guess about a second use that has not arrived. Keep it
+inline and direct until a real one does. If you find speculative machinery like
+that, delete it rather than keeping it "in case".
+
+**DRY is about duplicated KNOWLEDGE, not duplicated shape.** Two blocks that
+look alike but exist for different reasons — and would change for different
+reasons — stay separate; merging them couples things that have no relationship,
+and the helper grows a flag per caller to pull them apart again. Ask whether one
+change should always alter both: yes means extract, no means leave the
+resemblance alone.
+
+**Make new code clear on its own, not clever-with-a-disclaimer.** If a block
+needs a comment longer than the block to explain WHAT it does, that's a sign to
+rewrite the code simpler — not to annotate a knot you didn't want to untangle.
+Comments earn their place explaining WHY. Leave a hard thing unsolved only when
+solving it is big enough to be its own task; don't skip the clean version merely
+because it took more thought.
+
+When correctness, performance and readability pull against each other, the order
+is **correctness first**, then performance on the paths that actually matter (a
+hot loop, a request handler — not everything), then readability. Genuinely
+security- or performance-critical code may have to be intricate, and there a
+clear comment explaining it is right; everywhere else, prefer the version a
+reader understands at a glance.
+
+**A file that keeps growing is a defect**, not a neutral fact. A 300-line module
+becomes 5000, a function stops fitting on a screen, one type accumulates a dozen
+responsibilities. Nobody can hold that in their head; every change forces a
+reader — or a model, on a token budget — to load all of it to touch any of it,
+reviews get shallower as the diff context grows, and concurrent changes collide
+in the one file. Split it as part of the work rather than filing it under
+"later", which never comes.
+
+- **Split along the seams the code already has** — one responsibility per unit,
+  each named for what it owns and testable on its own. Not by line count:
+  shearing a file into `part1`/`part2` at an arbitrary boundary moves the mess
+  and costs you navigability too. If you cannot name the piece you are
+  extracting, you have not found the seam yet.
+- **Keep the split reviewable:** move code in one step and change behaviour in
+  another, so a reviewer can see that a move was only a move. Preserve the
+  public surface (re-export from the old path) so callers don't churn for a
+  reorganisation they didn't ask for.
+- **Scope still applies:** split what your task is already touching. If the
+  monolith is somewhere else, say it is a problem and let the user decide.
+
+## Soundness and security
+
+Write secure code: parameterize SQL (never string-build a query), never hardcode
+a secret or token, validate and escape external input, and never build a shell
+command or a filesystem path out of unsanitized input. Don't introduce the
+vulnerability you would flag in review.
+
+**Enforce a contract, don't document one.** Reaching past the language's checks
+— `unsafe`, raw pointers and manual lifetimes, a cast/transmute/reinterpret,
+unchecked indexing, FFI, reflection, an `any`-typed escape — is only sound if
+something _makes_ callers comply. Constrain it in the type system so misuse
+fails to compile, or validate at the boundary so misuse fails loudly. A comment
+saying "the caller must only use this with…" is not a safeguard; and if the call
+arrives through a generic or dynamic boundary that bounds nothing, there is no
+caller who _can_ comply. Prefer a safe formulation even at some cost; reach for
+the escape hatch only when you can say why the safe one won't do, and then say
+so where the reader will see it.
+
+**Run the ecosystem's dynamic-analysis tool over new escape-hatch code before
+committing it**, not after someone else finds the bug — an undefined-behaviour
+interpreter, the address/undefined/thread sanitizers, a memory checker, a race
+detector, whatever this ecosystem provides (Miri, ASan/UBSan/TSan, valgrind,
+`-race` are examples of the shape). If the project already runs one anywhere in
+its history or CI, that is your answer about whether it is expected here.
+
+**Don't derive a value's identity from its memory representation.** When you
+hash, checksum, compare, serialize or fingerprint something, do it over the
+logical value — field by field, through a defined encoding — not by reading the
+bytes the object happens to occupy. Raw bytes fold in padding (uninitialized, so
+both undefined behaviour AND unstable), pointers and handles (two equal values
+differ because they live at different addresses), and multiple encodings of one
+value (a float's NaN payloads and signed zero). This is how a determinism check
+ends up reporting identical states as different and different states as
+identical.
+
 ## Verification
 
 **A check that cannot fail is not a check.** Every test, assertion, hash,
