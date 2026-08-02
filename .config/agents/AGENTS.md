@@ -55,6 +55,23 @@ Project has format command (e.g. `npm run format`) → run on all changed files.
 
 Updating markdown → run `prettier --write {path_to_markdown_file}`.
 
+**Prettier is the markdown standard, and it has no exceptions.** Every markdown
+file you touch goes through it — including files something else reads
+programmatically, like prompt templates or fixtures. It reflows prose to a
+column limit and normalizes syntax (`*emphasis*` → `_emphasis_`), so the diff
+will contain lines you did not edit. That is the formatter doing its job, not
+damage.
+
+**If a reflow breaks a test, fix the TEST.** Never carve the file out of the
+formatter, add it to an ignore list, or hand-format it to keep an assertion
+happy — the formatter is not the negotiable part. A test that fails when a
+paragraph rewraps was asserting on layout, which is not what it meant to guard:
+compare with soft wraps collapsed — read a newline plus its following indent as
+a single space, on both sides of the comparison — so it tracks the words instead
+of the columns. Done that way the assertion keeps its teeth: it still fails on a
+real wording change, and stops failing on reformats. Verify both halves before
+believing it.
+
 ## Rust
 
 Rust project changes → always run `cargo clippy --all-targets -- -D warnings`,
