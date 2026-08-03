@@ -26,6 +26,121 @@ split. Then one blank line, then a body of 1–3 short paragraphs hard-wrapped a
 not restating the diff. Omit the body only when the subject already says
 everything.
 
+## Rust
+
+Rust project changes → always run `cargo clippy --all-targets -- -D warnings`,
+`cargo fmt --all`, `cargo test` after. All three, every time — clippy and the
+tests green while `cargo fmt --all` was skipped is a red CI run over whitespace.
+
+Run them on the **workspace**, not just the crate you touched: a change that is
+locally correct while breaking something elsewhere is the whole reason the rest
+of the suite exists.
+
+`cargo` here runs through a wrapper that **indents** its `error:` lines, so
+`grep -E '^error'` reports a false pass. Read the summary line it prints.
+
+Platform-gated code (`#[cfg(windows)]`, `#[cfg(target_os = "macos")]`) is not
+compiled by a local run at all, so a green local pass says nothing about it —
+that verdict only comes from CI, and each round trip is a full run. Expect the
+misses to be constants and types that moved between crate versions; spell a
+known-fixed ABI value out locally rather than importing it.
+
+## BCTP Workflow
+
+User says "**BCTP**", execute in order:
+
+1. **B**ump patch version (semver) in manifest. Detect automatically:
+   - Rust: `Cargo.toml` (regenerate `Cargo.lock` with `cargo generate-lockfile`
+     if `Cargo.lock` is tracked; library crates that gitignore `Cargo.lock` skip
+     the regen)
+   - Node: `package.json` (regenerate lockfile:
+     `npm install --package-lock-only`, `pnpm install --lockfile-only`, or
+     `yarn install --mode=update-lockfile`, match project's package manager)
+   - Python: `pyproject.toml` / `setup.py` / `setup.cfg` (regenerate `uv.lock` /
+     `poetry.lock` if present)
+   - Go: module `version` tag (no manifest bump; tag suffices)
+   - PHP: `composer.json` (regenerate `composer.lock` with
+     `composer update --lock`)
+   - Generic: `VERSION` file or language equivalent
+2. **Update CHANGELOG** before committing. If `CHANGELOG.md` (or equivalent:
+   `CHANGES.md`, `HISTORY.md`, `RELEASES.md`) exists in the repo:
+   - Move entries under `## [Unreleased]` to a new `## [X.Y.Z] - YYYY-MM-DD`
+     heading, keeping `## [Unreleased]` empty above it.
+   - **Update the link block at the bottom** — the half that gets forgotten.
+     Where the file keeps reference links, add the new version's **own** compare
+     link and **repoint** `[Unreleased]` at the tag you are about to create:
+
+     ```
+     [Unreleased]: https://…/compare/vX.Y.Z...HEAD     ← now the NEW version
+     [X.Y.Z]:      https://…/compare/vPREV...vX.Y.Z    ← added
+     ```
+
+     Miss the repoint and `[Unreleased]` shows this release's own changes
+     forever; miss the new link and the heading is dead. Before committing,
+     confirm every `## [version]` heading has a matching `[version]:` reference
+     — a release is when they drift and nothing else will flag it.
+
+   - If `Unreleased` is empty or missing, draft entries from the unreleased
+     commit log (`git log $(git describe --tags --abbrev=0)..HEAD`) using
+     Keep-a-Changelog sections (`Added` / `Changed` / `Fixed` / `Removed` /
+     `Deprecated` / `Breaking`). Be specific — name the APIs / files / behaviors
+     that changed; don't just rephrase commit subjects.
+   - Run `prettier --write` on the file per the markdown rule below.
+   - Stage `CHANGELOG.md` alongside the manifest in step 3. If no changelog file
+     exists, start one at this release rather than skipping it: the entries for
+     THIS version drafted from the commit range, under an empty
+     `## [Unreleased]` heading above them.
+
+3. **C**ommit version bump with message `chore: bump version`. Stage only
+   manifest, lockfile, and changelog.
+4. **T**ag commit as `vX.Y.Z` matching new version. The tree must be green first
+   — a tag is not something you can take back, and never move or reuse one that
+   already exists; cut the next version instead.
+5. **P**ush commit and tag to remote.
+6. **Watch the tag's CI run to completion, and confirm it published.** A push
+   succeeding means the tag exists, nothing more. Release pipelines gate their
+   publish jobs on the build jobs, so one red check does not fail loudly — it
+   **skips** the publish steps and leaves a green-looking push, a tag on the
+   remote, and nothing released. Enumerate the run's jobs rather than trusting
+   its summary, then check the artifact actually landed (the release page, the
+   registry). "Tagged and pushed" is not "released", and only one of them is
+   what was asked.
+
+Defaults:
+
+- Patch bump unless user says minor/major — **except** that below 1.0 (`0.y.z`)
+  a breaking change bumps the MINOR. A changed public signature counts, even
+  when the caller is in the same workspace. A minor bump also means updating any
+  internal dependency pins that name the old version, which a patch bump never
+  surfaces.
+- Never skip hooks or force-push.
+- No version field → ask before proceeding.
+- CI/deploy triggered by version tags → push starts the release; step 6 is what
+  finishes it. No manual deploy.
+
+## Aliases
+
+- **cut** / **cut release** — alias for **BCTP**.
+
+## Caveman
+
+Terse like caveman. Technical substance exact. Only fluff die. Drop: articles,
+filler (just/really/basically), pleasantries, hedging. Fragments OK. Short
+synonyms. Code unchanged. Pattern: [thing] [action] [reason]. [next step].
+ACTIVE EVERY RESPONSE. No revert after many turns. No filler drift.
+Code/commits/PRs: normal. Off: "stop caveman" / "normal mode".
+
+<!-- hrdr:ignore-below -->
+
+<!--
+Everything below this marker is guidance hrdr already ships in its own prompt
+templates, so hrdr truncates the file here (crates/hrdr-agent/src/prompt.rs,
+`AGENTS_IGNORE_MARKER`) and reads only what is above. It stays in the file
+because the other harnesses that read AGENTS.md — Claude Code, Codex, opencode —
+do NOT ship it and still need it. Moving a section across this line is the only
+thing that decides which side gets it.
+-->
+
 ## Staging Commits
 
 Always stage explicit files: `git add {file_name}` per file. Never `git add -A`,
@@ -42,6 +157,20 @@ cat > file.md <<'EOF'
 Literal `backticks` and $(command) and $vars, no escaping.
 EOF
 ```
+
+## Searching
+
+**A search hit is a location, not an answer.** Grep tells you WHERE something
+is; it never tells you what it does. A matching line arrives stripped of the
+things that decide its meaning — the guard above it, the negation in the
+condition, the early return, the `cfg`/feature flag that makes it dead here, the
+later definition that shadows it, the comment saying it is the deprecated copy.
+
+**So treat every match as a coordinate, then go read it.** Open that file with
+the read tool using `offset`/`limit` around the hit, wide enough to take in the
+whole function or block it sits in. Answering from the match line, editing from
+it, or citing it as the implementation is how a turn produces a confident and
+precisely wrong account of the code.
 
 ## Prettier for all
 
@@ -71,25 +200,6 @@ a single space, on both sides of the comparison — so it tracks the words inste
 of the columns. Done that way the assertion keeps its teeth: it still fails on a
 real wording change, and stops failing on reformats. Verify both halves before
 believing it.
-
-## Rust
-
-Rust project changes → always run `cargo clippy --all-targets -- -D warnings`,
-`cargo fmt --all`, `cargo test` after. All three, every time — clippy and the
-tests green while `cargo fmt --all` was skipped is a red CI run over whitespace.
-
-Run them on the **workspace**, not just the crate you touched: a change that is
-locally correct while breaking something elsewhere is the whole reason the rest
-of the suite exists.
-
-`cargo` here runs through a wrapper that **indents** its `error:` lines, so
-`grep -E '^error'` reports a false pass. Read the summary line it prints.
-
-Platform-gated code (`#[cfg(windows)]`, `#[cfg(target_os = "macos")]`) is not
-compiled by a local run at all, so a green local pass says nothing about it —
-that verdict only comes from CI, and each round trip is a full run. Expect the
-misses to be constants and types that moved between crate versions; spell a
-known-fixed ABI value out locally rather than importing it.
 
 ## Scope
 
@@ -464,91 +574,6 @@ Keeping it honest:
   and a stale backlog is worse than a short one.
 
 Run `prettier --write docs/backlog.md`, per the markdown rule above.
-
-## BCTP Workflow
-
-User says "**BCTP**", execute in order:
-
-1. **B**ump patch version (semver) in manifest. Detect automatically:
-   - Rust: `Cargo.toml` (regenerate `Cargo.lock` with `cargo generate-lockfile`
-     if `Cargo.lock` is tracked; library crates that gitignore `Cargo.lock` skip
-     the regen)
-   - Node: `package.json` (regenerate lockfile:
-     `npm install --package-lock-only`, `pnpm install --lockfile-only`, or
-     `yarn install --mode=update-lockfile`, match project's package manager)
-   - Python: `pyproject.toml` / `setup.py` / `setup.cfg` (regenerate `uv.lock` /
-     `poetry.lock` if present)
-   - Go: module `version` tag (no manifest bump; tag suffices)
-   - PHP: `composer.json` (regenerate `composer.lock` with
-     `composer update --lock`)
-   - Generic: `VERSION` file or language equivalent
-2. **Update CHANGELOG** before committing. If `CHANGELOG.md` (or equivalent:
-   `CHANGES.md`, `HISTORY.md`, `RELEASES.md`) exists in the repo:
-   - Move entries under `## [Unreleased]` to a new `## [X.Y.Z] - YYYY-MM-DD`
-     heading, keeping `## [Unreleased]` empty above it.
-   - **Update the link block at the bottom** — the half that gets forgotten.
-     Where the file keeps reference links, add the new version's **own** compare
-     link and **repoint** `[Unreleased]` at the tag you are about to create:
-
-     ```
-     [Unreleased]: https://…/compare/vX.Y.Z...HEAD     ← now the NEW version
-     [X.Y.Z]:      https://…/compare/vPREV...vX.Y.Z    ← added
-     ```
-
-     Miss the repoint and `[Unreleased]` shows this release's own changes
-     forever; miss the new link and the heading is dead. Before committing,
-     confirm every `## [version]` heading has a matching `[version]:` reference
-     — a release is when they drift and nothing else will flag it.
-
-   - If `Unreleased` is empty or missing, draft entries from the unreleased
-     commit log (`git log $(git describe --tags --abbrev=0)..HEAD`) using
-     Keep-a-Changelog sections (`Added` / `Changed` / `Fixed` / `Removed` /
-     `Deprecated` / `Breaking`). Be specific — name the APIs / files / behaviors
-     that changed; don't just rephrase commit subjects.
-   - Run `prettier --write` on the file per the markdown rule below.
-   - Stage `CHANGELOG.md` alongside the manifest in step 3. If no changelog file
-     exists, start one at this release rather than skipping it: the entries for
-     THIS version drafted from the commit range, under an empty
-     `## [Unreleased]` heading above them.
-
-3. **C**ommit version bump with message `chore: bump version`. Stage only
-   manifest, lockfile, and changelog.
-4. **T**ag commit as `vX.Y.Z` matching new version. The tree must be green first
-   — a tag is not something you can take back, and never move or reuse one that
-   already exists; cut the next version instead.
-5. **P**ush commit and tag to remote.
-6. **Watch the tag's CI run to completion, and confirm it published.** A push
-   succeeding means the tag exists, nothing more. Release pipelines gate their
-   publish jobs on the build jobs, so one red check does not fail loudly — it
-   **skips** the publish steps and leaves a green-looking push, a tag on the
-   remote, and nothing released. Enumerate the run's jobs rather than trusting
-   its summary, then check the artifact actually landed (the release page, the
-   registry). "Tagged and pushed" is not "released", and only one of them is
-   what was asked.
-
-Defaults:
-
-- Patch bump unless user says minor/major — **except** that below 1.0 (`0.y.z`)
-  a breaking change bumps the MINOR. A changed public signature counts, even
-  when the caller is in the same workspace. A minor bump also means updating any
-  internal dependency pins that name the old version, which a patch bump never
-  surfaces.
-- Never skip hooks or force-push.
-- No version field → ask before proceeding.
-- CI/deploy triggered by version tags → push starts the release; step 6 is what
-  finishes it. No manual deploy.
-
-## Aliases
-
-- **cut** / **cut release** — alias for **BCTP**.
-
-## Caveman
-
-Terse like caveman. Technical substance exact. Only fluff die. Drop: articles,
-filler (just/really/basically), pleasantries, hedging. Fragments OK. Short
-synonyms. Code unchanged. Pattern: [thing] [action] [reason]. [next step].
-ACTIVE EVERY RESPONSE. No revert after many turns. No filler drift.
-Code/commits/PRs: normal. Off: "stop caveman" / "normal mode".
 
 ## Agents
 
