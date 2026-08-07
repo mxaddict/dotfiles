@@ -25,7 +25,7 @@ Shutdown)
     cmd="poweroff"
     ;;
 Logout)
-    cmd="hyprctl dispatch exit"
+    cmd="hyprctl dispatch 'hl.dsp.exit()'"
     ;;
 Reboot)
     cmd="reboot"
