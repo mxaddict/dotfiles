@@ -193,8 +193,10 @@ hl.bind(mod .. " + CTRL + L", hl.dsp.exec_cmd("krypt menu autofill -- pass"))
 hl.bind(mod .. " + CTRL + semicolon", hl.dsp.exec_cmd("krypt menu autofill -- otp"))
 
 -- Systemcontrol binds
-hl.bind(mod .. " + F", hl.dsp.window.fullscreen({ action = "set" }))
-hl.bind(mod .. " + SHIFT + F", hl.dsp.window.fullscreen({ action = "unset" }))
+-- `fullscreen 1` / `fullscreen 0` in the old hyprlang config were toggles:
+-- mode 1 = maximize, mode 0 = fullscreen (see the 0.54 dispatcher docs).
+hl.bind(mod .. " + F", hl.dsp.window.fullscreen({ mode = "maximized" }))
+hl.bind(mod .. " + SHIFT + F", hl.dsp.window.fullscreen({ mode = "fullscreen" }))
 hl.bind(mod .. " + Q", hl.dsp.window.kill())
 hl.bind(mod .. " + S", hl.dsp.layout("togglesplit"))
 hl.bind(mod .. " + V", hl.dsp.window.float({ action = "toggle" }))
