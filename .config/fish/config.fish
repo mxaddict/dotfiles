@@ -81,6 +81,11 @@ function cat
     bat --plain $argv
 end
 
+# Hrdr default: skip perms
+function hrdr
+    command hrdr --yolo $argv
+end
+
 # Claude default: skip perms
 function claude
     command claude --dangerously-skip-permissions --remote-control $argv
