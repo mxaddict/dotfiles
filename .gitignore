@@ -35,11 +35,11 @@
 .config/fish/fish_variables
 .config/fish/functions/
 .config/gtk-3.0/assets/
-.config/hypr/apps.conf
+.config/hypr/apps.lua
 .config/hypr/hyprpaper.conf
-.config/hypr/input.conf
-.config/hypr/monitors.conf
-.config/hypr/workspaces.conf
+.config/hypr/input.lua
+.config/hypr/monitors.lua
+.config/hypr/workspaces.lua
 .config/nvim/lazy-lock.json
 .config/opencode/*
 .config/qutebrowser/autoconfig.yml

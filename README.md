@@ -106,7 +106,7 @@ Bash scripts in `.local/bin/.*` (e.g. `.menu-power`, `.kanata`, `t`) **stay on
 disk** — krypt invokes them via `[[command]]` entries. They get full
 `shellcheck` + `ft=bash` treatment instead of being inlined into TOML strings.
 
-The Hyprland keybinds in `hyprland.conf` now invoke `krypt menu <name>` instead
+The Hyprland keybinds in `hyprland.lua` now invoke `krypt menu <name>` instead
 of the scripts directly. Same for waybar `on-click` handlers.
 
 ## Templates (user-specific, gitignored)
@@ -114,24 +114,24 @@ of the scripts directly. Same for waybar `on-click` handlers.
 `krypt setup` seeds these from `*.template.*` files on first run. Re-running is
 safe — krypt only seeds files that don't exist yet.
 
-| Template (repo)                        | Destination                     | Purpose                          |
-| -------------------------------------- | ------------------------------- | -------------------------------- |
-| `.gitconfig.local.template`            | `~/.gitconfig.local`            | Name, email, GPG                 |
-| `.config/hypr/apps.template.conf`      | `~/.config/hypr/apps.conf`      | `$terminal`, `$browser`, `$lock` |
-| `.config/hypr/input.template.conf`     | `~/.config/hypr/input.conf`     | Keyboard layout                  |
-| `.config/hypr/monitors.template.conf`  | `~/.config/hypr/monitors.conf`  | Monitor positions                |
-| `.config/hypr/hyprpaper.template.conf` | `~/.config/hypr/hyprpaper.conf` | Wallpaper                        |
+| Template (repo)                        | Destination                     | Purpose                         |
+| -------------------------------------- | ------------------------------- | ------------------------------- |
+| `.gitconfig.local.template`            | `~/.gitconfig.local`            | Name, email, GPG                |
+| `.config/hypr/apps.template.lua`       | `~/.config/hypr/apps.lua`       | Terminal, browser, file manager |
+| `.config/hypr/input.template.lua`      | `~/.config/hypr/input.lua`      | Keyboard layout                 |
+| `.config/hypr/monitors.template.lua`   | `~/.config/hypr/monitors.lua`   | Monitor positions               |
+| `.config/hypr/hyprpaper.template.conf` | `~/.config/hypr/hyprpaper.conf` | Wallpaper                       |
 
 ### Files to edit per-machine
 
 1. `~/.gitconfig.local` — identity + signing.
-2. `~/.config/hypr/monitors.conf` — `hyprctl monitors` to discover names.
-3. `~/.config/hypr/apps.conf` — terminal / browser / file manager defaults.
-4. `~/.config/hypr/input.conf` — change `kb_layout` if not US.
+2. `~/.config/hypr/monitors.lua` — `hyprctl monitors` to discover names.
+3. `~/.config/hypr/apps.lua` — terminal / browser / file manager defaults.
+4. `~/.config/hypr/input.lua` — change `kb_layout` if not US.
 
 Optional:
 
-- `~/.config/hypr/workspaces.conf` — pin workspaces to monitors.
+- `~/.config/hypr/workspaces.lua` — pin workspaces to monitors.
 - `~/.config/hypr/hyprpaper.conf` — wallpaper path.
 - `.codex/config.toml`, `.config/opencode/opencode.json` — Ollama host.
 
@@ -223,8 +223,8 @@ To add a new menu (e.g. `krypt menu screenshot`):
 
 1. Add `[[command]] group = "menu" name = "screenshot" steps = […]` to
    `.krypt/commands.toml`.
-2. (Optional) Add the Hyprland bind in `.config/hypr/hyprland.conf`:
-   `bind = $mod shift, s, exec, krypt menu screenshot`.
+2. (Optional) Add the Hyprland bind in `.config/hypr/hyprland.lua`:
+   `hl.bind("SUPER + SHIFT + S", hl.dsp.exec_cmd("krypt menu screenshot"))`.
 3. `krypt validate` — fail fast on config errors.
 
 ## Convention: dotfile-prefixed scripts

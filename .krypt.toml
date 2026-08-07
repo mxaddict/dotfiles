@@ -27,14 +27,14 @@ dst     = "${HOME}/.gitconfig.local"
 prompts = ["git"]
 
 [[template]]
-src      = ".config/hypr/apps.template.conf"
-dst      = "${XDG_CONFIG}/hypr/apps.conf"
+src      = ".config/hypr/apps.template.lua"
+dst      = "${XDG_CONFIG}/hypr/apps.lua"
 prompts  = ["hypr_apps"]
 platform = "linux"
 
 [[template]]
-src      = ".config/hypr/input.template.conf"
-dst      = "${XDG_CONFIG}/hypr/input.conf"
+src      = ".config/hypr/input.template.lua"
+dst      = "${XDG_CONFIG}/hypr/input.lua"
 prompts  = ["hypr_input"]
 platform = "linux"
 
@@ -47,8 +47,8 @@ platform = "linux"
 
 # Seed monitor config from template; hand-curated per machine (no prompts).
 [[template]]
-src      = ".config/hypr/monitors.template.conf"
-dst      = "${XDG_CONFIG}/hypr/monitors.conf"
+src      = ".config/hypr/monitors.template.lua"
+dst      = "${XDG_CONFIG}/hypr/monitors.lua"
 prompts  = []
 platform = "linux"
 
@@ -85,35 +85,31 @@ requires = "user.signingkey"
 
 [prompts.hypr_apps]
 heading = "Hyprland application defaults"
-writer  = "hypr_vars"
+writer  = "generic_template"
 
 [[prompts.hypr_apps.fields]]
-key      = "terminal"
-prompt   = "Terminal command"
-default  = "alacritty"
-read_var = "terminal"
+key     = "terminal"
+prompt  = "Terminal command"
+default = "alacritty"
 
 [[prompts.hypr_apps.fields]]
-key      = "browser"
-prompt   = "Browser launcher"
-default  = "~/.local/bin/.browser"
-read_var = "browser"
+key     = "browser"
+prompt  = "Browser launcher"
+default = "~/.local/bin/.browser"
 
 [[prompts.hypr_apps.fields]]
-key      = "filemanager"
-prompt   = "File manager command"
-default  = "nautilus -w"
-read_var = "filemanager"
+key     = "filemanager"
+prompt  = "File manager command"
+default = "nautilus -w"
 
 [[prompts.hypr_apps.fields]]
-key      = "lock"
-prompt   = "Lock screen command"
-default  = "hyprlock"
-read_var = "lock"
+key     = "lock"
+prompt  = "Lock screen command"
+default = "hyprlock"
 
 [prompts.hypr_input]
 heading = "Hyprland keyboard / input"
-writer  = "hypr_vars"
+writer  = "generic_template"
 
 [[prompts.hypr_input.fields]]
 key     = "kb_layout"
@@ -134,7 +130,7 @@ ignore_failure = true
 name           = "ensure-hypr-workspaces"
 when           = "post-update"
 if             = "platform:linux"
-run            = ["bash", "-c", "mkdir -p ${XDG_CONFIG}/hypr && touch ${XDG_CONFIG}/hypr/workspaces.conf"]
+run            = ["bash", "-c", "mkdir -p ${XDG_CONFIG}/hypr && touch ${XDG_CONFIG}/hypr/workspaces.lua"]
 ignore_failure = true
 
 [[hook]]

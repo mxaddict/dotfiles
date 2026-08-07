@@ -60,12 +60,12 @@ dst = "${XDG_CONFIG}/gtk-3.0/"
 src_glob = ".config/gtk-4.0/**/*"
 dst = "${XDG_CONFIG}/gtk-4.0/"
 
-# Hyprland: only versioned files; the live *.conf (apps.conf, input.conf,
-# monitors.conf, hyprpaper.conf, workspaces.conf) are gitignored and managed
-# via [[template]] entries in .krypt.toml.
+# Hyprland: only versioned files; the live *.lua (apps.lua, input.lua,
+# monitors.lua, workspaces.lua) are gitignored and managed via [[template]]
+# entries in .krypt.toml. hyprpaper.conf is seeded from its own template.
 [[link]]
-src = ".config/hypr/hyprland.conf"
-dst = "${XDG_CONFIG}/hypr/hyprland.conf"
+src = ".config/hypr/hyprland.lua"
+dst = "${XDG_CONFIG}/hypr/hyprland.lua"
 
 [[link]]
 src = ".config/hypr/hypridle.conf"
