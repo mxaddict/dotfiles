@@ -78,5 +78,5 @@
   "skipDangerousModePermissionPrompt": true,
   "theme": "dark",
   "skipAutoPermissionPrompt": true,
-  "awaySummaryEnabled": false
+  "switchModelsOnFlag": false
 }
