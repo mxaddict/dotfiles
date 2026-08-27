@@ -12,14 +12,14 @@ require("input")
 
 -- Execute your favorite apps at launch
 hl.on("hyprland.start", function()
-    hl.exec_cmd("hyprctl setcursor Breeze_Light 24")
-    hl.exec_cmd("hypridle")
-    hl.exec_cmd("hyprpaper")
-    hl.exec_cmd("waybar")
-    hl.exec_cmd("swaync")
-    hl.exec_cmd("swayosd-server")
-    hl.exec_cmd("systemctl --user start hyprpolkitagent")
-    hl.exec_cmd("dbus-update-activation-environment --systemd --all")
+  hl.exec_cmd("hyprctl setcursor Breeze_Light 24")
+  hl.exec_cmd("hypridle")
+  hl.exec_cmd("hyprpaper")
+  hl.exec_cmd("waybar")
+  hl.exec_cmd("swaync")
+  hl.exec_cmd("swayosd-server")
+  hl.exec_cmd("systemctl --user start hyprpolkitagent")
+  hl.exec_cmd("dbus-update-activation-environment --systemd --all")
 end)
 
 -- Set cursor theme and size
@@ -38,49 +38,49 @@ hl.env("XDG_SESSION_DESKTOP", "Hyprland")
 hl.env("XDG_SESSION_TYPE", "wayland")
 
 hl.config({
-    misc = {
-        disable_hyprland_logo = true,
-        mouse_move_enables_dpms = true,
-        key_press_enables_dpms = true,
+  misc = {
+    disable_hyprland_logo = true,
+    mouse_move_enables_dpms = true,
+    key_press_enables_dpms = true,
 
-        vrr = true,
+    vrr = true,
+  },
+
+  debug = {
+    vfr = true,
+  },
+
+  general = {
+    gaps_in = 4,
+    gaps_out = 8,
+    border_size = 2,
+    col = {
+      active_border = { colors = { "rgb(33ccff)", "rgb(00ff99)" }, angle = 45 },
+      inactive_border = "rgb(595959)",
     },
 
-    debug = {
-        vfr = true,
-    },
+    layout = "dwindle",
+  },
 
-    general = {
-        gaps_in = 4,
-        gaps_out = 8,
-        border_size = 2,
-        col = {
-            active_border = { colors = { "rgb(33ccff)", "rgb(00ff99)" }, angle = 45 },
-            inactive_border = "rgb(595959)",
-        },
+  decoration = {
+    rounding = 4,
+    blur = { enabled = false },
+    shadow = { enabled = false },
+  },
 
-        layout = "dwindle",
-    },
+  animations = {
+    enabled = false,
+  },
 
-    decoration = {
-        rounding = 4,
-        blur = { enabled = false },
-        shadow = { enabled = false },
-    },
-
-    animations = {
-        enabled = false,
-    },
-
-    dwindle = {
-        preserve_split = true,
-    },
+  dwindle = {
+    preserve_split = true,
+  },
 })
 
 -- Red border when fullscreen
 hl.window_rule({
-    match = { fullscreen = true },
-    border_color = { colors = { "rgb(ff9e64)", "rgb(880808)" }, angle = 45 },
+  match = { fullscreen = true },
+  border_color = { colors = { "rgb(ff9e64)", "rgb(880808)" }, angle = 45 },
 })
 
 -- WINE STUFF: hide explorer.exe windows
@@ -94,22 +94,22 @@ hl.window_rule({ match = wine, workspace = "10 silent" })
 
 -- Force some apps/windows to be floating
 for _, cls in ipairs({
-    "^(blueman-manager)$",
-    "^(nm-connection-editor)$",
-    "^(nwg-displays)$",
-    "^(nwg-look)$",
-    "^(org.kde.kcalc)$",
+  "^(blueman-manager)$",
+  "^(nm-connection-editor)$",
+  "^(nwg-displays)$",
+  "^(nwg-look)$",
+  "^(org.kde.kcalc)$",
 }) do
-    hl.window_rule({ match = { class = cls }, float = true })
+  hl.window_rule({ match = { class = cls }, float = true })
 end
 for _, title in ipairs({
-    "^(Calculator)(.*)$",
-    "^(Friends List)(.*)$",
-    "^(MetaMask)(.*)$",
-    "^(Steam - News)(.*)$",
-    "^(btop)(.*)$",
+  "^(Calculator)(.*)$",
+  "^(Friends List)(.*)$",
+  "^(MetaMask)(.*)$",
+  "^(Steam - News)(.*)$",
+  "^(btop)(.*)$",
 }) do
-    hl.window_rule({ match = { title = title }, float = true })
+  hl.window_rule({ match = { title = title }, float = true })
 end
 hl.window_rule({ match = { class = "floating|bloating" }, float = true })
 hl.window_rule({ match = { class = "floating" }, size = { 800, 600 } })
@@ -126,17 +126,27 @@ hl.window_rule({ match = share, workspace = "10 silent" })
 
 -- Send apps to their workspaces
 local workspace_rules = {
-    { "2 silent", { "^(.*)discord.com(.*)$", "^(.*)teams.microsoft.com(.*)$", "^(.*)teams.cloud.microsoft(.*)$", "discord", "org.telegram.desktop", "teams-for-linux" } },
-    { "3 silent", { "org.mozilla.Thunderbird" } },
-    { "7 silent", { "Exodus", "Navcoin-Qt" } },
-    { "8 silent", { "lutris", "steam" } },
-    { "9 silent", { "^(.*)open.spotify.com(.*)$", "obs", "spotify" } },
+  {
+    "2 silent",
+    {
+      "^(.*)discord.com(.*)$",
+      "^(.*)teams.microsoft.com(.*)$",
+      "^(.*)teams.cloud.microsoft(.*)$",
+      "discord",
+      "org.telegram.desktop",
+      "teams-for-linux",
+    },
+  },
+  { "3 silent", { "org.mozilla.Thunderbird" } },
+  { "7 silent", { "Exodus", "Navcoin-Qt" } },
+  { "8 silent", { "lutris", "steam" } },
+  { "9 silent", { "^(.*)open.spotify.com(.*)$", "obs", "spotify" } },
 }
 for _, entry in ipairs(workspace_rules) do
-    local ws, classes = entry[1], entry[2]
-    for _, cls in ipairs(classes) do
-        hl.window_rule({ match = { class = cls }, workspace = ws })
-    end
+  local ws, classes = entry[1], entry[2]
+  for _, cls in ipairs(classes) do
+    hl.window_rule({ match = { class = cls }, workspace = ws })
+  end
 end
 
 -- See https://wiki.hypr.land/Configuring/Basics/Binds/ for more
@@ -197,7 +207,7 @@ hl.bind(mod .. " + CTRL + semicolon", hl.dsp.exec_cmd("krypt menu autofill -- ot
 -- mode 1 = maximize, mode 0 = fullscreen (see the 0.54 dispatcher docs).
 hl.bind(mod .. " + F", hl.dsp.window.fullscreen({ mode = "maximized" }))
 hl.bind(mod .. " + SHIFT + F", hl.dsp.window.fullscreen({ mode = "fullscreen" }))
-hl.bind(mod .. " + Q", hl.dsp.window.kill())
+hl.bind(mod .. " + Q", hl.dsp.window.close())
 hl.bind(mod .. " + S", hl.dsp.layout("togglesplit"))
 hl.bind(mod .. " + V", hl.dsp.window.float({ action = "toggle" }))
 
@@ -249,9 +259,9 @@ hl.bind(mod .. " + SHIFT + J", hl.dsp.window.move({ direction = "d" }))
 -- Switch workspaces with mod + [0-9]
 -- Move active window to a workspace with mod + shift + [0-9]
 for i = 1, 10 do
-    local key = i % 10 -- 10 maps to key 0
-    hl.bind(mod .. " + " .. key, hl.dsp.focus({ workspace = i }))
-    hl.bind(mod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i }))
+  local key = i % 10 -- 10 maps to key 0
+  hl.bind(mod .. " + " .. key, hl.dsp.focus({ workspace = i }))
+  hl.bind(mod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i }))
 end
 
 -- Move/resize windows with mod + LMB/RMB and dragging
