@@ -50,6 +50,8 @@
 .local/bin/acli
 .local/bin/claude
 .local/bin/codex
+.local/bin/dxc
+.local/bin/slangc
 butler
 compile_commands.json
 history.txt
