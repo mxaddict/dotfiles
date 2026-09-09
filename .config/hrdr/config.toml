@@ -1,5 +1,2 @@
-timestamps = "relative"
-show_thinking = true
 statusbar = "truncate"
-theme = "tokyonight"
-model = "go://deepseek-v4-flash"
+model = "deepseek://deepseek-v4-flash"
