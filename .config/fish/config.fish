@@ -86,6 +86,11 @@ function hrdr
     command hrdr --yolo $argv
 end
 
+# Codex default: skip approvals and sandbox
+function codex
+    command codex --dangerously-bypass-approvals-and-sandbox $argv
+end
+
 # Claude default: skip perms
 function claude
     command claude --dangerously-skip-permissions --remote-control $argv
