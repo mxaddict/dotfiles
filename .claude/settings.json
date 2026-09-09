@@ -73,7 +73,6 @@
     }
   },
   "effortLevel": "high",
-  "autoCompactWindow": 500000,
   "tui": "fullscreen",
   "skipDangerousModePermissionPrompt": true,
   "theme": "dark",
