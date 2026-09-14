@@ -1,59 +1,423 @@
 #!/usr/bin/env bash
 # vi: ft=bash
 
-pkill -9 nmcli
+runtime=${XDG_RUNTIME_DIR:-/tmp}
+double_click_ms=400
+fresh_scan_ms=30000
 
-pikr_kill() {
-    pkill -9 pikr
+notify() {
+    # swaync renders body markup, and an SSID can contain & < >. The quoted
+    # replacements keep bash's patsub_replacement from reading & as the match.
+    local body=${1//'&'/'&amp;'}
+    body=${body//'<'/'&lt;'}
+    body=${body//'>'/'&gt;'}
+    command -v notify-send >/dev/null && notify-send -- "Wi-Fi" "$body"
 }
 
-pikr_kill && exit 0
+# English messages whatever the locale: the script matches words nmcli
+# translates ("yes", "running", "enabled", "secrets", "Error:"). LC_MESSAGES=C
+# also overrides LANGUAGE. LC_ALL would override LC_MESSAGES, so its value is
+# moved to LANG and LC_CTYPE, keeping SSID bytes and bar glyphs as they were.
+nmcli() {
+    local lang=${LC_ALL:-$LANG} ctype=${LC_ALL:-${LC_CTYPE:-$LANG}}
+    LC_ALL='' LANG=$lang LC_CTYPE=$ctype LC_MESSAGES=C command nmcli "$@"
+}
 
-lock=
+# The reason from nmcli's output ($1) for a notification. A failed activation
+# also prints secret-agent warnings and a journalctl hint around the
+# "Error:" line.
+nm_error() {
+    local error
+    error=$(grep -m 1 '^Error: ' <<<"$1")
+    error=${error#Error: }
+    printf '%s' "${error:-$1}"
+}
 
-ssids=$(nmcli -g ssid device wifi list | sort | uniq)
-ssid_active=$(nmcli -g active,ssid dev wifi | grep '^yes' | cut -d: -f2)
+# Milliseconds since boot. Unlike the wall clock it never steps backwards,
+# which would leave a stamp in the future and the menu refusing to open.
+uptime_ms() {
+    awk '{ printf "%d", $1 * 1000 }' /proc/uptime
+}
 
-list=$(
+# A press within double_click_ms of the picker being launched is the second
+# half of a double-click — ignore it. Checked before the toggle so it also
+# covers the moment before pikr's window exists.
+stamp="$runtime/menu-wifi.opened"
+opened=$(cat "$stamp" 2>/dev/null)
+[[ $opened =~ ^[0-9]+$ ]] || opened=0
+elapsed=$(($(uptime_ms) - opened))
+((elapsed >= 0 && elapsed < double_click_ms)) && exit 0
+
+# Toggle: a later press while this menu's picker or password prompt is open
+# closes it. Matched on pikr's arguments so other pikr menus are left alone.
+menu_pikr='^pikr -d (-p Wi-Fi|-P -p Password for )'
+if pgrep -f "$menu_pikr" >/dev/null; then
+    pkill -f "$menu_pikr"
+    exit 0
+fi
+
+# Serialise runs. The lock is held while the run starts up (device lookup,
+# first scan read, the stock-pikr scanning modal) and again from the pick
+# until the run ends, so a click in either window bails instead of starting
+# a second menu. It is released while the picker is open, where the toggle
+# above handles clicks.
+exec 9>"$runtime/menu-wifi.lock"
+flock -n 9 || exit 0
+
+if [[ $(nmcli -g RUNNING general 2>/dev/null) != running ]]; then
+    notify "NetworkManager isn't running"
+    exit
+fi
+wifi_dev=$(nmcli -g DEVICE,TYPE dev | awk -F: '$2 == "wifi" { print $1; exit }')
+if [[ -z $wifi_dev ]]; then
+    notify "No Wi-Fi device"
+    exit
+fi
+if [[ $(nmcli radio wifi) != enabled ]]; then
+    notify "Wi-Fi is off"
+    exit
+fi
+# Radio on but the device can't scan or connect (unmanaged, or unavailable
+# while wpa_supplicant is down): say so instead of opening an empty picker.
+if [[ $(nmcli -g GENERAL.STATE device show "$wifi_dev") == @(10|20)\ * ]]; then
+    notify "$wifi_dev is unavailable"
+    exit
+fi
+dbus_path=$(nmcli -g GENERAL.DBUS-PATH device show "$wifi_dev" 2>/dev/null)
+
+# nmcli's --rescan is an option of `dev wifi list` and must follow it.
+#
+# Reading NetworkManager's cache is instant, but once associated NM scans
+# rarely and lets other access points expire — the cache can hold just the
+# network you're on. So trust it only if the last scan is within
+# fresh_scan_ms (nmcli's own --rescan auto uses the same cutoff). Otherwise
+# wait for a real scan: ~2.5 s on junji-pc, ~7.7 s on the T14's QCNFA765.
+#
+# Every field but SSID is a number, a bars glyph or a security word, none of
+# which contain the ":" or "\" that -g escapes, so SSID (last) is the only
+# field that needs unescaping.
+read_scan() {
+    nmcli -g active,signal,bars,security,ssid dev wifi list ifname "$wifi_dev" --rescan no
+}
+last_scan() {
+    busctl get-property org.freedesktop.NetworkManager "$dbus_path" \
+        org.freedesktop.NetworkManager.Device.Wireless LastScan 2>/dev/null | awk '{ print $2 }'
+}
+
+before=$(last_scan)
+now=$(uptime_ms)
+fresh=false
+[[ ${before:--1} -ge 0 ]] && ((now - before <= fresh_scan_ms)) && fresh=true
+
+# Always request a rescan so the next open is current. NM rejects the request
+# while the device can't scan; only wait on one it accepted. An accepted
+# request can still be rate-limited and never run, so the wait is capped.
+rescan_ok=false
+nmcli device wifi rescan ifname "$wifi_dev" >/dev/null 2>&1 && rescan_ok=true
+
+wait_for_scan() {
+    local scanned
+    for _ in $(seq 1 60); do
+        sleep 0.2
+        scanned=$(last_scan)
+        # An empty read means there is no LastScan to watch (busctl failed or
+        # the device went away), so waiting longer can't help.
+        [[ -z $scanned || $scanned != "$before" ]] && break
+    done
+}
+
+# The network the device is on, from its active profile rather than the scan's
+# "active" column, which parse_scan can only read from an SSID's first line:
+# nmcli doesn't escape newlines in SSIDs.
+active_ssid() {
+    local uuid
+    uuid=$(nmcli -g GENERAL.CON-UUID device show "$wifi_dev")
+    [[ -n $uuid ]] && nmcli -e no -g 802-11-wireless.ssid connection show uuid "$uuid"
+}
+
+# How much an access point's security string asks of the client: nothing,
+# OWE (encrypted but no password), or anything else (password or refused).
+security_rank() {
+    case $1 in
+        "") echo 0 ;;
+        OWE | OWE-TM) echo 1 ;;
+        *) echo 2 ;;
+    esac
+}
+
+# One entry per SSID from $scan: the strongest access point's signal and
+# bars, and the most demanding security string among its access points, so a
+# spoofed open or OWE twin can't downgrade the prompt whatever its signal.
+declare -A signal_of bars_of security_of
+parse_scan() {
+    local line active signal bars security escaped ssid strongest known rank known_rank
+    signal_of=() bars_of=() security_of=()
+    while IFS= read -r line; do
+        active=${line%%:*} line=${line#*:}
+        signal=${line%%:*} line=${line#*:}
+        bars=${line%%:*} line=${line#*:}
+        security=${line%%:*} escaped=${line#*:}
+        # A line that isn't a well-formed scan row is the tail of an SSID
+        # containing a newline.
+        [[ $active == @(yes|no) && $signal =~ ^(0|[1-9][0-9]?|100)$ ]] || continue
+        # Undo -g's escaping: a backslash makes the next character literal.
+        ssid=
+        while [[ $escaped == *\\* ]]; do
+            ssid+=${escaped%%\\*}
+            escaped=${escaped#*\\}
+            ssid+=${escaped:0:1}
+            escaped=${escaped:1}
+        done
+        ssid+=$escaped
+        # Hidden networks have no SSID.
+        [[ -z $ssid ]] && continue
+        strongest=${signal_of["$ssid"]:--1} known=${security_of["$ssid"]-}
+        if ((signal > strongest)); then
+            signal_of["$ssid"]=$signal
+            bars_of["$ssid"]=${bars//\*/█}
+        fi
+        rank=$(security_rank "$security") known_rank=$(security_rank "$known")
+        if ((strongest < 0 || rank > known_rank)); then
+            security_of["$ssid"]=$security
+        elif ((rank == 2 && known_rank == 2)) && [[ " $known " != *" $security "* ]]; then
+            # Keep every scheme seen, so "WPA3" means all access points are
+            # SAE-only and one 802.1X access point marks the SSID enterprise.
+            security_of["$ssid"]="$known $security"
+        fi
+    done <<<"$scan"
+}
+
+# Rows for the picker, strongest first. The SSID of each row goes to $ssids
+# on the same line number as its row in $rows, so the pick maps back to an
+# SSID without parsing the display text.
+ssids='' rows=''
+trap 'rm -f -- "$ssids" "$rows"' EXIT
+ssids=$(mktemp "$runtime/menu-wifi.ssids.XXXXXX") || exit
+rows=$(mktemp "$runtime/menu-wifi.rows.XXXXXX") || exit
+build_list() {
+    local ssid mark
+    for ssid in "${!signal_of[@]}"; do
+        printf '%s\t%s\n' "${signal_of["$ssid"]}" "$ssid"
+    done | sort -t $'\t' -k1,1nr | cut -f2- >"$ssids"
     while IFS= read -r ssid; do
-        if [[ $ssid == "SSID" || $ssid == "--" || $ssid == "" ]]; then
-            continue
-        fi
-        bars=$(nmcli -g ssid,bars device wifi list | grep -w -F "$ssid" | head -n 1 | cut -d : -f2 | sed 's/*/█/g')
-        signal=$(nmcli -g ssid,signal device wifi list | grep -w -F "$ssid" | head -n 1 | cut -d : -f2)
-        security=$(nmcli -g ssid,security device wifi list | grep -w -F "$ssid" | head -n 1 | cut -d : -f2 | sed 's/WPA[1]//g' | xargs)
-        icon=""
-        if [[ $security != "" ]]; then
-            icon=$lock
-        fi
-        echo "$signal:\"$ssid\":$bars ($signal%):$icon"
-    done <<<"$ssids"
-)
+        mark="  "
+        # U+F00C, Nerd Font check, as UTF-8 bytes (a private-use glyph is
+        # invisible in most editors): ✓ (U+2713) isn't in Hack Nerd Font Mono.
+        [[ $ssid == "$ssid_active" ]] && mark=$'\xef\x80\x8c '
+        # A tab would split the row into extra columns; show it as a space.
+        # Two SSIDs can then render identically, which the pick refuses.
+        printf '%s"%s"\t%s (%s%%)\n' "$mark" "${ssid//$'\t'/ }" "${bars_of["$ssid"]}" "${signal_of["$ssid"]}"
+    done <"$ssids" | column -t -s $'\t' | tee "$rows"
+}
 
-list=$(echo "$list" | sort -k1 -nr | cut -d : -f2- | column -t -s :)
-wifi=$(echo "$list" | pikr -d -p Wi-Fi)
-ssid=$(echo "$wifi" | cut -d '"' -f2)
-security=$(echo "$wifi" | cut -d '"' -f3 | awk '{print $3}')
+pikr_help=$(pikr --help 2>/dev/null)
 
-if [[ $ssid == "" || $ssid == "$ssid_active" ]]; then
+# Right on a highlighted network opens a "Forget?" card; Enter forgets it
+# (pikr exits 10). Needs a pikr with --kb-custom KEY=PROMPT; stock pikr lacks
+# it, so detect instead of assuming.
+forget_key=()
+prompt="Wi-Fi"
+if grep -qF 'KEY[=PROMPT]' <<<"$pikr_help"; then
+    forget_key=(--kb-custom 'Right=Forget?')
+    prompt="Wi-Fi  (→ forget)"
+fi
+
+scan=$(read_scan)
+parse_scan
+ssid_active=$(active_ssid)
+loading=()
+if $rescan_ok && { ! $fresh || ((${#signal_of[@]} == 0)); }; then
+    if grep -qF -- '--loading' <<<"$pikr_help"; then
+        # Open the picker now with "Scanning…" where the list goes; the rows
+        # replace it when build_list closes pikr's stdin, after the scan lands
+        # or wait_for_scan gives up.
+        loading=(--loading "Scanning…")
+    else
+        # 9>&-: the modal must not inherit the lock, or a run killed while it
+        # is up leaves the lock held until the modal is dismissed.
+        pikr -e "Wi-Fi: scanning…" 9>&- &
+        modal=$!
+        wait_for_scan
+        kill "$modal" 2>/dev/null
+        scan=$(read_scan)
+        parse_scan
+    fi
+fi
+
+# Stamp the launch for the double-click guard, then release the lock so a
+# later press reaches the toggle.
+uptime_ms >"$stamp"
+flock -u 9
+if ((${#loading[@]})); then
+    wifi=$( { wait_for_scan; scan=$(read_scan); parse_scan; build_list; } | pikr -d -p "$prompt" "${loading[@]}" "${forget_key[@]}")
+else
+    wifi=$(build_list | pikr -d -p "$prompt" "${forget_key[@]}")
+fi
+picked=$?
+
+# Cancelled (Esc exits 1, the toggle's SIGTERM 143), nothing chosen, or
+# several rows (Visual mode).
+if [[ -z $wifi || $wifi == *$'\n'* || ($picked != 0 && $picked != 10) ]]; then
+    exit
+fi
+# Back under the lock for the rest of the run, so a click while connecting
+# doesn't open a second menu that acts on the same network.
+if ! flock -w 5 9; then
+    notify "Another Wi-Fi menu is starting; pick again"
     exit
 fi
 
-connection=$(nmcli connection show | grep "wifi" | grep -w -F "$ssid" | awk '{print $1}' | head -n 1)
-if [[ -n "$connection" ]]; then
-    nmcli connection up "$ssid"
+# Only a row from the list counts: pikr returns typed text that matches no
+# row (trimmed), and that is not a network in range. A row shown more than
+# once can't be told apart.
+matches=$(grep -cxF -- "$wifi" "$rows")
+if ((matches != 1)); then
+    ((matches > 1)) && notify "Two networks look identical in the list; not choosing either"
+    exit
+fi
+line=$(grep -nxF -- "$wifi" "$rows" | cut -d : -f1)
+ssid=$(sed -n "${line}p" "$ssids")
+
+# The rows may come from a scan read inside the --loading producer's
+# subshell; re-read for the security lookup and the active network.
+scan=$(read_scan)
+parse_scan
+ssid_active=$(active_ssid)
+
+# Wi-Fi client profiles for an SSID, by UUID. Matched on the profile's SSID,
+# not its name: names can differ from the SSID ("Roku Nana 1"), and passing a
+# name to nmcli is ambiguous (another profile type may share it, and names
+# like "id" or "help" parse as keywords). Hotspot and ad-hoc profiles are
+# skipped: bringing one up would start a network, not join one.
+profiles_for() {
+    local uuid type fields
+    while IFS=: read -r uuid type; do
+        [[ $type == 802-11-wireless ]] || continue
+        # -g prints one value per line: mode, then SSID.
+        mapfile -t fields < <(nmcli -e no -g 802-11-wireless.mode,802-11-wireless.ssid connection show uuid "$uuid")
+        [[ ${fields[0]:-infrastructure} == infrastructure && ${fields[1]} == "$1" ]] && echo "$uuid"
+    done < <(nmcli -g UUID,TYPE connection show)
+}
+mapfile -t profiles < <(profiles_for "$ssid")
+
+if [[ $picked == 10 ]]; then
+    # pikr's card already asked "Forget?", so act immediately.
+    if ((${#profiles[@]} == 0)); then
+        notify "$ssid isn't a saved network"
+        exit
+    fi
+    failed=
+    for uuid in "${profiles[@]}"; do
+        out=$(nmcli connection delete uuid "$uuid" 2>&1) || failed=$(nm_error "$out")
+    done
+    if [[ -n $failed ]]; then
+        notify "Could not forget $ssid: $failed"
+    else
+        notify "Forgot $ssid"
+    fi
     exit
 fi
 
-if [[ $security == "" ]]; then
-    nmcli device wifi connect "$ssid"
+# Already on it: nothing to do.
+if [[ $ssid == "$ssid_active" ]]; then
     exit
 fi
 
-password=$(echo "" | pikr -d -p Password | xargs)
-if [[ -z $password ]]; then
+# Masked prompt for a profile with key management $1. Returns non-zero on
+# cancel, or on a password WPA-PSK can't have; NetworkManager counts bytes
+# (8–63, or 64 hex digits) and puts no limit on SAE. pikr trims the typed
+# text, so a password with leading or trailing spaces can't be entered.
+ask_password() {
+    password=$(echo "" | pikr -d -P -p "Password for $ssid") || return 1
+    [[ -n $password ]] || return 1
+    [[ $1 == sae ]] && return 0
+    local LC_ALL=C
+    if ((${#password} < 8 || ${#password} > 64)) ||
+        { ((${#password} == 64)) && [[ ! $password =~ ^[0-9A-Fa-f]+$ ]]; }; then
+        notify "A Wi-Fi password is 8 to 63 bytes, or 64 hex digits"
+        return 1
+    fi
+}
+
+if ((${#profiles[@]})); then
+    uuid=${profiles[0]}
+    if out=$(nmcli connection up uuid "$uuid" 2>&1); then
+        notify "Connected to $ssid"
+        exit
+    fi
+    # NetworkManager reports missing secrets for a wrong or absent password
+    # but also when association times out, so the stored password may be
+    # right. Keep the profile and offer to replace the password instead;
+    # cancelling leaves it as it was. Only PSK/SAE profiles take a password
+    # typed here; anything else (802.1X, WEP) is reported as is.
+    key_mgmt=$(nmcli -e no -g 802-11-wireless-security.key-mgmt connection show uuid "$uuid")
+    if ! grep -qi 'secrets' <<<"$out" || [[ $key_mgmt != wpa-psk && $key_mgmt != sae ]]; then
+        notify "Could not connect to $ssid: $(nm_error "$out")"
+        exit
+    fi
+    ask_password "$key_mgmt" || exit
+    if ! out=$(nmcli connection modify uuid "$uuid" wifi-sec.psk "$password" 2>&1) ||
+        ! out=$(nmcli connection up uuid "$uuid" 2>&1); then
+        notify "Could not connect to $ssid: $(nm_error "$out")"
+        exit
+    fi
+    notify "Connected to $ssid"
     exit
 fi
 
-nmcli connection add type wifi con-name "$ssid" ssid "$ssid" wifi-sec.key-mgmt wpa-psk wifi-sec.psk "$password"
-nmcli connection up "$ssid"
+if [[ -z ${signal_of["$ssid"]} ]]; then
+    notify "$ssid is out of range"
+    exit
+fi
+
+# Security comes from the scan. nmcli prints WPA2 for both PSK and 802.1X
+# access points but adds "802.1X" for the latter, so enterprise (and WEP)
+# networks are refused before the WPA patterns match.
+security=${security_of["$ssid"]}
+settings=()
+case $security in
+    "") ;;
+    *802.1X* | *WEP* | *SUITE-B*)
+        notify "$ssid uses $security; set it up with nmtui"
+        exit
+        ;;
+    # WPA3 alone is SAE-only: use sae, which has no PSK length limits.
+    WPA3)
+        ask_password sae || exit
+        settings=(wifi-sec.key-mgmt sae wifi-sec.psk "$password")
+        ;;
+    *WPA1* | *WPA2* | *WPA3*)
+        ask_password wpa-psk || exit
+        settings=(wifi-sec.key-mgmt wpa-psk wifi-sec.psk "$password")
+        ;;
+    # A transition-mode access point's open BSS joins as an open network.
+    *OWE-TM*) ;;
+    *OWE*) settings=(wifi-sec.key-mgmt owe) ;;
+    *)
+        notify "$ssid uses $security, which this menu doesn't know"
+        exit
+        ;;
+esac
+
+if ! out=$(nmcli connection add type wifi con-name "$ssid" ssid "$ssid" "${settings[@]}" 2>&1); then
+    notify "Could not save $ssid: $(nm_error "$out")"
+    exit
+fi
+uuid=$(grep -oE '[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}' <<<"$out" | tail -n 1)
+if [[ -z $uuid ]]; then
+    notify "Could not save $ssid: $out"
+    exit
+fi
+if out=$(nmcli connection up uuid "$uuid" 2>&1); then
+    notify "Connected to $ssid"
+else
+    # The new profile has never connected. A secrets failure (wrong password
+    # or an association timeout) drops it so the next attempt asks again, as
+    # does any failure of a profile with no security settings, which holds
+    # nothing worth keeping. A PSK or OWE profile that failed for another
+    # reason (DHCP timeout) is kept.
+    if ((${#settings[@]} == 0)) || grep -qi 'secrets' <<<"$out"; then
+        nmcli connection delete uuid "$uuid" >/dev/null 2>&1
+    fi
+    notify "Could not connect to $ssid: $(nm_error "$out")"
+fi
