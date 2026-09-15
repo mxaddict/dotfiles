@@ -16,8 +16,11 @@ genuinely shell-shaped.
 
 ## Prerequisites
 
-- **Distro**: Arch Linux (or derivative). Cross-distro deps are stubbed — expand
-  `[[deps]] apt = […]` / `dnf = […]` in `.krypt/deps.toml` to extend.
+- **OS**: Arch Linux is the primary target. `.krypt/deps.toml` also maps
+  packages for Debian/Ubuntu (apt), Fedora (dnf), macOS (Homebrew) and Windows
+  (winget, with PowerShell 7 and uutils coreutils standing in for fish), and CI
+  resolves every package and installs the `core` group on each of them. Known
+  gaps are in `docs/backlog.md`.
 - **Display server**: Wayland (Hyprland). X11 unsupported.
 - **CPU/GPU**: x86_64, any modern Wayland-capable GPU (tested on AMD).
 - **CLI bootstrap**: `git`, `bash`, `curl`. Everything else `krypt setup`
@@ -51,12 +54,13 @@ genuinely shell-shaped.
 
 ### 1. Install krypt
 
-| Platform | Command                                                                        |
-| -------- | ------------------------------------------------------------------------------ |
-| Arch     | `paru -S krypt-bin`                                                            |
-| macOS    | `brew install kryptic-sh/tap/krypt`                                            |
-| Any      | `cargo install krypt-cli`                                                      |
-| Manual   | grab a binary from [GH Releases](https://github.com/kryptic-sh/krypt/releases) |
+| Platform | Command                                                                                             |
+| -------- | --------------------------------------------------------------------------------------------------- |
+| Arch     | `paru -S krypt-bin`                                                                                 |
+| macOS    | `brew install kryptic-sh/tap/krypt`                                                                 |
+| Windows  | `scoop bucket add kryptic-sh https://github.com/kryptic-sh/scoop-bucket` then `scoop install krypt` |
+| Any      | `cargo install krypt-cli`                                                                           |
+| Manual   | grab a binary from [GH Releases](https://github.com/kryptic-sh/krypt/releases)                      |
 
 Verify: `krypt --version` should report `0.2.0` or newer.
 
@@ -64,13 +68,16 @@ Verify: `krypt --version` should report `0.2.0` or newer.
 
 ```sh
 krypt init https://github.com/mxaddict/dotfiles
-krypt setup    # interactive: seeds templates, prompts for identity, installs deps
-krypt link     # symlink the tree into $HOME
+cd ~/.config/krypt/repo
+krypt deps     # install this OS's packages
+krypt setup    # interactive: git identity, Hyprland defaults, keyboard layout
+krypt link     # copy this platform's files into place
 ```
 
-`krypt setup` is the wizard pass — runs the `[prompts.*]` blocks defined in
-`.krypt.toml` (git identity, hypr defaults, keyboard layout), seeds templates,
-then triggers `krypt deps` to install packages.
+`krypt setup` runs the `[prompts.*]` blocks in `.krypt.toml` and writes the
+answers to the `[[template]]` destinations; sections whose templates belong to
+another platform (the Hyprland ones outside Linux) are skipped. `krypt link`
+deploys only the entries whose `platform` matches this OS.
 
 ### 3. Daily updates
 
