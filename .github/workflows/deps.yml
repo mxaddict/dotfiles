@@ -74,6 +74,12 @@ jobs:
         with:
           cache-key: ${{ matrix.name }}
 
+      # Homebrew skips formulae from untrusted taps; trusting the kryptic-sh
+      # tap is the same one-time step the README gives for a Mac.
+      - name: Trust the kryptic-sh Homebrew tap
+        if: matrix.name == 'macos'
+        run: brew trust --tap kryptic-sh/tap
+
       - name: Every package resolves on this system
         run: krypt deps --config .krypt.toml --check
 

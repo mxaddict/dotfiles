@@ -57,7 +57,7 @@ genuinely shell-shaped.
 | Platform | Command                                                                                             |
 | -------- | --------------------------------------------------------------------------------------------------- |
 | Arch     | `paru -S krypt-bin`                                                                                 |
-| macOS    | `brew install kryptic-sh/tap/krypt`                                                                 |
+| macOS    | `brew trust --tap kryptic-sh/tap` then `brew install kryptic-sh/tap/krypt`                          |
 | Windows  | `scoop bucket add kryptic-sh https://github.com/kryptic-sh/scoop-bucket` then `scoop install krypt` |
 | Any      | `cargo install krypt-cli`                                                                           |
 | Manual   | grab a binary from [GH Releases](https://github.com/kryptic-sh/krypt/releases)                      |

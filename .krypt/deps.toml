@@ -28,10 +28,12 @@ dnf = [
     "fd-find", "fish", "fzf", "git", "jq", "neovim", "ripgrep", "stow",
     "tealdeer", "tmux", "unzip", "wget", "zoxide",
 ]
+# Homebrew disabled its alacritty cask on 2026-09-01 (fails Gatekeeper); see
+# docs/backlog.md.
 brew = [
-    "alacritty", "bat", "btop", "eza", "fastfetch", "fd", "fish", "fzf",
-    "git", "jq", "neovim", "ripgrep", "starship", "stow", "tealdeer", "tmux",
-    "unzip", "wget", "zoxide",
+    "bat", "btop", "eza", "fastfetch", "fd", "fish", "fzf", "git", "jq",
+    "neovim", "ripgrep", "starship", "stow", "tealdeer", "tmux", "unzip", "wget",
+    "zoxide",
 ]
 winget = [
     "Alacritty.Alacritty", "BurntSushi.ripgrep.MSVC", "Fastfetch-cli.Fastfetch",

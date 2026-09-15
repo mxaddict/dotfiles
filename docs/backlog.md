@@ -120,6 +120,16 @@ Homebrew/winget catalogs, with no fix available inside the manifest:
   with `cargo`, which Debian's and Fedora's `rustup` packages leave without a
   default toolchain until `rustup default stable` runs — and the
   `rustup-default-stable` hook only runs on `krypt update`, after deps.
+- **The kryptic-sh Homebrew tap must be trusted**
+  (`brew trust --tap kryptic-sh/tap`) before Homebrew installs anything from it,
+  including krypt itself. krypt does not trust taps on its own; the README and
+  the macOS deps job do it explicitly.
+- **Alacritty has no Homebrew install on macOS.** Homebrew disabled the
+  `alacritty` cask on 2026-09-01 because it does not pass Gatekeeper, so it was
+  dropped from the `core` brew list. Options: the signed DMG from Alacritty's
+  GitHub releases by hand, `cargo:alacritty` (a binary without the `.app`
+  bundle, so no Dock/Finder launch), or another terminal on macOS. The macOS
+  entry point in `.config/alacritty/` still deploys for a manual install.
 - **The scoop bucket is unused.** On a Windows machine with scoop, winget still
   installs every group because none lists scoop packages; the kryptic-sh bucket
   (pikr, buffr, hrdr, krypt) would need `scoop bucket add` before any `scoop`
