@@ -33,13 +33,28 @@ src = ".prettierignore"
 dst = "${HOME}/.prettierignore"
 
 # --- .config subdirs (glob per subdir) ---
+#
+# Entries gated to ["linux", "macos"] have a native-folder counterpart on
+# Windows (or no Windows use at all), so the ~/.config copy is not deployed
+# where nothing reads it.
+
+# Alacritty: one shared config and an entry point per platform that imports it
+# and sets the shell (fish on Linux and macOS, PowerShell 7 on Windows).
+[[link]]
+src = ".config/alacritty/common.toml"
+dst = "${XDG_CONFIG}/alacritty/common.toml"
 
 [[link]]
-src_glob = ".config/alacritty/**/*"
-dst = "${XDG_CONFIG}/alacritty/"
+src = ".config/alacritty/alacritty.toml"
+dst = "${XDG_CONFIG}/alacritty/alacritty.toml"
+platform = "linux"
 
-# Alacritty on Windows ignores ~/.config; this entry point imports the shared
-# config above and switches the shell to PowerShell 7.
+[[link]]
+src = ".config/alacritty/macos.toml"
+dst = "${XDG_CONFIG}/alacritty/alacritty.toml"
+platform = "macos"
+
+# Alacritty on Windows ignores ~/.config.
 [[link]]
 src = "AppData/Roaming/alacritty/alacritty.toml"
 dst = "${WIN_APPDATA}/alacritty/alacritty.toml"
@@ -48,6 +63,7 @@ platform = "windows"
 [[link]]
 src_glob = ".config/bat/**/*"
 dst = "${XDG_CONFIG}/bat/"
+platform = ["linux", "macos"]
 
 [[link]]
 src_glob = ".config/bat/**/*"
@@ -66,10 +82,12 @@ platform = "linux"
 [[link]]
 src_glob = ".config/fish/**/*"
 dst = "${XDG_CONFIG}/fish/"
+platform = ["linux", "macos"]
 
 [[link]]
 src_glob = ".config/gh/**/*"
 dst = "${XDG_CONFIG}/gh/"
+platform = ["linux", "macos"]
 
 [[link]]
 src_glob = ".config/gh/**/*"
@@ -117,6 +135,14 @@ platform = "linux"
 [[link]]
 src_glob = ".config/lazygit/**/*"
 dst = "${XDG_CONFIG}/lazygit/"
+platform = "linux"
+
+# lazygit on macOS reads ~/Library/Application Support unless XDG_CONFIG_HOME
+# is set.
+[[link]]
+src_glob = ".config/lazygit/**/*"
+dst = "${MAC_LIBRARY}/Application Support/lazygit/"
+platform = "macos"
 
 [[link]]
 src_glob = ".config/lazygit/**/*"
@@ -131,6 +157,7 @@ platform = "linux"
 [[link]]
 src_glob = ".config/mpv/**/*"
 dst = "${XDG_CONFIG}/mpv/"
+platform = ["linux", "macos"]
 
 [[link]]
 src_glob = ".config/mpv/**/*"
@@ -138,12 +165,9 @@ dst = "${WIN_APPDATA}/mpv/"
 platform = "windows"
 
 [[link]]
-src_glob = ".config/nushell/**/*"
-dst = "${XDG_CONFIG}/nushell/"
-
-[[link]]
 src_glob = ".config/nvim/**/*"
 dst = "${XDG_CONFIG}/nvim/"
+platform = ["linux", "macos"]
 
 [[link]]
 src_glob = ".config/nvim/**/*"
@@ -168,8 +192,15 @@ platform = "linux"
 [[link]]
 src_glob = ".config/tealdeer/**/*"
 dst = "${XDG_CONFIG}/tealdeer/"
+platform = "linux"
 
-# tealdeer on Windows nests its config one level deeper, under config/.
+# tealdeer reads the platform config dir: Application Support on macOS, and on
+# Windows one level deeper, under config/.
+[[link]]
+src_glob = ".config/tealdeer/**/*"
+dst = "${MAC_LIBRARY}/Application Support/tealdeer/"
+platform = "macos"
+
 [[link]]
 src_glob = ".config/tealdeer/**/*"
 dst = "${WIN_APPDATA}/tealdeer/config/"
@@ -178,6 +209,7 @@ platform = "windows"
 [[link]]
 src_glob = ".config/tmux/**/*"
 dst = "${XDG_CONFIG}/tmux/"
+platform = ["linux", "macos"]
 
 [[link]]
 src_glob = ".config/waybar/**/*"
@@ -242,14 +274,17 @@ platform = "linux"
 [[link]]
 src = ".local/bin/.clear"
 dst = "${LOCAL_BIN}/.clear"
+platform = ["linux", "macos"]
 
 [[link]]
 src = ".local/bin/.clearkeys"
 dst = "${LOCAL_BIN}/.clearkeys"
+platform = ["linux", "macos"]
 
 [[link]]
 src = ".local/bin/.envdown"
 dst = "${LOCAL_BIN}/.envdown"
+platform = ["linux", "macos"]
 
 [[link]]
 src = ".local/bin/.envdown.ps1"
@@ -259,6 +294,7 @@ platform = "windows"
 [[link]]
 src = ".local/bin/.envup"
 dst = "${LOCAL_BIN}/.envup"
+platform = ["linux", "macos"]
 
 [[link]]
 src = ".local/bin/.envup.ps1"
@@ -332,10 +368,12 @@ platform = "linux"
 [[link]]
 src = ".local/bin/.nproc"
 dst = "${LOCAL_BIN}/.nproc"
+platform = ["linux", "macos"]
 
 [[link]]
 src = ".local/bin/.pull-all-models"
 dst = "${LOCAL_BIN}/.pull-all-models"
+platform = ["linux", "macos"]
 
 [[link]]
 src = ".local/bin/.pull-all-models.ps1"
@@ -366,6 +404,7 @@ platform = "linux"
 [[link]]
 src = ".local/bin/t"
 dst = "${LOCAL_BIN}/t"
+platform = ["linux", "macos"]
 
 # --- .local/share ---
 [[link]]

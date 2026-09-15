@@ -1,0 +1,9 @@
+# macOS entry point, deployed as ~/.config/alacritty/alacritty.toml.
+[general]
+import = ["~/.config/alacritty/common.toml"]
+
+# A configured shell is spawned directly with Alacritty's own environment, and
+# an app started from Finder or the Dock gets launchd's PATH, which has neither
+# Homebrew prefix. env looks fish up on the PATH given here instead.
+[terminal]
+shell = { program = "/usr/bin/env", args = ["PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin", "fish", "--login"] }

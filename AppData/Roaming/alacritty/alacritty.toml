@@ -1,9 +1,10 @@
 # Windows entry point. Alacritty reads only %APPDATA%\alacritty\alacritty.toml
 # here, so pull in the shared config that krypt deploys to ~/.config/alacritty.
 [general]
-import = ["~/.config/alacritty/alacritty.toml"]
+import = ["~/.config/alacritty/common.toml"]
 
 # PowerShell 7, not Alacritty's Windows default of Windows PowerShell 5.1.
+# fish has no native Windows build; revisit once one is usable.
 # -NoLogo drops the startup banner, as `set fish_greeting` does for fish.
 [terminal]
 shell = { program = "pwsh", args = ["-NoLogo"] }

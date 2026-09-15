@@ -155,6 +155,7 @@ steps = [
 group       = "env"
 name        = "up"
 description = "Upload .env.* files for the current project to a GCS bucket"
+platform    = ["linux", "macos"]
 steps = [
     { if = "command_exists:gcloud", run = ["bash", "${HOME}/.local/bin/.envup"] },
 ]
@@ -173,6 +174,7 @@ steps = [
 group       = "env"
 name        = "down"
 description = "Download .env.* files for the current project from a GCS bucket"
+platform    = ["linux", "macos"]
 steps = [
     { if = "command_exists:gcloud", run = ["bash", "${HOME}/.local/bin/.envdown"] },
 ]
@@ -194,6 +196,7 @@ steps = [
 group       = "tmux"
 name        = "open"
 description = "Open (or attach to) a tmux session named after the current directory"
+platform    = ["linux", "macos"]
 steps = [
     { if = "command_exists:tmux", run = ["bash", "${HOME}/.local/bin/t"] },
 ]
@@ -234,16 +237,7 @@ steps = [
 group       = "system"
 name        = "clear"
 description = "Purge caches (bash equiv: rm ~/.cache + /var/cache; rebuild bat + tldr)"
-platform    = "linux"
-steps = [
-    { run = ["bash", "${HOME}/.local/bin/.clear"] },
-]
-
-[[command]]
-group       = "system"
-name        = "clear"
-description = "Purge caches (bash equiv: rm ~/.cache + /var/cache; rebuild bat + tldr)"
-platform    = "macos"
+platform    = ["linux", "macos"]
 steps = [
     { run = ["bash", "${HOME}/.local/bin/.clear"] },
 ]
@@ -261,7 +255,7 @@ steps = [
 group       = "system"
 name        = "clearkeys"
 description = "Delete all GitLab deploy keys across accessible projects (interactive)"
-platform    = "linux"
+platform    = ["linux", "macos"]
 steps = [
     # Requires interactive stdin confirm + associative arrays — kept as bash.
     { run = ["bash", "${HOME}/.local/bin/.clearkeys"] },
@@ -269,17 +263,9 @@ steps = [
 
 [[command]]
 group       = "system"
-name        = "clearkeys"
-description = "Delete all GitLab deploy keys across accessible projects (interactive)"
-platform    = "macos"
-steps = [
-    { run = ["bash", "${HOME}/.local/bin/.clearkeys"] },
-]
-
-[[command]]
-group       = "system"
 name        = "nproc"
 description = "Print CPU core count (nproc on Linux, sysctl on macOS)"
+platform    = ["linux", "macos"]
 steps = [
     { run = ["bash", "${HOME}/.local/bin/.nproc"] },
 ]
@@ -310,6 +296,7 @@ steps = [
 group       = "ollama"
 name        = "pull-all"
 description = "Pull all Ollama models listed in opencode.json"
+platform    = ["linux", "macos"]
 steps = [
     { run = ["bash", "${HOME}/.local/bin/.pull-all-models"] },
 ]

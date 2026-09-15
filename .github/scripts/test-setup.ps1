@@ -65,10 +65,17 @@ try {
         $failures.Add("second link was not idempotent: first wrote $firstWrote, second wrote $secondWrote with $idempotent idempotent re-deploys")
     }
 
+    # Read from ~/.config on every OS (Alacritty's shared file on Windows
+    # through the AppData entry point's import).
     Assert-Deployed '.gitconfig' '.gitconfig'
     Assert-Deployed '.config/starship.toml' '.config/starship.toml'
-    Assert-Deployed '.config/alacritty/alacritty.toml' '.config/alacritty/alacritty.toml'
-    Assert-Deployed '.config/nvim/init.lua' '.config/nvim/init.lua'
+    Assert-Deployed '.config/alacritty/common.toml' '.config/alacritty/common.toml'
+    $alacrittyEntry = @{ linux = '.config/alacritty/alacritty.toml'; macos = '.config/alacritty/macos.toml' }[$os]
+    if ($alacrittyEntry) {
+        Assert-Deployed '.config/alacritty/alacritty.toml' $alacrittyEntry
+    } else {
+        Assert-Absent '.config/alacritty/alacritty.toml'
+    }
     Assert-Deployed '.config/opencode/AGENTS.md' '.config/agents/AGENTS.md'
     if (-not (Test-Path (Join-Path $sandbox '.gitconfig.local'))) { $failures.Add('missing: .gitconfig.local') }
 
@@ -83,16 +90,39 @@ try {
         'Documents/PowerShell/Microsoft.PowerShell_profile.ps1'   = 'Documents/PowerShell/Microsoft.PowerShell_profile.ps1'
         '.local/bin/.envup.ps1'                                   = '.local/bin/.envup.ps1'
     }
+    # ~/.config copies of tools that read a native folder on Windows, and
+    # shell tooling Windows has no use for.
+    $unixOnly = [ordered]@{
+        '.config/nvim/init.lua'     = '.config/nvim/init.lua'
+        '.config/bat/config'        = '.config/bat/config'
+        '.config/gh/config.yml'     = '.config/gh/config.yml'
+        '.config/mpv/mpv.conf'      = '.config/mpv/mpv.conf'
+        '.config/fish/config.fish'  = '.config/fish/config.fish'
+        '.config/tmux/tmux.conf'    = '.config/tmux/tmux.conf'
+        '.local/bin/t'              = '.local/bin/t'
+        '.local/bin/.nproc'         = '.local/bin/.nproc'
+    }
+    $macosOnly = [ordered]@{
+        'Library/Application Support/lazygit/config.yml'   = '.config/lazygit/config.yml'
+        'Library/Application Support/tealdeer/config.toml' = '.config/tealdeer/config.toml'
+    }
     $linuxOnly = [ordered]@{
-        '.config/hypr/hyprland.lua' = '.config/hypr/hyprland.lua'
-        '.gtkrc-2.0'                = '.gtkrc-2.0'
-        '.local/bin/grimblast'      = '.local/bin/grimblast'
+        '.config/hypr/hyprland.lua'    = '.config/hypr/hyprland.lua'
+        '.config/lazygit/config.yml'   = '.config/lazygit/config.yml'
+        '.config/tealdeer/config.toml' = '.config/tealdeer/config.toml'
+        '.gtkrc-2.0'                   = '.gtkrc-2.0'
+        '.local/bin/grimblast'         = '.local/bin/grimblast'
     }
-    foreach ($entry in $windowsOnly.GetEnumerator()) {
-        if ($os -eq 'windows') { Assert-Deployed $entry.Key $entry.Value } else { Assert-Absent $entry.Key }
-    }
-    foreach ($entry in $linuxOnly.GetEnumerator()) {
-        if ($os -ne 'linux') { Assert-Absent $entry.Key } else { Assert-Deployed $entry.Key $entry.Value }
+    $expected = @(
+        @{ Entries = $windowsOnly; On = @('windows') }
+        @{ Entries = $unixOnly; On = @('linux', 'macos') }
+        @{ Entries = $macosOnly; On = @('macos') }
+        @{ Entries = $linuxOnly; On = @('linux') }
+    )
+    foreach ($set in $expected) {
+        foreach ($entry in $set.Entries.GetEnumerator()) {
+            if ($os -in $set.On) { Assert-Deployed $entry.Key $entry.Value } else { Assert-Absent $entry.Key }
+        }
     }
 
     # Commands: the per-OS entry runs, and a Linux-only one refuses elsewhere.
@@ -106,9 +136,18 @@ try {
             $failures.Add("krypt browser open on $os did not refuse as linux-only")
         }
     }
+    if ($os -eq 'windows') {
+        # Gated by a platform list, so the refusal names both platforms.
+        $refusal = & { $ErrorActionPreference = 'Continue'; & krypt tmux open 2>&1 | ForEach-Object { "$_" } }
+        $refusal
+        if ($LASTEXITCODE -eq 0 -or -not ($refusal -match 'restricted to linux, macos')) {
+            $failures.Add('krypt tmux open on windows did not refuse as linux/macos-only')
+        }
+    }
 
-    # Dependency groups live in an included file; each manager must see some.
-    $managers = @{ windows = @('winget'); macos = @('brew'); linux = @('pacman', 'apt') }[$os]
+    # Installing and resolving packages is the deps workflow's job; here only
+    # that the included deps file is read for this OS's managers.
+    $managers = @{ windows = @('winget'); macos = @('brew'); linux = @('pacman', 'apt', 'dnf') }[$os]
     foreach ($manager in $managers) {
         $plan = Invoke-Krypt deps --config .krypt.toml --dry-run --manager $manager
         $plan
