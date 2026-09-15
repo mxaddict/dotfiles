@@ -1,0 +1,102 @@
+name: deps
+
+# Package names drift as distros and catalogs publish releases, independent of
+# any change here, so this runs weekly as well as on changes, and stays apart
+# from the setup workflow so a renamed package cannot mask a deploy regression.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 6 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  deps:
+    name: deps (${{ matrix.name }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: arch
+            os: ubuntu-latest
+            container: archlinux:latest
+            prepare: pacman -Syu --noconfirm --needed base-devel git
+          - name: debian
+            os: ubuntu-latest
+            container: debian:stable
+            prepare:
+              apt-get update && apt-get install -y --no-install-recommends
+              build-essential ca-certificates curl git
+          - name: ubuntu
+            os: ubuntu-latest
+            container: ubuntu:latest
+            prepare:
+              apt-get update && apt-get install -y --no-install-recommends
+              build-essential ca-certificates curl git
+          - name: fedora
+            os: ubuntu-latest
+            container: fedora:latest
+            prepare: dnf install -y gcc git
+          - name: macos
+            os: macos-latest
+            container: ''
+          - name: windows
+            os: windows-latest
+            container: ''
+    runs-on: ${{ matrix.os }}
+    container: ${{ matrix.container }}
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Prepare the package manager
+        if: matrix.prepare
+        run: ${{ matrix.prepare }}
+
+      - uses: actions/checkout@v5
+
+      # cargo builds krypt and backs the `cargo:` entries; the macOS and
+      # Windows runners ship it, the distro images do not.
+      - name: Install Rust
+        run: |
+          if ! command -v cargo >/dev/null; then
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
+            echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+          fi
+
+      - uses: ./.github/actions/krypt
+        with:
+          cache-key: ${{ matrix.name }}
+
+      - name: Every package resolves on this system
+        run: krypt deps --config .krypt.toml --check
+
+      - name: Install the core group
+        run: krypt deps --config .krypt.toml --group core
+
+      - name: A second run finds core installed
+        run: |
+          out=$(krypt deps --config .krypt.toml --group core)
+          echo "$out"
+          if echo "$out" | grep -q '^installed:'; then
+            echo "::error::the second run installed core packages again"
+            exit 1
+          fi
+          echo "$out" | grep -q '^already installed: ' ||
+            { echo "::error::the second run reported nothing installed"; exit 1; }
+
+      # links.toml deploys tealdeer's config to Application Support on macOS;
+      # ask the tealdeer that core installed where it actually reads it.
+      - name: tealdeer reads its config where macOS links it
+        if: matrix.name == 'macos'
+        run: |
+          paths=$(tldr --show-paths)
+          echo "$paths"
+          echo "$paths" | grep -q "$HOME/Library/Application Support/tealdeer" ||
+            { echo "::error::tealdeer does not read Library/Application Support/tealdeer"; exit 1; }

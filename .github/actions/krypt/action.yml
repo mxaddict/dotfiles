@@ -1,0 +1,46 @@
+name: Install krypt
+description: >
+  Build krypt from the tip of kryptic-sh/krypt main and put it on PATH, cached
+  per krypt commit. Needs git, cargo and a C compiler on the runner.
+
+inputs:
+  cache-key:
+    description: >
+      Separates binaries that must not be shared between jobs on the same runner
+      OS, such as builds for different Linux distro containers.
+    required: false
+    default: native
+
+runs:
+  using: composite
+  steps:
+    # The dotfiles rely on krypt behaviour newer than its latest release
+    # (platform lists, cargo: deps entries, deps --check), so build main.
+    - name: Resolve krypt revision
+      id: krypt
+      shell: bash
+      run: |
+        rev=$(git ls-remote https://github.com/kryptic-sh/krypt.git refs/heads/main | cut -f1)
+        [ -n "$rev" ] || { echo "::error::could not resolve krypt main"; exit 1; }
+        echo "rev=$rev" >> "$GITHUB_OUTPUT"
+
+    - name: Cache krypt
+      id: cache
+      uses: actions/cache@v6
+      with:
+        path: ${{ runner.temp }}/krypt
+        key:
+          krypt-${{ runner.os }}-${{ inputs.cache-key }}-${{
+          steps.krypt.outputs.rev }}
+
+    - name: Build krypt
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: >
+        cargo install --locked --git https://github.com/kryptic-sh/krypt.git
+        --rev ${{ steps.krypt.outputs.rev }} --root "${{ runner.temp }}/krypt"
+        krypt-cli
+
+    - name: Add krypt to PATH
+      shell: bash
+      run: echo "${{ runner.temp }}/krypt/bin" >> "$GITHUB_PATH"

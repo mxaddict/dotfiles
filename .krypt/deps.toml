@@ -20,12 +20,13 @@ pacman = [
 ]
 apt = [
     "alacritty", "bat", "btop", "curl", "eza", "fastfetch", "fd-find", "fish",
-    "fzf", "git", "jq", "neovim", "ripgrep", "stow", "tealdeer", "tmux",
-    "unzip", "wget", "zoxide",
+    "fzf", "git", "jq", "neovim", "ripgrep", "starship", "stow", "tealdeer",
+    "tmux", "unzip", "wget", "zoxide",
 ]
 dnf = [
-    "alacritty", "bat", "eza", "fastfetch", "fd-find", "fish", "fzf", "git",
-    "jq", "neovim", "ripgrep", "stow", "tealdeer", "tmux", "unzip", "zoxide",
+    "alacritty", "bat", "btop", "cargo:starship", "curl", "eza", "fastfetch",
+    "fd-find", "fish", "fzf", "git", "jq", "neovim", "ripgrep", "stow",
+    "tealdeer", "tmux", "unzip", "wget", "zoxide",
 ]
 brew = [
     "alacritty", "bat", "btop", "eza", "fastfetch", "fd", "fish", "fzf",
@@ -47,14 +48,14 @@ pacman = [
     "opencode", "python-tldextract", "rustup",
 ]
 apt = [
-    "bear", "libssl-dev", "nodejs", "npm", "opencode", "pkg-config", "python3",
-    "python3-venv", "rustup",
+    "bear", "gh", "glab", "lazygit", "libssl-dev", "nodejs", "npm", "pkg-config",
+    "python3", "python3-venv", "rustup",
 ]
 dnf = [
-    "nodejs", "npm", "opencode",
+    "bear", "doctl", "gh", "glab", "nodejs", "npm", "python3", "rustup",
 ]
 brew = [
-    "bear", "doctl", "lazygit", "nodejs", "npm", "opencode", "rustup",
+    "bear", "doctl", "gh", "glab", "lazygit", "node", "opencode", "rustup",
 ]
 winget = [
     "DigitalOcean.Doctl", "GLab.GLab", "GitHub.cli", "JesseDuffield.lazygit",
@@ -70,8 +71,8 @@ pacman = [
 ]
 apt = []
 dnf = []
-brew = []
-winget = ["DEVCOM.HackNerdFont"]
+brew = ["font-hack-nerd-font"]
+winget = []
 
 [[deps]]
 group = "hyprland"
@@ -100,13 +101,9 @@ pacman = [
     "pipewire-jack", "pipewire-pulse", "snapshot", "sof-firmware", "wiremix",
     "wireplumber", "yt-dlp",
 ]
-apt = [
-    "mpv",
-]
-dnf = [
-    "mpv",
-]
-brew = []
+apt = ["mpv", "yt-dlp"]
+dnf = ["mpv", "yt-dlp"]
+brew = ["mpv", "yt-dlp"]
 winget = ["shinchiro.mpv", "yt-dlp.yt-dlp"]
 
 [[deps]]
@@ -130,20 +127,27 @@ pacman = [
     "libadwaita", "nautilus", "papirus-icon-theme", "pass", "pass-otp",
     "pass-secret-service", "qalculate-qt", "thunderbird", "vieb-bin",
 ]
-apt = [
-    "duf",
-]
-dnf = []
-brew = []
+apt = ["duf", "dysk"]
+dnf = ["cargo:dysk", "duf", "firefox", "thunderbird"]
+brew = ["duf", "dysk", "firefox", "thunderbird"]
 winget = ["Mozilla.Firefox", "Mozilla.Thunderbird", "muesli.duf"]
 
+# kryptic-sh tools. Arch uses the AUR -bin packages (via paru) and macOS the
+# kryptic-sh Homebrew tap. Other systems build the ones published on crates.io
+# with cargo, which needs a default Rust toolchain (the dev group's rustup).
+# pikr, buffr, inbx, hodl and krypt publish no crate or distro repository, and
+# gemini-cli is an npm package; see docs/backlog.md.
 [[deps]]
-group = "aur-tools"
-required_platforms = ["linux"]
+group = "kryptic"
 pacman = [
-    "buffr-bin", "hjkl-bin", "hodl-bin", "inbx-bin", "krypt-bin", "pikr-bin",
-    "sqeel-bin", "gemini-cli",
+    "buffr-bin", "gemini-cli", "hjkl-bin", "hodl-bin", "hrdr-bin", "inbx-bin",
+    "krypt-bin", "pikr-bin", "sqeel-bin",
 ]
-apt = []
-dnf = []
-brew = []
+apt = ["cargo:hjkl", "cargo:hrdr", "cargo:sqeel"]
+dnf = ["cargo:hjkl", "cargo:hrdr", "cargo:sqeel"]
+brew = [
+    "gemini-cli", "kryptic-sh/tap/buffr", "kryptic-sh/tap/hjkl",
+    "kryptic-sh/tap/hodl", "kryptic-sh/tap/hrdr", "kryptic-sh/tap/inbx",
+    "kryptic-sh/tap/krypt", "kryptic-sh/tap/pikr", "kryptic-sh/tap/sqeel",
+]
+winget = ["cargo:hjkl", "cargo:hrdr", "cargo:sqeel"]
