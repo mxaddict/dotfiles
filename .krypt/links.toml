@@ -192,14 +192,9 @@ platform = "linux"
 [[link]]
 src_glob = ".config/tealdeer/**/*"
 dst = "${XDG_CONFIG}/tealdeer/"
-platform = "linux"
+platform = ["linux", "macos"]
 
-# tealdeer reads the platform config dir: Application Support on macOS, and on
-# Windows one level deeper, under config/.
-[[link]]
-src_glob = ".config/tealdeer/**/*"
-dst = "${MAC_LIBRARY}/Application Support/tealdeer/"
-platform = "macos"
+# tealdeer on Windows nests its config one level deeper, under config/.
 
 [[link]]
 src_glob = ".config/tealdeer/**/*"

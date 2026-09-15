@@ -97,12 +97,23 @@ jobs:
           echo "$out" | grep -q '^already installed: ' ||
             { echo "::error::the second run reported nothing installed"; exit 1; }
 
-      # links.toml deploys tealdeer's config to Application Support on macOS;
-      # ask the tealdeer that core installed where it actually reads it.
+      # links.toml deploys tealdeer's config to ~/.config on macOS, as on
+      # Linux; ask the tealdeer that core installed where it actually reads it.
       - name: tealdeer reads its config where macOS links it
         if: matrix.name == 'macos'
         run: |
           paths=$(tldr --show-paths)
           echo "$paths"
-          echo "$paths" | grep -q "$HOME/Library/Application Support/tealdeer" ||
-            { echo "::error::tealdeer does not read Library/Application Support/tealdeer"; exit 1; }
+          echo "$paths" | grep -q "Config path: *$HOME/.config/tealdeer/config.toml" ||
+            { echo "::error::tealdeer does not read ~/.config/tealdeer/config.toml"; exit 1; }
+
+      # lazygit (dev group, not installed above) is linked to Application
+      # Support on macOS per its docs; ask lazygit itself.
+      - name: lazygit reads its config where macOS links it
+        if: matrix.name == 'macos'
+        run: |
+          brew install lazygit
+          dir=$(lazygit --print-config-dir)
+          echo "$dir"
+          [ "$dir" = "$HOME/Library/Application Support/lazygit" ] ||
+            { echo "::error::lazygit reads $dir, not Library/Application Support/lazygit"; exit 1; }

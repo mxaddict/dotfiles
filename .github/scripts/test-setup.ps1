@@ -97,19 +97,18 @@ try {
         '.config/bat/config'        = '.config/bat/config'
         '.config/gh/config.yml'     = '.config/gh/config.yml'
         '.config/mpv/mpv.conf'      = '.config/mpv/mpv.conf'
+        '.config/tealdeer/config.toml' = '.config/tealdeer/config.toml'
         '.config/fish/config.fish'  = '.config/fish/config.fish'
         '.config/tmux/tmux.conf'    = '.config/tmux/tmux.conf'
         '.local/bin/t'              = '.local/bin/t'
         '.local/bin/.nproc'         = '.local/bin/.nproc'
     }
     $macosOnly = [ordered]@{
-        'Library/Application Support/lazygit/config.yml'   = '.config/lazygit/config.yml'
-        'Library/Application Support/tealdeer/config.toml' = '.config/tealdeer/config.toml'
+        'Library/Application Support/lazygit/config.yml' = '.config/lazygit/config.yml'
     }
     $linuxOnly = [ordered]@{
         '.config/hypr/hyprland.lua'    = '.config/hypr/hyprland.lua'
         '.config/lazygit/config.yml'   = '.config/lazygit/config.yml'
-        '.config/tealdeer/config.toml' = '.config/tealdeer/config.toml'
         '.gtkrc-2.0'                   = '.gtkrc-2.0'
         '.local/bin/grimblast'         = '.local/bin/grimblast'
     }

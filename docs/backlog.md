@@ -88,10 +88,6 @@
 - **Post-update hooks are not run anywhere in CI**: `krypt update` needs a repo
   it can pull, and `test-setup.ps1` uses `krypt link`. `psfzf-update` has not
   been executed at all.
-- **lazygit's macOS path comes from its docs** (`docs/Config.md`:
-  `~/Library/Application Support/lazygit/config.yml`), not from running lazygit
-  on a Mac; lazygit is in the `dev` group, which CI does not install. tealdeer's
-  is checked by the deps workflow against `tldr --show-paths`.
 - **Alacritty's macOS shell entry is unverified on a Mac.**
   `.config/alacritty/macos.toml` runs fish through `/usr/bin/env` with a PATH
   naming both Homebrew prefixes, because a configured shell is spawned with
