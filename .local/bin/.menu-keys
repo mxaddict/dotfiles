@@ -1,0 +1,123 @@
+#!/usr/bin/env bash
+# vi: ft=bash
+#
+# Keybinding cheatsheet. Hyprland rows are the running binds from
+# `hyprctl binds`. tmux rows are the binds ~/.config/tmux/tmux.conf and its
+# plugins add or change, in any key table (of the two copy-mode tables, the one
+# mode-keys selects), read by loading that file on a fresh server (so an edit
+# shows before tmux is reloaded). That load runs the config's `run` commands and
+# plugins each time the cheatsheet opens. Rows are tagged "Hyprland",
+# "tmux" or "tmux copy-mode". Descriptions are hand-written: `description` in
+# hyprland.lua, `bind -N` in tmux.conf, and ~/.config/tmux/plugin-notes.sh for
+# plugin binds; a bind without one reads "(no description)". A tmux.conf error
+# or a failed listing shows as a row of its own.
+# Picking a row does nothing; type to filter, e.g. "tmux".
+
+set -o pipefail
+
+pkill pikr && exit 0
+
+# A second press while the list is still being built exits here instead of
+# opening a second cheatsheet next to the first.
+exec 9>"${XDG_RUNTIME_DIR:?}/menu-keys.lock"
+flock -n 9 || exit 0
+
+hypr_binds() {
+    local rows
+    # Captured first, so a jq error part-way through can't leave half the rows.
+    rows=$(hyprctl binds -j | jq -r '
+        # Bit values from HL_MODIFIER_* in Hyprland src/devices/IKeyboard.hpp,
+        # listed in the order the binds are written in hyprland.lua.
+        def mods: . as $m
+            | [[64, "SUPER"], [4, "CTRL"], [8, "ALT"], [1, "SHIFT"],
+               [2, "CAPS"], [16, "MOD2"], [32, "MOD3"], [128, "MOD5"]]
+            | map(select(($m / .[0] | floor) % 2 == 1) | .[1]);
+        def keyname: {
+            "slash": "/", "period": ".", "comma": ",", "semicolon": ";",
+            "mouse:272": "LMB drag", "mouse:273": "RMB drag"
+        }[.] // .;
+        .[]
+        | ["Hyprland",
+           ((if .submap == "" then "" else "[\(.submap)] " end)
+            + ((.modmask | mods) + [.key | keyname] | join(" + "))),
+           (if .has_description then .description else "(no description)" end)]
+        | @tsv
+    ') || rows=$'Hyprland\t-\tCould not read binds from hyprctl'
+    printf '%s\n' "$rows"
+}
+
+# Prints the mode-keys line ("mode-keys vi"), then every bind in every key table,
+# on a throwaway server, so it works with no tmux running. The config is loaded
+# with source-file rather than -f: tmux skips a config with a syntax error
+# silently at startup, but reports it to a source-file client, and those
+# messages are merged into the output. Each listing gets its own socket: both
+# run at once, and a shared one would serve the first's binds. The server is
+# killed first (one left behind would still hold its old binds) and after. fd 9
+# (the lock) is closed for tmux, which could otherwise keep it, and the listing
+# gets tmux_timeout seconds, so a config that hangs can't hold the lock either.
+tmux_timeout=5
+
+tmux_keys() {
+    local format='#{key_prefix}	#{key_table}	#{key_string}	#{key_note}	#{key_command}'
+    local load=()
+    [[ -n ${2-} ]] && load=(source-file "$2" \;)
+    tmux -L "menu-keys-$1" kill-server 2>/dev/null
+    timeout "$tmux_timeout" tmux -L "menu-keys-$1" -f /dev/null start-server \; "${load[@]}" \
+        show-options -gw mode-keys \; list-keys -F "$format" \; kill-server 2>&1 9>&-
+    if (($? == 124)); then
+        # A server stuck in the config ignores kill-server and SIGTERM (it waits
+        # for the stuck job), and the next open on this socket would hit it.
+        pkill -KILL -f "^tmux -L menu-keys-$1 "
+        echo "tmux.conf took over ${tmux_timeout}s to load"
+    fi
+}
+
+tmux_binds() {
+    # Drop tmux's built-in binds: rows whose table, key, note and command match
+    # an unconfigured server's. The prefix is left out of the match so a changed
+    # prefix doesn't make every built-in prefix bind look new. Anything else tmux
+    # printed (a config error, a `run` that failed) becomes a row, and a listing
+    # with no mode-keys line means that server failed. A note containing a tab
+    # would split its row, so notes must not have one.
+    awk -F '\t' -v OFS='\t' '
+        function readable(key,    mods) {
+            mods = ""
+            while (key ~ /^[CMS]-./) {
+                mods = mods (substr(key, 1, 1) == "C" ? "CTRL" : substr(key, 1, 1) == "M" ? "ALT" : "SHIFT") " + "
+                key = substr(key, 3)
+            }
+            return mods key
+        }
+        /^mode-keys (vi|emacs)$/ {
+            if (FILENAME == ARGV[1]) defaults_read = 1
+            else { config_read = 1; copy_table = ($0 == "mode-keys vi") ? "copy-mode-vi" : "copy-mode" }
+            next
+        }
+        FILENAME == ARGV[1] { if (NF == 5) builtin[$2 FS $3 FS $4 FS $5]; next }
+        NF != 5 { if ($0 != "") print "tmux", "-", $0; next }
+        { rows[++n] = $0 }
+        END {
+            if (!defaults_read || !config_read) {
+                print "tmux", "-", "Could not read binds from tmux"
+                exit
+            }
+            for (i = 1; i <= n; i++) {
+                split(rows[i], f, "\t")
+                if ((f[2] FS f[3] FS f[4] FS f[5]) in builtin) continue
+                if (f[2] ~ /^copy-mode/ && f[2] != copy_table) continue
+                if (f[2] == copy_table) { tag = "tmux copy-mode"; combo = readable(f[3]) }
+                else if (f[2] == "prefix") { tag = "tmux"; combo = readable(f[1]) ", " readable(f[3]) }
+                else if (f[2] == "root") { tag = "tmux"; combo = readable(f[3]) }
+                else { tag = "tmux"; combo = "[" f[2] "] " readable(f[3]) }
+                print tag, combo, (f[4] == "" ? "(no description)" : f[4])
+            }
+        }
+    ' <(tmux_keys defaults) <(tmux_keys config "$HOME/.config/tmux/tmux.conf")
+}
+
+binds=$({ hypr_binds; tmux_binds; } | column -t -s $'\t' -o '    ') || {
+    notify-send -u critical "Keybinding cheatsheet" "Could not build the list"
+    exit 1
+}
+
+pikr -d -p Keys -l 20 --width 1000 <<<"$binds" >/dev/null 9>&-
