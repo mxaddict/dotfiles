@@ -1,51 +1,50 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Newline-separated "id<TAB>name" records rather than associative arrays:
+# macOS ships bash 3.2, which has no `declare -A`.
+
 PAGE=1
 PER_PAGE=100
 
-declare -A KEY_MAP   # "pid:kid" => "key title"
-declare -A PROJECTS  # pid => name
+PROJECTS="" # "pid<TAB>name" per line
+KEYS=""     # "pid<TAB>kid<TAB>title" per line
 
 echo "=== Fetching all projects ==="
 
 while true; do
-  response=$(glab api "projects?membership=true&per_page=$PER_PAGE&page=$PAGE" | jq -c '.[] | {id: .id, name: .name_with_namespace}')
+  response=$(glab api "projects?membership=true&per_page=$PER_PAGE&page=$PAGE" | jq -r '.[] | "\(.id)\t\(.name_with_namespace)"')
 
   [[ -z "$response" ]] && break
 
-  while IFS= read -r project; do
-    pid=$(echo "$project" | jq -r '.id')
-    pname=$(echo "$project" | jq -r '.name')
-    PROJECTS["$pid"]="$pname"
+  while IFS=$'\t' read -r pid pname; do
+    PROJECTS+="$pid"$'\t'"$pname"$'\n'
     echo "  [$pid] $pname"
   done <<< "$response"
 
   sleep 1
-  ((PAGE++))
+  PAGE=$((PAGE + 1))
 done
 
 echo ""
-echo "Total projects: ${#PROJECTS[@]}"
+echo "Total projects: $(printf '%s' "$PROJECTS" | grep -c . || true)"
 echo ""
 echo "=== Fetching deploy keys ==="
 
-for pid in "${!PROJECTS[@]}"; do
-  pname="${PROJECTS[$pid]}"
-  keys=$(glab api "projects/$pid/deploy_keys" | jq -c '.[] | {id: .id, title: .title}')
+while IFS=$'\t' read -r pid pname; do
+  [[ -z "$pid" ]] && continue
+  keys=$(glab api "projects/$pid/deploy_keys" | jq -r '.[] | "\(.id)\t\(.title)"')
 
-  while IFS= read -r key; do
-    [[ -z "$key" ]] && continue
-    kid=$(echo "$key" | jq -r '.id')
-    ktitle=$(echo "$key" | jq -r '.title')
-    KEY_MAP["$pid:$kid"]="$ktitle"
+  while IFS=$'\t' read -r kid ktitle; do
+    [[ -z "$kid" ]] && continue
+    KEYS+="$pid"$'\t'"$kid"$'\t'"$ktitle"$'\n'
     echo "  Project [$pid] $pname — Key [$kid] $ktitle"
   done <<< "$keys"
   sleep 1
-done
+done <<< "$PROJECTS"
 
 echo ""
-echo "Total keys to delete: ${#KEY_MAP[@]}"
+echo "Total keys to delete: $(printf '%s' "$KEYS" | grep -c . || true)"
 echo ""
 read -rp "Delete all? [y/N] " confirm
 [[ "$confirm" != "y" && "$confirm" != "Y" ]] && echo "Aborted." && exit 0
@@ -53,13 +52,11 @@ read -rp "Delete all? [y/N] " confirm
 echo ""
 echo "=== Deleting ==="
 
-for entry in "${!KEY_MAP[@]}"; do
-  pid="${entry%%:*}"
-  kid="${entry##*:}"
-  title="${KEY_MAP[$entry]}"
+while IFS=$'\t' read -r pid kid title; do
+  [[ -z "$pid" ]] && continue
   glab api --method DELETE "projects/$pid/deploy_keys/$kid"
   echo "Deleted key [$kid] $title from project $pid"
   sleep 1
-done
+done <<< "$KEYS"
 
 echo "Done."
