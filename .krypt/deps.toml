@@ -32,6 +32,13 @@ brew = [
     "git", "jq", "neovim", "ripgrep", "starship", "stow", "tealdeer", "tmux",
     "unzip", "wget", "zoxide",
 ]
+winget = [
+    "Alacritty.Alacritty", "BurntSushi.ripgrep.MSVC", "Fastfetch-cli.Fastfetch",
+    "Git.Git", "Microsoft.PowerShell", "Neovim.Neovim", "Starship.Starship",
+    "ajeetdsouza.zoxide", "aristocratos.btop4win", "dbrgn.tealdeer",
+    "eza-community.eza", "jqlang.jq", "junegunn.fzf", "sharkdp.bat", "sharkdp.fd",
+    "uutils.coreutils",
+]
 
 [[deps]]
 group = "dev"
@@ -49,6 +56,10 @@ dnf = [
 brew = [
     "bear", "doctl", "lazygit", "nodejs", "npm", "opencode", "rustup",
 ]
+winget = [
+    "DigitalOcean.Doctl", "GLab.GLab", "GitHub.cli", "JesseDuffield.lazygit",
+    "OpenJS.NodeJS.LTS", "Rustlang.Rustup", "SST.opencode",
+]
 
 [[deps]]
 group = "fonts"
@@ -60,6 +71,7 @@ pacman = [
 apt = []
 dnf = []
 brew = []
+winget = ["DEVCOM.HackNerdFont"]
 
 [[deps]]
 group = "hyprland"
@@ -95,6 +107,7 @@ dnf = [
     "mpv",
 ]
 brew = []
+winget = ["shinchiro.mpv", "yt-dlp.yt-dlp"]
 
 [[deps]]
 group = "system"
@@ -122,6 +135,7 @@ apt = [
 ]
 dnf = []
 brew = []
+winget = ["Mozilla.Firefox", "Mozilla.Thunderbird", "muesli.duf"]
 
 [[deps]]
 group = "aur-tools"

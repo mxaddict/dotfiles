@@ -1,5 +1,10 @@
 # Links — deploy files / dirs from the repo into $HOME
 # Included by .krypt.toml
+#
+# Tools that read ~/.config on every OS share one entry. Tools that read a
+# native folder on Windows get a second `platform = "windows"` entry with the
+# same source; Windows-only files live under AppData/ and Documents/, mirroring
+# where they land.
 
 # --- Root dotfiles ---
 [[link]]
@@ -9,6 +14,7 @@ dst = "${HOME}/.gitconfig"
 [[link]]
 src = ".gtkrc-2.0"
 dst = "${HOME}/.gtkrc-2.0"
+platform = "linux"
 
 [[link]]
 src = ".clang-format"
@@ -32,9 +38,21 @@ dst = "${HOME}/.prettierignore"
 src_glob = ".config/alacritty/**/*"
 dst = "${XDG_CONFIG}/alacritty/"
 
+# Alacritty on Windows ignores ~/.config; this entry point imports the shared
+# config above and switches the shell to PowerShell 7.
+[[link]]
+src = "AppData/Roaming/alacritty/alacritty.toml"
+dst = "${WIN_APPDATA}/alacritty/alacritty.toml"
+platform = "windows"
+
 [[link]]
 src_glob = ".config/bat/**/*"
 dst = "${XDG_CONFIG}/bat/"
+
+[[link]]
+src_glob = ".config/bat/**/*"
+dst = "${WIN_APPDATA}/bat/"
+platform = "windows"
 
 [[link]]
 src_glob = ".config/cargo/**/*"
@@ -43,6 +61,7 @@ dst = "${XDG_CONFIG}/cargo/"
 [[link]]
 src_glob = ".config/dconf/**/*"
 dst = "${XDG_CONFIG}/dconf/"
+platform = "linux"
 
 [[link]]
 src_glob = ".config/fish/**/*"
@@ -53,12 +72,19 @@ src_glob = ".config/gh/**/*"
 dst = "${XDG_CONFIG}/gh/"
 
 [[link]]
+src_glob = ".config/gh/**/*"
+dst = "${WIN_APPDATA}/GitHub CLI/"
+platform = "windows"
+
+[[link]]
 src_glob = ".config/gtk-3.0/**/*"
 dst = "${XDG_CONFIG}/gtk-3.0/"
+platform = "linux"
 
 [[link]]
 src_glob = ".config/gtk-4.0/**/*"
 dst = "${XDG_CONFIG}/gtk-4.0/"
+platform = "linux"
 
 # Hyprland: only versioned files; the live *.lua (apps.lua, input.lua,
 # monitors.lua, workspaces.lua) are gitignored and managed via [[template]]
@@ -66,34 +92,50 @@ dst = "${XDG_CONFIG}/gtk-4.0/"
 [[link]]
 src = ".config/hypr/hyprland.lua"
 dst = "${XDG_CONFIG}/hypr/hyprland.lua"
+platform = "linux"
 
 [[link]]
 src = ".config/hypr/hypridle.conf"
 dst = "${XDG_CONFIG}/hypr/hypridle.conf"
+platform = "linux"
 
 [[link]]
 src = ".config/hypr/hyprlock.conf"
 dst = "${XDG_CONFIG}/hypr/hyprlock.conf"
+platform = "linux"
 
 [[link]]
 src = ".config/hypr/hyprqt6engine.conf"
 dst = "${XDG_CONFIG}/hypr/hyprqt6engine.conf"
+platform = "linux"
 
 [[link]]
 src = ".config/hypr/exfil.png"
 dst = "${XDG_CONFIG}/hypr/exfil.png"
+platform = "linux"
 
 [[link]]
 src_glob = ".config/lazygit/**/*"
 dst = "${XDG_CONFIG}/lazygit/"
 
 [[link]]
+src_glob = ".config/lazygit/**/*"
+dst = "${WIN_LOCALAPPDATA}/lazygit/"
+platform = "windows"
+
+[[link]]
 src_glob = ".config/MangoHud/**/*"
 dst = "${XDG_CONFIG}/MangoHud/"
+platform = "linux"
 
 [[link]]
 src_glob = ".config/mpv/**/*"
 dst = "${XDG_CONFIG}/mpv/"
+
+[[link]]
+src_glob = ".config/mpv/**/*"
+dst = "${WIN_APPDATA}/mpv/"
+platform = "windows"
 
 [[link]]
 src_glob = ".config/nushell/**/*"
@@ -104,20 +146,34 @@ src_glob = ".config/nvim/**/*"
 dst = "${XDG_CONFIG}/nvim/"
 
 [[link]]
+src_glob = ".config/nvim/**/*"
+dst = "${WIN_LOCALAPPDATA}/nvim/"
+platform = "windows"
+
+[[link]]
 src_glob = ".config/nwg-look/**/*"
 dst = "${XDG_CONFIG}/nwg-look/"
+platform = "linux"
 
 [[link]]
 src_glob = ".config/rofi/**/*"
 dst = "${XDG_CONFIG}/rofi/"
+platform = "linux"
 
 [[link]]
 src_glob = ".config/swaync/**/*"
 dst = "${XDG_CONFIG}/swaync/"
+platform = "linux"
 
 [[link]]
 src_glob = ".config/tealdeer/**/*"
 dst = "${XDG_CONFIG}/tealdeer/"
+
+# tealdeer on Windows nests its config one level deeper, under config/.
+[[link]]
+src_glob = ".config/tealdeer/**/*"
+dst = "${WIN_APPDATA}/tealdeer/config/"
+platform = "windows"
 
 [[link]]
 src_glob = ".config/tmux/**/*"
@@ -126,18 +182,22 @@ dst = "${XDG_CONFIG}/tmux/"
 [[link]]
 src_glob = ".config/waybar/**/*"
 dst = "${XDG_CONFIG}/waybar/"
+platform = "linux"
 
 [[link]]
 src_glob = ".config/xsettingsd/**/*"
 dst = "${XDG_CONFIG}/xsettingsd/"
+platform = "linux"
 
 [[link]]
 src = ".config/chromium-flags.conf"
 dst = "${XDG_CONFIG}/chromium-flags.conf"
+platform = "linux"
 
 [[link]]
 src = ".config/mimeapps.list"
 dst = "${XDG_CONFIG}/mimeapps.list"
+platform = "linux"
 
 [[link]]
 src = ".config/starship.toml"
@@ -146,14 +206,29 @@ dst = "${XDG_CONFIG}/starship.toml"
 [[link]]
 src = ".config/user-dirs.dirs"
 dst = "${XDG_CONFIG}/user-dirs.dirs"
+platform = "linux"
 
 [[link]]
 src = ".config/user-dirs.locale"
 dst = "${XDG_CONFIG}/user-dirs.locale"
+platform = "linux"
 
 [[link]]
 src_glob = ".config/opencode/**/*"
 dst = "${XDG_CONFIG}/opencode/"
+
+# A real file rather than a git symlink: Git for Windows checks symlinks out as
+# text files holding the target path.
+[[link]]
+src = ".config/agents/AGENTS.md"
+dst = "${XDG_CONFIG}/opencode/AGENTS.md"
+
+# --- PowerShell ---
+
+[[link]]
+src = "Documents/PowerShell/Microsoft.PowerShell_profile.ps1"
+dst = "${DOCUMENTS}/PowerShell/Microsoft.PowerShell_profile.ps1"
+platform = "windows"
 
 # --- .local/bin utility + menu scripts ---
 # Battery scripts (.batrep/.batlog/.batclear) absorbed into the native
@@ -162,6 +237,7 @@ dst = "${XDG_CONFIG}/opencode/"
 [[link]]
 src = ".local/bin/.browser"
 dst = "${LOCAL_BIN}/.browser"
+platform = "linux"
 
 [[link]]
 src = ".local/bin/.clear"
@@ -176,16 +252,28 @@ src = ".local/bin/.envdown"
 dst = "${LOCAL_BIN}/.envdown"
 
 [[link]]
+src = ".local/bin/.envdown.ps1"
+dst = "${LOCAL_BIN}/.envdown.ps1"
+platform = "windows"
+
+[[link]]
 src = ".local/bin/.envup"
 dst = "${LOCAL_BIN}/.envup"
 
 [[link]]
+src = ".local/bin/.envup.ps1"
+dst = "${LOCAL_BIN}/.envup.ps1"
+platform = "windows"
+
+[[link]]
 src = ".local/bin/.firmup"
 dst = "${LOCAL_BIN}/.firmup"
+platform = "linux"
 
 [[link]]
 src = ".local/bin/.kanata"
 dst = "${LOCAL_BIN}/.kanata"
+platform = "linux"
 
 # .menu-apps / .menu-audio / .menu-bluetooth / .menu-top wrappers
 # removed — krypt's `commands.toml` invokes the underlying tools
@@ -194,42 +282,52 @@ dst = "${LOCAL_BIN}/.kanata"
 [[link]]
 src = ".local/bin/.menu-autofill"
 dst = "${LOCAL_BIN}/.menu-autofill"
+platform = "linux"
 
 [[link]]
 src = ".local/bin/.menu-calc"
 dst = "${LOCAL_BIN}/.menu-calc"
+platform = "linux"
 
 [[link]]
 src = ".local/bin/.menu-emoji"
 dst = "${LOCAL_BIN}/.menu-emoji"
+platform = "linux"
 
 [[link]]
 src = ".local/bin/.menu-emoji-update"
 dst = "${LOCAL_BIN}/.menu-emoji-update"
+platform = "linux"
 
 [[link]]
 src = ".local/bin/.menu-mail"
 dst = "${LOCAL_BIN}/.menu-mail"
+platform = "linux"
 
 [[link]]
 src = ".local/bin/.menu-pass"
 dst = "${LOCAL_BIN}/.menu-pass"
+platform = "linux"
 
 [[link]]
 src = ".local/bin/.menu-power"
 dst = "${LOCAL_BIN}/.menu-power"
+platform = "linux"
 
 [[link]]
 src = ".local/bin/.menu-time"
 dst = "${LOCAL_BIN}/.menu-time"
+platform = "linux"
 
 [[link]]
 src = ".local/bin/.menu-wifi"
 dst = "${LOCAL_BIN}/.menu-wifi"
+platform = "linux"
 
 [[link]]
 src = ".local/bin/.mirror"
 dst = "${LOCAL_BIN}/.mirror"
+platform = "linux"
 
 [[link]]
 src = ".local/bin/.nproc"
@@ -240,21 +338,30 @@ src = ".local/bin/.pull-all-models"
 dst = "${LOCAL_BIN}/.pull-all-models"
 
 [[link]]
+src = ".local/bin/.pull-all-models.ps1"
+dst = "${LOCAL_BIN}/.pull-all-models.ps1"
+platform = "windows"
+
+[[link]]
 src = ".local/bin/.start"
 dst = "${LOCAL_BIN}/.start"
+platform = "linux"
 
 [[link]]
 src = ".local/bin/.swap"
 dst = "${LOCAL_BIN}/.swap"
+platform = "linux"
 
 [[link]]
 src = ".local/bin/.swaync-test"
 dst = "${LOCAL_BIN}/.swaync-test"
+platform = "linux"
 
 
 [[link]]
 src = ".local/bin/grimblast"
 dst = "${LOCAL_BIN}/grimblast"
+platform = "linux"
 
 [[link]]
 src = ".local/bin/t"
@@ -264,7 +371,9 @@ dst = "${LOCAL_BIN}/t"
 [[link]]
 src = ".local/share/emojis"
 dst = "${HOME}/.local/share/emojis"
+platform = "linux"
 
 [[link]]
 src_glob = ".local/share/applications/**/*"
 dst = "${HOME}/.local/share/applications/"
+platform = "linux"

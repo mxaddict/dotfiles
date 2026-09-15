@@ -79,6 +79,7 @@ steps = [
 group       = "menu"
 name        = "emoji-update"
 description = "Re-download emoji database from emojilib v4"
+platform    = "linux"
 steps = [
     { run = ["bash", "${HOME}/.local/bin/.menu-emoji-update"] },
 ]
@@ -124,6 +125,7 @@ steps = [
 group       = "menu"
 name        = "mail"
 description = "Email account picker → opens Himalaya in Neovim"
+platform    = "linux"
 steps = [
     { run = ["bash", "${HOME}/.local/bin/.menu-mail"], ignore_failure = true },
 ]
@@ -157,12 +159,31 @@ steps = [
     { if = "command_exists:gcloud", run = ["bash", "${HOME}/.local/bin/.envup"] },
 ]
 
+# Windows variants run PowerShell ports: `bash` there is the WSL launcher.
+[[command]]
+group       = "env"
+name        = "up"
+description = "Upload .env.* files for the current project to a GCS bucket"
+platform    = "windows"
+steps = [
+    { if = "command_exists:gcloud", run = ["pwsh", "-NoProfile", "-File", "${HOME}/.local/bin/.envup.ps1"] },
+]
+
 [[command]]
 group       = "env"
 name        = "down"
 description = "Download .env.* files for the current project from a GCS bucket"
 steps = [
     { if = "command_exists:gcloud", run = ["bash", "${HOME}/.local/bin/.envdown"] },
+]
+
+[[command]]
+group       = "env"
+name        = "down"
+description = "Download .env.* files for the current project from a GCS bucket"
+platform    = "windows"
+steps = [
+    { if = "command_exists:gcloud", run = ["pwsh", "-NoProfile", "-File", "${HOME}/.local/bin/.envdown.ps1"] },
 ]
 
 # ---------------------------------------------------------------------------
@@ -213,6 +234,16 @@ steps = [
 group       = "system"
 name        = "clear"
 description = "Purge caches (bash equiv: rm ~/.cache + /var/cache; rebuild bat + tldr)"
+platform    = "linux"
+steps = [
+    { run = ["bash", "${HOME}/.local/bin/.clear"] },
+]
+
+[[command]]
+group       = "system"
+name        = "clear"
+description = "Purge caches (bash equiv: rm ~/.cache + /var/cache; rebuild bat + tldr)"
+platform    = "macos"
 steps = [
     { run = ["bash", "${HOME}/.local/bin/.clear"] },
 ]
@@ -230,8 +261,18 @@ steps = [
 group       = "system"
 name        = "clearkeys"
 description = "Delete all GitLab deploy keys across accessible projects (interactive)"
+platform    = "linux"
 steps = [
     # Requires interactive stdin confirm + associative arrays — kept as bash.
+    { run = ["bash", "${HOME}/.local/bin/.clearkeys"] },
+]
+
+[[command]]
+group       = "system"
+name        = "clearkeys"
+description = "Delete all GitLab deploy keys across accessible projects (interactive)"
+platform    = "macos"
+steps = [
     { run = ["bash", "${HOME}/.local/bin/.clearkeys"] },
 ]
 
@@ -241,6 +282,15 @@ name        = "nproc"
 description = "Print CPU core count (nproc on Linux, sysctl on macOS)"
 steps = [
     { run = ["bash", "${HOME}/.local/bin/.nproc"] },
+]
+
+[[command]]
+group       = "system"
+name        = "nproc"
+description = "Print CPU core count"
+platform    = "windows"
+steps = [
+    { run = ["pwsh", "-NoProfile", "-Command", "[Environment]::ProcessorCount"] },
 ]
 
 [[command]]
@@ -264,6 +314,15 @@ steps = [
     { run = ["bash", "${HOME}/.local/bin/.pull-all-models"] },
 ]
 
+[[command]]
+group       = "ollama"
+name        = "pull-all"
+description = "Pull all Ollama models listed in opencode.json"
+platform    = "windows"
+steps = [
+    { run = ["pwsh", "-NoProfile", "-File", "${HOME}/.local/bin/.pull-all-models.ps1"] },
+]
+
 # ---------------------------------------------------------------------------
 # browser group
 # ---------------------------------------------------------------------------
@@ -272,6 +331,7 @@ steps = [
 group       = "browser"
 name        = "open"
 description = "Launch the system default browser (resolved via xdg-settings)"
+platform    = "linux"
 steps = [
     { run = ["bash", "${HOME}/.local/bin/.browser"] },
 ]

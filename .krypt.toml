@@ -123,6 +123,7 @@ default = "us"
 [[hook]]
 name           = "ensure-user-dirs"
 when           = "post-update"
+if             = "!platform:windows"
 run            = ["bash", "-c", "mkdir -p ${HOME}/Desktop ${HOME}/Documents ${HOME}/Downloads ${HOME}/Music ${HOME}/OSs ${HOME}/Pictures/Screenshots ${HOME}/Projects ${HOME}/Public ${HOME}/Templates ${HOME}/Videos ${HOME}/.local/log"]
 ignore_failure = true
 
@@ -138,6 +139,15 @@ name           = "fisher-update"
 when           = "post-update"
 if             = "command_exists:fish"
 run            = ["fish", "-c", "curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish > /tmp/fisher.fish && source /tmp/fisher.fish && fisher update"]
+ignore_failure = true
+
+# PowerShell counterpart of fisher-update: PSFzf provides the fzf key bindings
+# the PowerShell profile loads, as fzf.fish does for fish.
+[[hook]]
+name           = "psfzf-update"
+when           = "post-update"
+if             = "platform:windows,command_exists:pwsh"
+run            = ["pwsh", "-NoProfile", "-Command", "if (Get-InstalledPSResource -Name PSFzf -ErrorAction Ignore) { Update-PSResource -Name PSFzf -TrustRepository -Quiet } else { Install-PSResource -Name PSFzf -TrustRepository -Quiet }"]
 ignore_failure = true
 
 [[hook]]
