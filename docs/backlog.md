@@ -49,6 +49,14 @@
   overrides are unreleased (latest release 0.2.2). Switch `setup.yml` to the
   release binary once one ships with them. Until then, `krypt-bin` 0.2.2 on
   Linux runs the first entry by name, which is still the Linux/generic one.
+  Tracking `main` unpinned means a krypt commit can turn this repo's CI red with
+  no dotfiles change, and each new krypt commit rebuilds it on all three
+  runners. Pinning a revision in `setup.yml` makes runs reproducible but stops
+  this CI from exercising new krypt changes until the pin is bumped — which is
+  currently the only end-to-end Windows/macOS check krypt gets. Needs a
+  decision.
+- **krypt's own open items** (notify backends, interactive steps, CI toolchain)
+  are tracked in `kryptic-sh/krypt` under `docs/backlog.md`.
 
 ## Not ported to Windows
 
@@ -61,6 +69,13 @@
 - `.local/bin/.pull-all-models` reads `$HOME/.files/.config/opencode/`, which
   only exists when the repo is cloned to `~/.files`; the PowerShell port reads
   the deployed `~/.config/opencode/opencode.json` instead.
+
+## CI
+
+- **PSScriptAnalyzer enforces only `ParseError` and `Error` severity** (the
+  `psscriptanalyzer` job in `lint.yml`). Warning-level rules are not enforced;
+  how many warnings the existing `.ps1` files raise has not been measured, so
+  turning them on may need fixes or per-rule suppressions first.
 
 ## Coverage gaps
 
