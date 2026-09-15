@@ -1,0 +1,65 @@
+name: setup
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  setup:
+    name: setup (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v5
+
+      # The dotfiles rely on krypt behaviour newer than its latest release
+      # (per-platform [[command]] overrides), so build main, cached per commit.
+      - name: Resolve krypt revision
+        id: krypt
+        run: |
+          $rev = (git ls-remote https://github.com/kryptic-sh/krypt.git refs/heads/main).Split("`t")[0]
+          "rev=$rev" >> $env:GITHUB_OUTPUT
+
+      - name: Cache krypt
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/krypt
+          key: krypt-${{ runner.os }}-${{ steps.krypt.outputs.rev }}
+
+      - name: Install Rust
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          cache: false
+          rustflags: ''
+
+      - name: Build krypt
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: >
+          cargo install --locked --git https://github.com/kryptic-sh/krypt.git
+          --rev ${{ steps.krypt.outputs.rev }} --root '${{ runner.temp }}/krypt'
+          krypt-cli
+
+      - name: Add krypt to PATH
+        run:
+          Join-Path '${{ runner.temp }}' krypt bin | Add-Content
+          $env:GITHUB_PATH
+
+      - name: Check fish config syntax
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fish
+          fish --no-execute .config/fish/config.fish
+
+      - name: Deploy and verify
+        run: ./.github/scripts/test-setup.ps1
