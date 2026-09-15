@@ -24,6 +24,13 @@ function Invoke-Krypt {
     if ($LASTEXITCODE -ne 0) { throw "krypt $args exited with $LASTEXITCODE" }
 }
 
+# The count after `<Label>:` in a `krypt link` report; 0 when the line is absent
+# (krypt omits zero-valued lines other than the first).
+function Get-ReportCount([object[]]$Report, [string]$Label) {
+    $match = $Report | Select-String -Pattern "^\s*$([regex]::Escape($Label)): (\d+)$" | Select-Object -First 1
+    if ($match) { [int]$match.Matches[0].Groups[1].Value } else { 0 }
+}
+
 $failures = [Collections.Generic.List[string]]::new()
 
 function Assert-Deployed([string]$Destination, [string]$Source) {
@@ -45,9 +52,18 @@ Push-Location $repo
 try {
     Invoke-Krypt validate .krypt.toml
     Invoke-Krypt link --config .krypt.toml --manifest $manifest --dry-run
-    Invoke-Krypt link --config .krypt.toml --manifest $manifest
-    # A second run must find every destination tracked and nothing to fix.
-    Invoke-Krypt link --config .krypt.toml --manifest $manifest
+    $firstLink = Invoke-Krypt link --config .krypt.toml --manifest $manifest
+    $firstLink
+    # A second run must find every destination tracked and nothing to fix:
+    # it rewrites exactly what the first run wrote, all of it byte-identical.
+    $secondLink = Invoke-Krypt link --config .krypt.toml --manifest $manifest
+    $secondLink
+    $firstWrote = Get-ReportCount $firstLink 'wrote'
+    $secondWrote = Get-ReportCount $secondLink 'wrote'
+    $idempotent = Get-ReportCount $secondLink 'idempotent re-deploys'
+    if ($firstWrote -eq 0 -or $secondWrote -ne $firstWrote -or $idempotent -ne $secondWrote) {
+        $failures.Add("second link was not idempotent: first wrote $firstWrote, second wrote $secondWrote with $idempotent idempotent re-deploys")
+    }
 
     Assert-Deployed '.gitconfig' '.gitconfig'
     Assert-Deployed '.config/starship.toml' '.config/starship.toml'
@@ -82,8 +98,13 @@ try {
     # Commands: the per-OS entry runs, and a Linux-only one refuses elsewhere.
     Invoke-Krypt system nproc
     if ($os -ne 'linux') {
-        & krypt browser open
-        if ($LASTEXITCODE -eq 0) { $failures.Add("krypt browser open ran on $os instead of refusing") }
+        # Any failure would exit non-zero (the script it runs is not deployed
+        # here either), so require krypt's own platform refusal.
+        $refusal = & { $ErrorActionPreference = 'Continue'; & krypt browser open 2>&1 | ForEach-Object { "$_" } }
+        $refusal
+        if ($LASTEXITCODE -eq 0 -or -not ($refusal -match 'restricted to linux')) {
+            $failures.Add("krypt browser open on $os did not refuse as linux-only")
+        }
     }
 
     # Dependency groups live in an included file; each manager must see some.

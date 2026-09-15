@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   shellcheck:
@@ -17,7 +21,7 @@ jobs:
         run: |
           shopt -s nullglob
           # Third-party scripts we ship as-is — don't lint upstream.
-          skip=(".local/bin/grimblast" ".local/bin/t")
+          skip=(".local/bin/grimblast")
           is_skipped() {
             local f="$1"
             for s in "${skip[@]}"; do [ "$f" = "$s" ] && return 0; done
@@ -41,7 +45,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
-          node-version: '20'
+          node-version: '24'
       - name: Install prettier
         run: npm install --global prettier@3
       - name: Check formatting
@@ -88,6 +92,58 @@ jobs:
           while IFS= read -r f; do
             [ -f "$f" ] || { echo "== skip (missing) $f =="; continue; }
             echo "== toml $f =="
-            python3 -c "import tomli, sys; tomli.loads(open('$f','rb').read().decode())" || fail=1
+            python3 -c "import sys, tomli; tomli.loads(open(sys.argv[1], 'rb').read().decode())" "$f" || fail=1
           done < <(git ls-files '*.toml')
           exit "$fail"
+
+  fish:
+    name: fish syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install fish
+        run: sudo apt-get update && sudo apt-get install -y fish
+      - name: Check fish syntax
+        run: |
+          fail=0
+          count=0
+          while IFS= read -r f; do
+            echo "== fish $f =="
+            count=$((count + 1))
+            fish --no-execute "$f" || fail=1
+          done < <(git ls-files '*.fish')
+          [ "$count" -gt 0 ] || { echo "no .fish files found"; exit 1; }
+          exit "$fail"
+
+  psscriptanalyzer:
+    name: PSScriptAnalyzer
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install PSScriptAnalyzer
+        run: |
+          if (-not (Get-Module -ListAvailable PSScriptAnalyzer)) {
+            Install-Module PSScriptAnalyzer -Scope CurrentUser -Force
+          }
+      - name: Analyze PowerShell scripts
+        run: |
+          $ErrorActionPreference = 'Stop'
+          # Prove the analyzer reports at this severity before trusting a
+          # clean result: a script with a syntax error must be flagged.
+          $probe = Join-Path $env:RUNNER_TEMP 'probe.ps1'
+          Set-Content -LiteralPath $probe -Value 'function Broken {'
+          if (-not (Invoke-ScriptAnalyzer -Path $probe -Severity ParseError, Error)) {
+            throw 'PSScriptAnalyzer flagged nothing in a script with a syntax error'
+          }
+
+          $files = @(git ls-files '*.ps1')
+          if ($files.Count -eq 0) { throw 'no .ps1 files found' }
+          $findings = @($files | ForEach-Object {
+            Invoke-ScriptAnalyzer -Path $_ -Severity ParseError, Error
+          })
+          $findings | Format-Table -AutoSize ScriptName, Line, RuleName, Message | Out-String -Width 200
+          Write-Host "analyzed $($files.Count) files, $($findings.Count) findings"
+          if ($findings.Count) { exit 1 }

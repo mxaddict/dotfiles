@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   setup:
@@ -29,7 +33,7 @@ jobs:
 
       - name: Cache krypt
         id: cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/krypt
           key: krypt-${{ runner.os }}-${{ steps.krypt.outputs.rev }}
@@ -53,13 +57,6 @@ jobs:
         run:
           Join-Path '${{ runner.temp }}' krypt bin | Add-Content
           $env:GITHUB_PATH
-
-      - name: Check fish config syntax
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y fish
-          fish --no-execute .config/fish/config.fish
 
       - name: Deploy and verify
         run: ./.github/scripts/test-setup.ps1
