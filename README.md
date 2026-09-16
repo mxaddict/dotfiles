@@ -146,7 +146,11 @@ Optional:
 
 `$mod` = **Super** (Windows key). Every menu binding invokes `krypt menu <name>`
 or another krypt subcommand — see `.krypt/commands.toml` for the underlying
-step.
+step. `$mod + /` opens a cheatsheet of these binds, read each time it opens:
+Hyprland's running binds from `hyprctl binds` (tagged `Hyprland`), and the binds
+the deployed `tmux.conf` and its plugins add, in any key table (tagged `tmux`,
+or `tmux copy-mode`). Descriptions come from each bind's `description` /
+`bind -N` note, and from `.config/tmux/plugin-notes.sh` for plugin binds.
 
 ### Apps & menus
 
@@ -164,6 +168,7 @@ step.
 | `$mod + t`            | `krypt menu time`      | Timezone picker         |
 | `$mod + escape`       | `krypt menu top`       | btop                    |
 | `$mod + shift + m`    | `krypt menu power`     | Power picker            |
+| `$mod + /`            | `krypt menu keys`      | Keybinding cheatsheet   |
 | `$mod + n` / `+S+n`   | —                      | swaync toggle / dismiss |
 | `ctrl + shift + k`    | `krypt kanata toggle`  | Toggle kanata.service   |
 
@@ -231,7 +236,9 @@ To add a new menu (e.g. `krypt menu screenshot`):
 1. Add `[[command]] group = "menu" name = "screenshot" steps = […]` to
    `.krypt/commands.toml`.
 2. (Optional) Add the Hyprland bind in `.config/hypr/hyprland.lua`:
-   `hl.bind("SUPER + SHIFT + S", hl.dsp.exec_cmd("krypt menu screenshot"))`.
+   `hl.bind("SUPER + SHIFT + S", hl.dsp.exec_cmd("krypt menu screenshot"), { description = "Screenshot menu" })`.
+   Give every bind a `description` — `krypt menu keys` (`$mod + /`) lists them
+   as the live cheatsheet.
 3. `krypt validate` — fail fast on config errors.
 
 ## Convention: dotfile-prefixed scripts

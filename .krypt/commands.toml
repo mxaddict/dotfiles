@@ -21,6 +21,15 @@ steps = [
 
 [[command]]
 group       = "menu"
+name        = "keys"
+description = "Keybinding cheatsheet — Hyprland and tmux binds, shown in pikr"
+platform    = "linux"
+steps = [
+    { run = ["bash", "${HOME}/.local/bin/.menu-keys"], ignore_failure = true },
+]
+
+[[command]]
+group       = "menu"
 name        = "power"
 description = "Power action picker (lock/sleep/hibernate/shutdown/logout/reboot)"
 platform    = "linux"
