@@ -1,4 +1,4 @@
-model = "gpt-6-astra"
+model = "gpt-5.6-sol"
 model_reasoning_effort = "medium"
 # Ollama profile — change base_url to point at your Ollama host.
 # Default assumes Ollama running on localhost:11434. For a remote box, set
