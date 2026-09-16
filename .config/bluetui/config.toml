@@ -1,0 +1,7 @@
+# bluetui — TUI bluetooth manager, opened from waybar via `krypt menu bluetooth`.
+# Only the non-default settings live here; everything else keeps bluetui's
+# defaults.
+
+# Quit on Esc as well as `q` / `ctrl+c`, so the waybar menus all close the same
+# way. Off by default upstream.
+esc_quit = true

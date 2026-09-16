@@ -71,6 +71,11 @@ dst = "${WIN_APPDATA}/bat/"
 platform = "windows"
 
 [[link]]
+src_glob = ".config/bluetui/**/*"
+dst = "${XDG_CONFIG}/bluetui/"
+platform = "linux"
+
+[[link]]
 src_glob = ".config/cargo/**/*"
 dst = "${XDG_CONFIG}/cargo/"
 
@@ -209,6 +214,11 @@ platform = ["linux", "macos"]
 [[link]]
 src_glob = ".config/waybar/**/*"
 dst = "${XDG_CONFIG}/waybar/"
+platform = "linux"
+
+[[link]]
+src_glob = ".config/wiremix/**/*"
+dst = "${XDG_CONFIG}/wiremix/"
 platform = "linux"
 
 [[link]]
