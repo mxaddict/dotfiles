@@ -18,7 +18,10 @@ hl.on("hyprland.start", function()
   hl.exec_cmd("waybar")
   hl.exec_cmd("swaync")
   hl.exec_cmd("swayosd-server")
-  hl.exec_cmd("systemctl --user start hyprpolkitagent")
+  -- The user manager outlives a logout: the agent restarts while no compositor
+  -- exists, hits its start limit, and a plain start is then refused. One shell
+  -- command, so the reset lands before the start.
+  hl.exec_cmd("systemctl --user reset-failed hyprpolkitagent; systemctl --user start hyprpolkitagent")
   hl.exec_cmd("dbus-update-activation-environment --systemd --all")
 end)
 
