@@ -73,6 +73,7 @@ platform = "windows"
 [[link]]
 src_glob = ".config/bluetui/**/*"
 dst = "${XDG_CONFIG}/bluetui/"
+platform = "linux"
 
 [[link]]
 src_glob = ".config/cargo/**/*"
@@ -218,6 +219,7 @@ platform = "linux"
 [[link]]
 src_glob = ".config/wiremix/**/*"
 dst = "${XDG_CONFIG}/wiremix/"
+platform = "linux"
 
 [[link]]
 src_glob = ".config/xsettingsd/**/*"
