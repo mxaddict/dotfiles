@@ -1,0 +1,461 @@
+#!/usr/bin/env bash
+# vi: ft=bash
+
+runtime=${XDG_RUNTIME_DIR:-/tmp}
+double_click_ms=400
+# How long the "new devices" picker shows "Scanning…" before listing. Discovery
+# has no completion signal to wait on, so the window is fixed.
+scan_s=8
+# Upper bound on the background scanner's life. It is killed on exit; this only
+# stops a SIGKILLed run from leaving discovery on for good.
+scan_session_s=120
+pair_timeout_s=30
+call_timeout_s=30
+# wait_dev / wait_adapter: how often and how long a property is re-read.
+poll_tries=15
+poll_s=0.2
+
+notify() {
+    # swaync renders body markup, and a device name can contain & < >. The
+    # quoted replacements keep bash's patsub_replacement from reading & as the
+    # match.
+    local body=${1//'&'/'&amp;'}
+    body=${body//'<'/'&lt;'}
+    body=${body//'>'/'&gt;'}
+    command -v notify-send >/dev/null && notify-send -- "Bluetooth" "$body"
+}
+
+# The reason from busctl's output ($1) for a notification.
+bt_error() {
+    local error
+    error=$(grep -m 1 . <<<"$1")
+    error=${error#Call failed: }
+    error=${error#Failed to set property: }
+    printf '%s' "${error:-no reason given}"
+}
+
+# Milliseconds since boot. Unlike the wall clock it never steps backwards,
+# which would leave a stamp in the future and the menu refusing to open.
+uptime_ms() {
+    awk '{ printf "%d", $1 * 1000 }' /proc/uptime
+}
+
+# A press within double_click_ms of the picker being launched is the second
+# half of a double-click — ignore it. Checked before the toggle so it also
+# covers the moment before pikr's window exists.
+stamp="$runtime/menu-bluetooth.opened"
+opened=$(cat "$stamp" 2>/dev/null)
+[[ $opened =~ ^[0-9]+$ ]] || opened=0
+elapsed=$(($(uptime_ms) - opened))
+((elapsed >= 0 && elapsed < double_click_ms)) && exit 0
+
+# Toggle: a later press while one of this menu's pickers is open closes it.
+# Matched on pikr's arguments so other pikr menus are left alone; every prompt
+# this menu uses starts with "Bluetooth".
+menu_pikr='^pikr -d -p Bluetooth'
+if pgrep -f "$menu_pikr" >/dev/null; then
+    pkill -f "$menu_pikr"
+    exit 0
+fi
+
+# Serialise runs. The lock is held while the run starts up and again from each
+# pick until the next picker opens or the run ends, so a click in either window
+# bails instead of starting a second menu. It is released while a picker is
+# open, where the toggle above handles clicks.
+exec 9>"$runtime/menu-bluetooth.lock"
+flock -n 9 || exit 0
+
+# Everything bluetoothd knows, as one JSON document: the adapter and every
+# device object with its properties. Reads go through this rather than
+# bluetoothctl's text, which has no stable format.
+snapshot() {
+    objects=$(busctl --json=short call org.bluez / org.freedesktop.DBus.ObjectManager GetManagedObjects 2>/dev/null)
+}
+
+# A property of the adapter ($1) or of a device ($1 path, $2 property) from a
+# fresh snapshot: "true", "false", a value, or empty when it isn't there.
+# Spelled with an explicit null test because jq's // treats false as missing.
+adapter_prop() {
+    snapshot && jq -r --arg p "$adapter" --arg k "$1" \
+        '.data[0][$p]["org.bluez.Adapter1"][$k].data | if . == null then "" else tostring end' <<<"$objects"
+}
+dev_prop() {
+    snapshot && jq -r --arg p "$1" --arg k "$2" \
+        '.data[0][$p]["org.bluez.Device1"][$k].data | if . == null then "" else tostring end' <<<"$objects"
+}
+dev_exists() {
+    snapshot && jq -e --arg p "$1" '.data[0] | has($p)' <<<"$objects" >/dev/null
+}
+
+# The property is the truth, not the exit status of the call that was meant to
+# change it: "already connected" and "in progress" are errors whose outcome is
+# fine, and an adapter passes through a transitional state on its way up.
+wait_dev() {
+    for _ in $(seq 1 "$poll_tries"); do
+        [[ $(dev_prop "$1" "$2") == "$3" ]] && return 0
+        sleep "$poll_s"
+    done
+    return 1
+}
+wait_adapter() {
+    for _ in $(seq 1 "$poll_tries"); do
+        [[ $(adapter_prop "$1") == "$2" ]] && return 0
+        sleep "$poll_s"
+    done
+    return 1
+}
+
+if ! snapshot; then
+    notify "Bluetooth service isn't running"
+    exit
+fi
+# The first adapter; a second one is not offered (see docs/backlog.md).
+adapter=$(jq -r '[.data[0] | to_entries[] | select(.value["org.bluez.Adapter1"]) | .key] | sort | .[0] // empty' <<<"$objects")
+if [[ -z $adapter ]]; then
+    notify "No Bluetooth adapter"
+    exit
+fi
+
+# Rows for the picker. The id of each row goes to $ids on the same line number
+# as its row in $rows, so the pick maps back to a device without parsing the
+# display text. An id is "action<US>path<US>alias": the action is the one the
+# row offered, so a device that reconnected on its own while the list was up
+# isn't disconnected by an Enter that meant "connect".
+scanner=''
+ids='' rows=''
+cleanup() {
+    [[ -n $scanner ]] && kill "$scanner" 2>/dev/null
+    rm -f -- "$ids" "$rows"
+}
+trap cleanup EXIT
+ids=$(mktemp "$runtime/menu-bluetooth.ids.XXXXXX") || exit
+rows=$(mktemp "$runtime/menu-bluetooth.rows.XXXXXX") || exit
+
+# jq does the shaping — filter, sort, glyphs, the suffix that tells two devices
+# with one name apart — because splitting tab-separated fields in bash drops
+# the empty ones. Glyphs are \u escapes (Nerd Font, private use) since they are
+# invisible in most editors. Tabs and newlines in a name would break the
+# columns, and the unit separator would break the id.
+device_rows() {
+    jq -r --arg mode "$1" --arg adapter "$adapter" '
+def glyph:
+    if . == null then "\uf294"
+    elif startswith("audio") then "\uf025"
+    elif . == "input-keyboard" then "\uf11c"
+    elif . == "input-mouse" then "\uf245"
+    elif . == "input-gaming" then "\uf11b"
+    elif . == "phone" then "\uf10b"
+    elif . == "computer" then "\uf109"
+    else "\uf294" end;
+def bars:
+    if . >= -60 then "████" elif . >= -70 then "███" elif . >= -80 then "██" else "█" end;
+[ .data[0] | to_entries[]
+  | select(.value["org.bluez.Device1"])
+  | .value["org.bluez.Device1"] as $d
+  | select($d.Adapter.data == $adapter)
+  | { path: .key,
+      mac: $d.Address.data,
+      alias: (($d.Alias.data // $d.Address.data) | gsub("[\\t\\n\\r\u001f]"; " ")),
+      named: ($d.Name.data != null),
+      paired: ($d.Paired.data == true),
+      connected: ($d.Connected.data == true),
+      blocked: ($d.Blocked.data == true),
+      rssi: $d.RSSI.data,
+      icon: $d.Icon.data,
+      battery: .value["org.bluez.Battery1"].Percentage.data } ] as $all
+| ( if $mode == "scan" then
+        [ $all[] | select((.paired | not) and (.blocked | not) and .rssi != null and .named) ] | sort_by(-.rssi)
+    elif $mode == "forget" then
+        [ $all[] | select(.paired) ] | sort_by(.alias | ascii_downcase)
+    else
+        [ $all[] | select(.paired or .connected) ] | sort_by([(.connected | not), (.alias | ascii_downcase)])
+    end ) as $list
+| ( $list | map(.alias) | group_by(.) | map(select(length > 1) | .[0]) ) as $dups
+| $list[]
+| (.alias as $a | if ($dups | index($a)) != null then "\($a) [\(.mac[-5:])]" else $a end) as $shown
+| ( if $mode == "forget" then "forget"
+    elif .blocked then "blocked"
+    elif .connected then "disconnect"
+    elif .paired then "connect"
+    else "pair" end ) as $action
+| ( if .connected then "connected" elif .blocked then "blocked" elif .paired then "paired" else "new" end ) as $state
+| ( if $mode == "scan" then (.rssi | bars) elif .battery != null then "\(.battery)%" else "" end ) as $detail
+| [ ([$action, .path, .alias] | join("\u001f")),
+    ((if .connected then "\uf00c " else "  " end) + (.icon | glyph) + " " + $shown),
+    $state,
+    $detail ] | join("\t")
+' <<<"$objects"
+}
+
+# $1 is the list to build: known, scan, forget, or off (adapter powered down).
+# Action rows carry no glyph, so they can't be mistaken for a device row, and
+# every action has one: a click accepts a row just as Enter does, which keeps
+# the menu whole for a mouse and for a pikr without --kb-custom.
+build_list() {
+    local table
+    table=$(
+        if [[ $1 == off ]]; then
+            printf '%s\t%s\n' "@power-on" "    Bluetooth is off — turn on"
+        else
+            device_rows "$1"
+        fi
+        case $1 in
+        known)
+            jq -e --arg adapter "$adapter" \
+                '[.data[0][] | .["org.bluez.Device1"] | select(. != null and .Adapter.data == $adapter and .Paired.data == true)] | length > 0' \
+                <<<"$objects" >/dev/null && printf '%s\t%s\n' "@forget" "    Forget a device…"
+            printf '%s\t%s\n' "@scan" "    Scan for new devices…"
+            printf '%s\t%s\n' "@power-off" "    Turn Bluetooth off"
+            ;;
+        scan)
+            printf '%s\t%s\n' "@scan" "    Scan again…"
+            ;;
+        esac
+    )
+    # The ids are on disk before the first row reaches pikr: written from a
+    # process substitution they could still be in flight when a pick lands.
+    cut -f1 <<<"$table" >"$ids"
+    cut -f2- <<<"$table" | column -t -s $'\t' | sed 's/[[:space:]]*$//' | tee "$rows"
+}
+
+pikr_help=$(pikr --help 2>/dev/null)
+
+# Right on a highlighted device opens a "Forget?" card; Enter forgets it (pikr
+# exits 10). Needs a pikr with --kb-custom KEY=PROMPT; stock pikr lacks it, so
+# detect instead of assuming. It is an accelerator — the "Forget a device…" row
+# does the same without it.
+forget_key=()
+prompt="Bluetooth"
+if grep -qF 'KEY[=PROMPT]' <<<"$pikr_help"; then
+    forget_key=(--kb-custom 'Right=Forget?')
+    prompt="Bluetooth  (→ forget)"
+fi
+loading=()
+grep -qF -- '--loading' <<<"$pikr_help" && loading=(--loading "Scanning…")
+
+# Discovery belongs to the D-Bus client that asked for it and ends with it, so
+# it needs a process that stays: a busctl call would stop scanning as it
+# returned. Left running through a pair, because an unpaired device's object
+# expires shortly after discovery stops.
+start_scan() {
+    [[ -n $scanner ]] && kill -0 "$scanner" 2>/dev/null && return 0
+    # 9>&-: the scanner must not inherit the lock, or a run killed while it is
+    # up leaves the lock held until the scanner times out.
+    bluetoothctl --timeout "$scan_session_s" scan on >/dev/null 2>&1 9>&- &
+    scanner=$!
+    # --timeout hides the exit status, so ask the adapter whether it started.
+    wait_adapter Discovering true
+}
+
+# Hand a device the picker can't pair to bluetui, which can show a passkey and
+# take a PIN. Backgrounded rather than exec'd so the EXIT trap still runs.
+hand_off() {
+    [[ -n $scanner ]] && kill "$scanner" 2>/dev/null
+    notify "$1 needs a passkey; opening bluetui"
+    alacritty --class floating -e bluetui >/dev/null 2>&1 9>&- &
+    exit
+}
+
+do_connect() {
+    local path=$1 alias=$2 out reason
+    if [[ $(dev_prop "$path" Connected) == true ]]; then
+        notify "Connected to $alias"
+        return
+    fi
+    notify "Connecting to $alias…"
+    out=$(busctl --timeout="$call_timeout_s" call org.bluez "$path" org.bluez.Device1 Connect 2>&1)
+    if wait_dev "$path" Connected true; then
+        notify "Connected to $alias"
+        return
+    fi
+    reason=$(bt_error "$out")
+    if [[ $reason == *page-timeout* || $reason == *"Host is down"* ]]; then
+        notify "$alias isn't responding; is it on and in range?"
+    else
+        notify "Could not connect to $alias: $reason"
+    fi
+}
+
+do_disconnect() {
+    local path=$1 alias=$2 out
+    out=$(busctl --timeout="$call_timeout_s" call org.bluez "$path" org.bluez.Device1 Disconnect 2>&1)
+    if wait_dev "$path" Connected false; then
+        notify "Disconnected $alias"
+    else
+        notify "Could not disconnect $alias: $(bt_error "$out")"
+    fi
+}
+
+do_forget() {
+    local path=$1 alias=$2 out
+    if [[ $(dev_prop "$path" Paired) != true ]]; then
+        notify "$alias isn't paired"
+        return
+    fi
+    out=$(busctl --timeout="$call_timeout_s" call org.bluez "$adapter" org.bluez.Adapter1 RemoveDevice o "$path" 2>&1)
+    if dev_exists "$path"; then
+        notify "Could not forget $alias: $(bt_error "$out")"
+    else
+        notify "Forgot $alias"
+    fi
+}
+
+# Whether a failed pair ($1, bluetoothctl's output) failed for want of a
+# passkey or PIN: an authentication error, or one of bluetoothctl's prompts
+# left unanswered.
+pair_failed_needs_passkey() {
+    grep -qE 'Authentication ?(Failed|Rejected|Canceled|Timeout)|Enter PIN code|Enter passkey|Confirm passkey|PIN code:|Passkey:' <<<"$1"
+}
+
+do_pair() {
+    local path=$1 alias=$2 mac out reason
+    if ! dev_exists "$path"; then
+        notify "$alias is no longer visible; scan again"
+        return
+    fi
+    # bluetoothctl's pair removes an existing pairing before it starts, so a
+    # device that is already paired must never reach it.
+    if [[ $(dev_prop "$path" Paired) == true ]]; then
+        do_connect "$path" "$alias"
+        return
+    fi
+    [[ $(dev_prop "$path" LegacyPairing) == true ]] && hand_off "$alias"
+    mac=$(dev_prop "$path" Address)
+    notify "Pairing with $alias…"
+    # bluetoothctl rather than Device1.Pair: pairing needs an agent, and this
+    # registers its own instead of depending on one happening to be running.
+    # NoInputNoOutput can only negotiate Just Works. Not --timeout, which runs
+    # its full length and discards the exit status.
+    out=$(timeout "$pair_timeout_s" bluetoothctl --agent NoInputNoOutput pair "$mac" </dev/null 2>&1)
+    if [[ $(dev_prop "$path" Paired) != true ]]; then
+        pair_failed_needs_passkey "$out" && hand_off "$alias"
+        reason=$(grep -oE 'org\.bluez\.Error\.[A-Za-z.]+' <<<"$out" | head -n 1)
+        reason=${reason#org.bluez.Error.}
+        notify "Could not pair with $alias: ${reason:-no response}"
+        return
+    fi
+    # Trusted lets the device reconnect by itself later, when no agent is
+    # around to authorise it.
+    busctl set-property org.bluez "$path" org.bluez.Device1 Trusted b true >/dev/null 2>&1
+    if ! wait_dev "$path" Connected true; then
+        out=$(busctl --timeout="$call_timeout_s" call org.bluez "$path" org.bluez.Device1 Connect 2>&1)
+        if ! wait_dev "$path" Connected true; then
+            notify "Paired with $alias, but could not connect: $(bt_error "$out")"
+            return
+        fi
+    fi
+    notify "Paired and connected to $alias"
+}
+
+# $1 is on or off; returns whether the adapter got there.
+do_power() {
+    local want=true out
+    [[ $1 == off ]] && want=false
+    out=$(busctl set-property org.bluez "$adapter" org.bluez.Adapter1 Powered b "$want" 2>&1)
+    wait_adapter Powered "$want" && return 0
+    notify "Could not turn Bluetooth $1: $(bt_error "$out")"
+    return 1
+}
+
+mode=known
+while :; do
+    if ! snapshot; then
+        notify "Bluetooth service isn't running"
+        exit
+    fi
+    [[ $(adapter_prop Powered) == true ]] || mode=off
+
+    scanning=()
+    if [[ $mode == scan ]]; then
+        if ! start_scan; then
+            notify "Could not start a Bluetooth scan"
+            exit
+        fi
+        if ((${#loading[@]})); then
+            scanning=("${loading[@]}")
+        else
+            # Stock pikr: a modal for the window, under the lock as the
+            # startup is. 9>&- for the same reason as the scanner.
+            pikr -e "Bluetooth: scanning…" 9>&- &
+            modal=$!
+            sleep "$scan_s"
+            kill "$modal" 2>/dev/null
+            snapshot
+        fi
+    fi
+
+    # Stamp the launch for the double-click guard, then release the lock so a
+    # later press reaches the toggle.
+    uptime_ms >"$stamp"
+    flock -u 9
+    case $mode in
+    scan)
+        if ((${#scanning[@]})); then
+            # Open the picker now with "Scanning…" where the list goes; the
+            # rows replace it when build_list closes pikr's stdin.
+            pick=$({ sleep "$scan_s"; snapshot; build_list scan; } | pikr -d -p "Bluetooth: new devices" "${scanning[@]}")
+        else
+            pick=$(build_list scan | pikr -d -p "Bluetooth: new devices")
+        fi
+        ;;
+    forget) pick=$(build_list forget | pikr -d -p "Bluetooth: forget") ;;
+    off) pick=$(build_list off | pikr -d -p "Bluetooth") ;;
+    *) pick=$(build_list known | pikr -d -p "$prompt" "${forget_key[@]}") ;;
+    esac
+    picked=$?
+
+    # Cancelled (Esc exits 1, the toggle's SIGTERM 143), nothing chosen, or
+    # several rows (Visual mode).
+    if [[ -z $pick || $pick == *$'\n'* || ($picked != 0 && $picked != 10) ]]; then
+        exit
+    fi
+
+    # Back under the lock for the rest of the run, so a click while connecting
+    # doesn't open a second menu that acts on the same device.
+    if ! flock -w 5 9; then
+        notify "Another Bluetooth menu is starting; pick again"
+        exit
+    fi
+
+    # Only a row from the list counts: pikr returns typed text that matches no
+    # row (trimmed). A row shown more than once can't be told apart.
+    matches=$(grep -cxF -- "$pick" "$rows")
+    if ((matches != 1)); then
+        ((matches > 1)) && notify "Two devices look identical in the list; not choosing either"
+        exit
+    fi
+    line=$(grep -nxF -- "$pick" "$rows" | cut -d : -f1)
+    IFS=$'\x1f' read -r action path alias < <(sed -n "${line}p" "$ids")
+
+    if [[ $picked == 10 ]]; then
+        # pikr's card already asked "Forget?", so act immediately.
+        if [[ $action == @* ]]; then
+            notify "Forget works on a paired device"
+        else
+            do_forget "$path" "$alias"
+        fi
+        exit
+    fi
+
+    case $action in
+    @scan) mode=scan ;;
+    @forget) mode=forget ;;
+    @power-on)
+        do_power on || exit
+        mode=known
+        ;;
+    @power-off)
+        do_power off && notify "Bluetooth off"
+        exit
+        ;;
+    connect) do_connect "$path" "$alias"; exit ;;
+    disconnect) do_disconnect "$path" "$alias"; exit ;;
+    pair) do_pair "$path" "$alias"; exit ;;
+    forget) do_forget "$path" "$alias"; exit ;;
+    blocked)
+        notify "$alias is blocked; unblock it in bluetui"
+        exit
+        ;;
+    *) exit ;;
+    esac
+done

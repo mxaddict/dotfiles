@@ -131,6 +131,59 @@ Homebrew/winget catalogs, with no fix available inside the manifest:
   (pikr, buffr, hrdr, krypt) would need `scoop bucket add` before any `scoop`
   list could use it.
 
+## `.menu-bluetooth` (pikr Bluetooth picker)
+
+`krypt menu bluetooth` runs `.local/bin/.menu-bluetooth`: reads go through one
+`busctl` `GetManagedObjects` snapshot shaped by `jq`, connect / disconnect /
+forget / power are `busctl` calls verified by re-reading the property, and only
+scanning and pairing use `bluetoothctl`. Verified against a stub harness (fake
+`busctl`, `bluetoothctl`, `pikr` on `PATH`, canned D-Bus JSON), with each guard
+broken once to see its test fail; nothing below was run against real hardware
+unless it says so.
+
+### Not covered
+
+- **Passkey and PIN pairing.** The picker pairs with a `NoInputNoOutput` agent,
+  which can only negotiate Just Works. A device that wants a passkey shown or a
+  PIN typed (most keyboards, some phones) is handed to bluetui with a
+  notification. Doing it inline means driving an interactive `bluetoothctl`
+  session and parsing its prompts.
+- **Just Works has no MITM protection.** That is the protocol, not the script,
+  but it is what inline pairing amounts to.
+- **A second adapter.** The first `org.bluez.Adapter1` object (sorted by path)
+  is used; devices on another adapter are not listed.
+- **Nameless devices** are left out of the scan list (random-address LE beacons
+  mostly), so a device that advertises no name can't be paired from the picker.
+- **Block / unblock, untrust, rename, per-profile connect.** bluetui does the
+  first three; a blocked device is shown as such and refused.
+
+### Not verified
+
+- Whether `bluetoothctl --agent NoInputNoOutput pair` has its agent registered
+  before the pair request goes out. Expected (one D-Bus connection, ordered),
+  not observed.
+- `bluetoothctl`'s exit status when the daemon returns a D-Bus error. The script
+  does not depend on it: success is the `Paired` / `Connected` property.
+- When a one-shot `pair` returns relative to the trust and connect bluetoothctl
+  does after pairing. The script sets `Trusted` itself, polls `Connected`, and
+  calls `Connect` only if the device is still not connected.
+- That discovery ends when the scanning `bluetoothctl` is killed. It is why a
+  `busctl` `StartDiscovery` was not used; the BlueZ docs say sessions are per
+  client but not that a client's exit releases them.
+- `AuthenticationFailed` is broader than "needs a passkey"; handing those to
+  bluetui is still the useful response.
+- The pikr flags it uses when present (`--kb-custom`, `--loading`) are not in a
+  pikr release yet; the stock-pikr paths were exercised in the harness only.
+
+### Shared code with `.menu-wifi`
+
+`notify`, `uptime_ms`, the debounce / toggle / `flock` block and the
+rows-file-to-line-number pick mapping are the same logic in both scripts,
+written with the same names so they can move. Extract them to a sourced
+`.local/bin/.menu-lib` and convert both scripts in one pure-move change. The lib
+needs its own `[[link]]`; CI's shellcheck glob only lints executables, so either
+make it executable or prove it is reached through `shellcheck -x`.
+
 ## Decisions needed
 
 - **`.config/cargo/config.toml` is deployed where cargo never reads it.** cargo

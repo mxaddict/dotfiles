@@ -164,7 +164,7 @@ or `tmux copy-mode`). Descriptions come from each bind's `description` /
 | `$mod + .`            | `krypt menu emoji`     | Emoji picker            |
 | `$mod + w`            | `krypt menu wifi`      | WiFi picker             |
 | `$mod + a`            | `krypt menu audio`     | wiremix                 |
-| `$mod + u`            | `krypt menu bluetooth` | bluetui                 |
+| `$mod + u`            | `krypt menu bluetooth` | Bluetooth picker        |
 | `$mod + t`            | `krypt menu time`      | Timezone picker         |
 | `$mod + escape`       | `krypt menu top`       | btop                    |
 | `$mod + shift + m`    | `krypt menu power`     | Power picker            |
