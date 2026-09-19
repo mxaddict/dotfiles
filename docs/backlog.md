@@ -48,16 +48,15 @@
   unless `HOME` is overridden (keeps sandboxed runs working), or set
   `[paths] DOCUMENTS` per machine. Not an issue on the current machine.
 - **Dotfiles CI builds krypt `main`** (`.github/actions/krypt`) because the
-  manifests use unreleased features: per-platform `[[command]]` overrides,
-  `platform` lists, `cargo:` deps entries and `krypt deps --check` (latest
-  release 0.2.2). Switch `setup.yml` to the release binary once one ships with
-  them. Until then, `krypt-bin` 0.2.2 on Linux runs the first entry by name,
-  which is still the Linux/generic one. Tracking `main` unpinned means a krypt
-  commit can turn this repo's CI red with no dotfiles change, and each new krypt
-  commit rebuilds it on all three runners. Pinning a revision in `setup.yml`
-  makes runs reproducible but stops this CI from exercising new krypt changes
-  until the pin is bumped — which is currently the only end-to-end Windows/macOS
-  check krypt gets. Needs a decision.
+  manifests used features unreleased at the time: per-platform `[[command]]`
+  overrides, `platform` lists, `cargo:` deps entries and `krypt deps --check`.
+  These all shipped in krypt **0.3.0** (2026-09-19), which also added the
+  `src_glob` tracked-files fix this repo now relies on (`krypt_min = "0.3.0"`).
+  `setup.yml` can now switch from building `main` to the 0.3.0 release binary
+  once `krypt-bin` / the tap catch up. Tracking `main` unpinned still means a
+  krypt commit can turn this repo's CI red with no dotfiles change; pinning the
+  0.3.0 tag makes runs reproducible at the cost of no longer exercising new
+  krypt changes. Needs a decision.
 - **krypt's own open items** (notify backends, interactive steps, CI toolchain)
   are tracked in `kryptic-sh/krypt` under `docs/backlog.md`.
 
@@ -138,8 +137,25 @@ Homebrew/winget catalogs, with no fix available inside the manifest:
   sets `CARGO_HOME`. Its `jobs = 16` is overridden by `CARGO_BUILD_JOBS` from
   the fish and PowerShell configs anyway. Options: retarget it to
   `~/.cargo/config.toml`, or delete it.
-- **`src_glob` deploys untracked files.** Globs match the working tree, so
-  `.config/tmux/**/*` also deploys the TPM plugin clones under
-  `.config/tmux/plugins/` on a machine that has them (hundreds of files); a CI
-  checkout has none. Options: exclude `plugins/` in the manifest, or make krypt
-  match only tracked files.
+- **Configs deployed by the old stow setup but not by krypt stay symlinked.**
+  This machine was migrated from the whole-repo stow symlinks to krypt's
+  copy-based deploy, but `.krypt/links.toml` covers only a curated subset. So
+  `.config/nushell`, `.config/hjkl/config.toml`, `.config/hrdr/config.toml`,
+  `.claude`, `.codex`, `.agents`, plus repo-meta (`docs`, `.krypt.toml`,
+  `.gitignore`) are still `~ -> .files` symlinks, not krypt-managed. Decision:
+  add the real configs among these to `[[link]]` entries so krypt owns them, or
+  leave them symlinked deliberately. Repo-meta should stay out of krypt either
+  way.
+- **Runtime data still lives in the repo working tree after the migration.**
+  Because the old model symlinked `~/.config/{tmux,fish,nvim,opencode}` into the
+  repo, plugin managers wrote their clones there (gitignored): `~58M` of
+  `opencode/node_modules`, the TPM plugins under `.config/tmux/plugins/`, fisher
+  functions, `nvim/lazy-lock.json`. The migration copied these into the real
+  `~/.config` dirs, so the repo's copies are now orphaned duplicates. They are
+  gitignored (harmless), but the repo tree could be pruned of them.
+- **`tpm-install` hook can't bootstrap tpm on a fresh krypt deploy.** Its `if`
+  guard requires `${XDG_CONFIG}/tmux/plugins/tpm/bin/install_plugins` to already
+  exist, which the old dir-symlink guaranteed but a copy-based deploy does not
+  (tpm is untracked, so `src_glob` no longer sweeps it in). A fresh machine now
+  needs a hook that clones tpm first. On this machine tpm was preserved by
+  copying it over, so nothing is broken here yet.

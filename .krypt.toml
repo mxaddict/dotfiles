@@ -14,7 +14,7 @@ include = [
 [meta]
 name           = "mxaddict dotfiles"
 description    = "Arch-first dotfiles for Hyprland, Neovim, Fish, Tmux, and friends."
-krypt_min      = "0.1.0"
+krypt_min      = "0.3.0"
 notify_backend = "auto"
 
 # ---------------------------------------------------------------------------
