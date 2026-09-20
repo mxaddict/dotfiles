@@ -9,7 +9,10 @@ scan_s=8
 # Upper bound on the background scanner's life. It is killed on exit; this only
 # stops a SIGKILLed run from leaving discovery on for good.
 scan_session_s=120
-pair_timeout_s=30
+# How long bluetoothctl stays registered as the pairing agent, and how many
+# polls the bond is given inside that.
+pair_agent_s=20
+bond_tries=60
 call_timeout_s=30
 # wait_dev / wait_adapter: how often and how long a property is re-read.
 poll_tries=15
@@ -23,6 +26,22 @@ notify() {
     body=${body//'<'/'&lt;'}
     body=${body//'>'/'&gt;'}
     command -v notify-send >/dev/null && notify-send -- "Bluetooth" "$body"
+}
+
+# A connect takes seconds and a pair longer. Where pikr can hold its window
+# open on a loading line the wait happens there, in the picker itself; this is
+# the fallback for a pikr that cannot, and -e is in stock pikr. Either way
+# something stays on screen: a notification alone is easy to miss, and an empty
+# screen reads as nothing happened.
+busy() {
+    # 9>&-: the modal must not inherit the lock, or a run killed while it is up
+    # leaves the lock held until the modal is dismissed.
+    pikr -e "$1" 9>&- >/dev/null 2>&1 &
+    busy_pid=$!
+}
+busy_done() {
+    [[ -n $busy_pid ]] && kill "$busy_pid" 2>/dev/null
+    busy_pid=''
 }
 
 # The reason from busctl's output ($1) for a notification.
@@ -91,8 +110,19 @@ dev_exists() {
 # change it: "already connected" and "in progress" are errors whose outcome is
 # fine, and an adapter passes through a transitional state on its way up.
 wait_dev() {
-    for _ in $(seq 1 "$poll_tries"); do
+    for _ in $(seq 1 "${4:-$poll_tries}"); do
         [[ $(dev_prop "$1" "$2") == "$3" ]] && return 0
+        sleep "$poll_s"
+    done
+    return 1
+}
+
+# bluetoothctl says this once bluez has accepted its agent as the default one,
+# which is the moment bluez adopts that agent's IO capability. Pairing before
+# it goes out under whatever capability was default before — see do_pair.
+wait_agent() {
+    for _ in $(seq 1 "$poll_tries"); do
+        grep -qF 'Default agent request successful' "$pairlog" && return 0
         sleep "$poll_s"
     done
     return 1
@@ -121,15 +151,27 @@ fi
 # display text. An id is "action<US>path<US>alias": the action is the one the
 # row offered, so a device that reconnected on its own while the list was up
 # isn't disconnected by an Enter that meant "connect".
-scanner=''
-ids='' rows=''
+scanner='' busy_pid='' pair_pid=''
+ids='' rows='' pairlog='' agentdir=''
 cleanup() {
     [[ -n $scanner ]] && kill "$scanner" 2>/dev/null
-    rm -f -- "$ids" "$rows"
+    [[ -n $busy_pid ]] && kill "$busy_pid" 2>/dev/null
+    [[ -n $pair_pid ]] && kill "$pair_pid" 2>/dev/null
+    rm -f -- "$ids" "$rows" "$pairlog"
+    if [[ -n $agentdir ]]; then
+        rm -f -- "$agentdir/ctl"
+        rmdir -- "$agentdir"
+    fi
 }
 trap cleanup EXIT
 ids=$(mktemp "$runtime/menu-bluetooth.ids.XXXXXX") || exit
 rows=$(mktemp "$runtime/menu-bluetooth.rows.XXXXXX") || exit
+pairlog=$(mktemp "$runtime/menu-bluetooth.pair.XXXXXX") || exit
+# A named pipe, not a coprocess: bluetoothctl has to stay readable on stdin for
+# its whole life, and the pairing command can only be written once bluez has
+# taken the agent — see do_pair.
+agentdir=$(mktemp -d "$runtime/menu-bluetooth.agent.XXXXXX") || exit
+mkfifo "$agentdir/ctl" || exit
 
 # jq does the shaping — filter, sort, glyphs, the suffix that tells two devices
 # with one name apart — because splitting tab-separated fields in bash drops
@@ -175,43 +217,69 @@ def bars:
 | (.alias as $a | if ($dups | index($a)) != null then "\($a) [\(.mac[-5:])]" else $a end) as $shown
 | ( if $mode == "forget" then "forget"
     elif .blocked then "blocked"
+    elif (.paired | not) then "pair"
     elif .connected then "disconnect"
-    elif .paired then "connect"
-    else "pair" end ) as $action
-| ( if .connected then "connected" elif .blocked then "blocked" elif .paired then "paired" else "new" end ) as $state
-| ( if $mode == "scan" then (.rssi | bars) elif .battery != null then "\(.battery)%" else "" end ) as $detail
+    else "connect" end ) as $action
+| ( if .connected then "●" elif .blocked then "\uf05e" elif .paired then "○" else "\uf067" end ) as $dot
+| ( if .blocked then "Blocked"
+    elif (.paired | not) and .connected then "Connected · not paired"
+    elif .connected then "Connected" + (if .battery != null then " · \(.battery)%" else "" end)
+    elif .paired then "Paired"
+    else "New · " + (.rssi | bars) end ) as $state
 | [ ([$action, .path, .alias] | join("\u001f")),
-    ((if .connected then "\uf00c " else "  " end) + (.icon | glyph) + " " + $shown),
-    $state,
-    $detail ] | join("\t")
+    ($dot + "  " + (.icon | glyph) + "  " + $shown),
+    $state ] | join("\t")
 ' <<<"$objects"
 }
 
-# $1 is the list to build: known, scan, forget, or off (adapter powered down).
-# Action rows carry no glyph, so they can't be mistaken for a device row, and
-# every action has one: a click accepts a row just as Enter does, which keeps
-# the menu whole for a mouse and for a pikr without --kb-custom.
+# Nerd Font glyphs for the action rows, as UTF-8 bytes (private-use glyphs are
+# invisible in most editors): plus, trash, power, search. Dingbats such as the
+# return symbol or a ballot X are not in Hack Nerd Font, so rows stick to what
+# the font has.
+glyph_pair=$'\xef\x81\xa7'
+glyph_forget=$'\xef\x87\xb8'
+glyph_power=$'\xef\x80\x91'
+glyph_scan=$'\xef\x80\x82'
+
+glyph_more=$'\xef\x85\x81'
+
+any_paired() {
+    jq -e --arg adapter "$adapter" \
+        '[.data[0][] | .["org.bluez.Device1"] | select(. != null and .Adapter.data == $adapter and .Paired.data == true)] | length > 0' \
+        <<<"$objects" >/dev/null
+}
+
+# $1 is the list to build. known, scan and forget hold devices and nothing
+# else, the way bluetui's tables do: the actions are keys, named in the prompt.
+# A pikr without --kb-custom has no keys to name, so there the device lists
+# carry one row through to a list of the actions instead. Where the keys are
+# bound a mouse reaches connect and disconnect and nothing else, which is a
+# deliberate trade and written up in the backlog. off is the adapter powered
+# down. A list that would come out empty gets one row saying why, with the way
+# out.
 build_list() {
     local table
     table=$(
-        if [[ $1 == off ]]; then
-            printf '%s\t%s\n' "@power-on" "    Bluetooth is off — turn on"
-        else
-            device_rows "$1"
-        fi
         case $1 in
-        known)
-            jq -e --arg adapter "$adapter" \
-                '[.data[0][] | .["org.bluez.Device1"] | select(. != null and .Adapter.data == $adapter and .Paired.data == true)] | length > 0' \
-                <<<"$objects" >/dev/null && printf '%s\t%s\n' "@forget" "    Forget a device…"
-            printf '%s\t%s\n' "@scan" "    Scan for new devices…"
-            printf '%s\t%s\n' "@power-off" "    Turn Bluetooth off"
+        off) printf '%s\t%s  %s\n' "@power-on" "$glyph_power" "Bluetooth is off — turn on" ;;
+        actions)
+            printf '%s\t%s  %s\n' "@scan" "$glyph_pair" "Pair a new device…"
+            any_paired && printf '%s\t%s  %s\n' "@forget" "$glyph_forget" "Forget a device…"
+            printf '%s\t%s  %s\n' "@power-off" "$glyph_power" "Turn Bluetooth off"
             ;;
-        scan)
-            printf '%s\t%s\n' "@scan" "    Scan again…"
-            ;;
+        *) device_rows "$1" ;;
         esac
     )
+    if [[ -z $table ]]; then
+        case $1 in
+        scan) table=$(printf '%s\t%s  %s' "@scan" "$glyph_scan" "Nothing found — scan again…") ;;
+        *) table=$(printf '%s\t%s  %s' "@scan" "$glyph_pair" "No paired devices — pair one…") ;;
+        esac
+    fi
+    # Without keys the device lists need one way through to the actions.
+    if ! $has_keys && [[ $1 == known || $1 == scan ]]; then
+        table+=$'\n'$(printf '%s\t%s  %s' "@actions" "$glyph_more" "More actions…")
+    fi
     # The ids are on disk before the first row reaches pikr: written from a
     # process substitution they could still be in flight when a pick lands.
     cut -f1 <<<"$table" >"$ids"
@@ -220,15 +288,23 @@ build_list() {
 
 pikr_help=$(pikr --help 2>/dev/null)
 
-# Right on a highlighted device opens a "Forget?" card; Enter forgets it (pikr
-# exits 10). Needs a pikr with --kb-custom KEY=PROMPT; stock pikr lacks it, so
-# detect instead of assuming. It is an accelerator — the "Forget a device…" row
-# does the same without it.
-forget_key=()
-prompt="Bluetooth"
+# Actions are keys, as in bluetui, with its letters where pikr leaves them free
+# (s scan, o power; its u for unpair is pikr's clear-line, so forget is Right,
+# as in the Wi-Fi menu). They need a pikr with --kb-custom KEY=PROMPT, which
+# stock pikr lacks, so detect instead of assuming. pikr numbers the bindings'
+# exit statuses from key_first in the order they are given.
+key_first=10
+key_forget=$key_first key_scan=$((key_first + 1)) key_power=$((key_first + 2))
+key_rescan=$key_first
+has_keys=false
+known_keys=() known_legend=""
+scan_keys=() scan_legend=""
 if grep -qF 'KEY[=PROMPT]' <<<"$pikr_help"; then
-    forget_key=(--kb-custom 'Right=Forget?')
-    prompt="Bluetooth  (→ forget)"
+    has_keys=true
+    known_keys=(--kb-custom 'Right=Forget?' --kb-custom 'Ctrl+s' --kb-custom 'Ctrl+o=Turn Bluetooth off?')
+    known_legend="  (→ forget · ^S scan · ^O off)"
+    scan_keys=(--kb-custom 'Ctrl+s')
+    scan_legend="  (^S rescan)"
 fi
 loading=()
 grep -qF -- '--loading' <<<"$pikr_help" && loading=(--loading "Scanning…")
@@ -250,8 +326,9 @@ start_scan() {
 # Hand a device the picker can't pair to bluetui, which can show a passkey and
 # take a PIN. Backgrounded rather than exec'd so the EXIT trap still runs.
 hand_off() {
+    [[ -n $pair_pid ]] && kill "$pair_pid" 2>/dev/null
     [[ -n $scanner ]] && kill "$scanner" 2>/dev/null
-    notify "$1 needs a passkey; opening bluetui"
+    notify "$1 needs bluetooth pairing this menu can't do; opening bluetui"
     alacritty --class floating -e bluetui >/dev/null 2>&1 9>&- &
     exit
 }
@@ -262,7 +339,6 @@ do_connect() {
         notify "Connected to $alias"
         return
     fi
-    notify "Connecting to $alias…"
     out=$(busctl --timeout="$call_timeout_s" call org.bluez "$path" org.bluez.Device1 Connect 2>&1)
     if wait_dev "$path" Connected true; then
         notify "Connected to $alias"
@@ -300,11 +376,19 @@ do_forget() {
     fi
 }
 
-# Whether a failed pair ($1, bluetoothctl's output) failed for want of a
-# passkey or PIN: an authentication error, or one of bluetoothctl's prompts
-# left unanswered.
-pair_failed_needs_passkey() {
-    grep -qE 'Authentication ?(Failed|Rejected|Canceled|Timeout)|Enter PIN code|Enter passkey|Confirm passkey|PIN code:|Passkey:' <<<"$1"
+# Whether a failed pair ($1, bluetoothctl's output) is one bluetui could still
+# manage. Two shapes, both ending in the same hand-off:
+#
+#   - a passkey or PIN was wanted: an authentication error, or a prompt this
+#     agent could not answer;
+#   - the pairing succeeded and was then rolled back. Observed with AirPods
+#     Pro: "Pairing successful", then bluez terminating the link locally and
+#     Paired going back to no, with Bonded never set — no key was stored.
+#     bluetui pairs the same earbuds, so what a script can drive through
+#     bluetoothctl is the limit here, not the hardware.
+pair_needs_bluetui() {
+    grep -qE 'Authentication ?(Failed|Rejected|Canceled|Timeout)|Enter PIN code|Enter passkey|Confirm passkey|PIN code:|Passkey:' <<<"$1" && return 0
+    grep -qF 'Pairing successful' <<<"$1"
 }
 
 do_pair() {
@@ -321,14 +405,73 @@ do_pair() {
     fi
     [[ $(dev_prop "$path" LegacyPairing) == true ]] && hand_off "$alias"
     mac=$(dev_prop "$path" Address)
-    notify "Pairing with $alias…"
+    # Stop discovering first. The radio cannot inquire and pair at once without
+    # the pairing suffering for it: with the scanner left running, AirPods Pro
+    # reported Paired: yes and never Bonded, while bluetui — which is not
+    # scanning by the time you pick a device — bonds them. The device object
+    # outlives discovery long enough to pair (TemporaryTimeout, 30s by default
+    # in main.conf), which is why it can be stopped here rather than after.
+    if [[ -n $scanner ]]; then
+        kill "$scanner" 2>/dev/null
+        scanner=''
+        wait_adapter Discovering false
+    fi
+    # Connected without being paired means the device opened the link itself,
+    # on a key only it still holds: forgetting here deletes the adapter's copy
+    # and nothing tells the device to drop its own. Pairing on top of a link
+    # somebody else authenticated is not the exchange this wants, so take the
+    # link down and let the pairing below be the one that brings it up.
+    if [[ $(dev_prop "$path" Connected) == true ]]; then
+        busctl --timeout="$call_timeout_s" call org.bluez "$path" \
+            org.bluez.Device1 Disconnect >/dev/null 2>&1
+        wait_dev "$path" Connected false
+    fi
     # bluetoothctl rather than Device1.Pair: pairing needs an agent, and this
     # registers its own instead of depending on one happening to be running.
-    # NoInputNoOutput can only negotiate Just Works. Not --timeout, which runs
-    # its full length and discards the exit status.
-    out=$(timeout "$pair_timeout_s" bluetoothctl --agent NoInputNoOutput pair "$mac" </dev/null 2>&1)
+    # KeyboardDisplay is the capability bluetui's agent has.
+    #
+    # Driven over a coprocess rather than handed `pair` as an argument. bluez
+    # takes the IO capability from the default agent at the moment it is asked
+    # to pair, and the argument form asks before its own agent is registered —
+    # --agent never reaches bluez at all. Traced on AirPods Pro: that pairing
+    # went out as Capability: NoInputNoOutput, which negotiates No Bonding, and
+    # a No Bonding key is deliberately never stored, so Paired went yes and
+    # straight back to no. The same earbuds on bluetui, whose agent is already
+    # registered, pair as KeyboardDisplay and keep the key. So wait for bluez
+    # to accept the agent before asking, and hold the process open across the
+    # bond, because an agent lives only as long as it does.
+    timeout "$pair_agent_s" bluetoothctl --agent KeyboardDisplay \
+        <"$agentdir/ctl" >"$pairlog" 2>&1 &
+    pair_pid=$!
+    # Opened read-write so the open returns whether or not the reader is up
+    # yet; a write-only open on a pipe blocks until one is.
+    exec {ctl}<>"$agentdir/ctl"
+    printf 'default-agent\n' >&"$ctl"
+    if ! wait_agent; then
+        kill "$pair_pid" 2>/dev/null
+        pair_pid=''
+        exec {ctl}>&-
+        notify "Could not register a pairing agent for $alias"
+        return
+    fi
+    printf 'pair %s\n' "$mac" >&"$ctl"
+    wait_dev "$path" Bonded true "$bond_tries"
+    kill "$pair_pid" 2>/dev/null
+    pair_pid=''
+    exec {ctl}>&-
+    out=$(cat "$pairlog")
+    # Paired without Bonded means no key was stored: the pairing dies with the
+    # connection and the device will not come back by itself. A bluetoothd too
+    # old to have Bonded reports nothing, which stays a pass.
+    if [[ $(dev_prop "$path" Paired) == true && $(dev_prop "$path" Bonded) == false ]]; then
+        busctl call org.bluez "$adapter" org.bluez.Adapter1 RemoveDevice o "$path" >/dev/null 2>&1
+        [[ -n $scanner ]] && kill "$scanner" 2>/dev/null
+        notify "$alias paired but stored no key; opening bluetui to pair it"
+        alacritty --class floating -e bluetui >/dev/null 2>&1 9>&- &
+        exit
+    fi
     if [[ $(dev_prop "$path" Paired) != true ]]; then
-        pair_failed_needs_passkey "$out" && hand_off "$alias"
+        pair_needs_bluetui "$out" && hand_off "$alias"
         reason=$(grep -oE 'org\.bluez\.Error\.[A-Za-z.]+' <<<"$out" | head -n 1)
         reason=${reason#org.bluez.Error.}
         notify "Could not pair with $alias: ${reason:-no response}"
@@ -340,7 +483,7 @@ do_pair() {
     if ! wait_dev "$path" Connected true; then
         out=$(busctl --timeout="$call_timeout_s" call org.bluez "$path" org.bluez.Device1 Connect 2>&1)
         if ! wait_dev "$path" Connected true; then
-            notify "Paired with $alias, but could not connect: $(bt_error "$out")"
+                notify "Paired with $alias, but could not connect: $(bt_error "$out")"
             return
         fi
     fi
@@ -357,7 +500,33 @@ do_power() {
     return 1
 }
 
-mode=known
+# The adapter state for the prompt: how many devices are connected, if any.
+connected_note() {
+    local n
+    n=$(jq -r --arg adapter "$adapter" \
+        '[.data[0][] | .["org.bluez.Device1"] | select(. != null and .Adapter.data == $adapter and .Connected.data == true)] | length' \
+        <<<"$objects")
+    ((n > 0)) && printf ' · %s connected' "$n"
+}
+
+# Open a picker over list $1 with prompt $2 (further arguments go to pikr),
+# leaving the row in $pick and returning pikr's exit status.
+pick_from() {
+    local list=$1 title=$2
+    shift 2
+    pick=$(build_list "$list" | pikr -d -p "$title" "$@")
+}
+
+# Back under the lock for the rest of the run, so a click while connecting
+# doesn't open a second menu that acts on the same device.
+relock() {
+    flock -w 5 9 && return 0
+    notify "Another Bluetooth menu is starting; pick again"
+    return 1
+}
+
+pending=() busy_text='' mode=known
+
 while :; do
     if ! snapshot; then
         notify "Bluetooth service isn't running"
@@ -384,38 +553,72 @@ while :; do
         fi
     fi
 
+    known_prompt="Bluetooth$(connected_note)$known_legend"
+
     # Stamp the launch for the double-click guard, then release the lock so a
     # later press reaches the toggle.
     uptime_ms >"$stamp"
     flock -u 9
+
+    # A slow action runs in the producer of the next picker: the window opens
+    # at once on its loading line, and the rows that replace it are the list
+    # rebuilt afterwards, so the device is shown in its new state. The lock
+    # stays released for it, as it does whenever a window is up — a click
+    # reaches the toggle, which closes the window while the action finishes on
+    # its own.
+    if ((${#pending[@]})); then
+        if ((${#loading[@]})); then
+            pick=$({ "${pending[@]}" >/dev/null; snapshot; build_list known; } | pikr -d -p "$known_prompt" --loading "$busy_text" "${known_keys[@]}")
+            picked=$?
+        else
+            busy "$busy_text"
+            "${pending[@]}" >/dev/null
+            busy_done
+                pending=()
+            continue
+        fi
+        pending=()
+        mode=known
+    else
     case $mode in
     scan)
         if ((${#scanning[@]})); then
             # Open the picker now with "Scanning…" where the list goes; the
             # rows replace it when build_list closes pikr's stdin.
-            pick=$({ sleep "$scan_s"; snapshot; build_list scan; } | pikr -d -p "Bluetooth: new devices" "${scanning[@]}")
+            pick=$({ sleep "$scan_s"; snapshot; build_list scan; } | pikr -d -p "Bluetooth · new devices$scan_legend" "${scanning[@]}" "${scan_keys[@]}")
         else
-            pick=$(build_list scan | pikr -d -p "Bluetooth: new devices")
+            pick_from scan "Bluetooth · new devices$scan_legend" "${scan_keys[@]}"
         fi
         ;;
-    forget) pick=$(build_list forget | pikr -d -p "Bluetooth: forget") ;;
-    off) pick=$(build_list off | pikr -d -p "Bluetooth") ;;
-    *) pick=$(build_list known | pikr -d -p "$prompt" "${forget_key[@]}") ;;
+    forget) pick_from forget "Bluetooth · forget" ;;
+    actions) pick_from actions "Bluetooth · actions" ;;
+    off) pick_from off "Bluetooth · off" ;;
+    *) pick_from known "$known_prompt" "${known_keys[@]}" ;;
     esac
     picked=$?
+    fi
+
+    # Keys that act on the adapter rather than on the highlighted row.
+    if [[ $mode == known && $picked == "$key_scan" ]] || [[ $mode == scan && $picked == "$key_rescan" ]]; then
+        relock || exit
+        mode=scan
+        continue
+    fi
+    if [[ $mode == known && $picked == "$key_power" ]]; then
+        # pikr's card already asked, so act immediately.
+        relock || exit
+        do_power off && notify "Bluetooth off"
+        exit
+    fi
 
     # Cancelled (Esc exits 1, the toggle's SIGTERM 143), nothing chosen, or
     # several rows (Visual mode).
-    if [[ -z $pick || $pick == *$'\n'* || ($picked != 0 && $picked != 10) ]]; then
+    forgetting=false
+    [[ $mode == known && $picked == "$key_forget" ]] && forgetting=true
+    if [[ -z $pick || $pick == *$'\n'* ]] || { [[ $picked != 0 ]] && ! $forgetting; }; then
         exit
     fi
-
-    # Back under the lock for the rest of the run, so a click while connecting
-    # doesn't open a second menu that acts on the same device.
-    if ! flock -w 5 9; then
-        notify "Another Bluetooth menu is starting; pick again"
-        exit
-    fi
+    relock || exit
 
     # Only a row from the list counts: pikr returns typed text that matches no
     # row (trimmed). A row shown more than once can't be told apart.
@@ -427,7 +630,7 @@ while :; do
     line=$(grep -nxF -- "$pick" "$rows" | cut -d : -f1)
     IFS=$'\x1f' read -r action path alias < <(sed -n "${line}p" "$ids")
 
-    if [[ $picked == 10 ]]; then
+    if $forgetting; then
         # pikr's card already asked "Forget?", so act immediately.
         if [[ $action == @* ]]; then
             notify "Forget works on a paired device"
@@ -440,6 +643,7 @@ while :; do
     case $action in
     @scan) mode=scan ;;
     @forget) mode=forget ;;
+    @actions) mode=actions ;;
     @power-on)
         do_power on || exit
         mode=known
@@ -448,9 +652,18 @@ while :; do
         do_power off && notify "Bluetooth off"
         exit
         ;;
-    connect) do_connect "$path" "$alias"; exit ;;
-    disconnect) do_disconnect "$path" "$alias"; exit ;;
-    pair) do_pair "$path" "$alias"; exit ;;
+    connect)
+        pending=(do_connect "$path" "$alias")
+        busy_text="Connecting to $alias…"
+        ;;
+    disconnect)
+        pending=(do_disconnect "$path" "$alias")
+        busy_text="Disconnecting $alias…"
+        ;;
+    pair)
+        pending=(do_pair "$path" "$alias")
+        busy_text="Pairing with $alias…"
+        ;;
     forget) do_forget "$path" "$alias"; exit ;;
     blocked)
         notify "$alias is blocked; unblock it in bluetui"
