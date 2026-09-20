@@ -130,6 +130,85 @@ Homebrew/winget catalogs, with no fix available inside the manifest:
   (pikr, buffr, hrdr, krypt) would need `scoop bucket add` before any `scoop`
   list could use it.
 
+## `.menu-bluetooth` (pikr Bluetooth picker)
+
+`krypt menu bluetooth` runs `.local/bin/.menu-bluetooth`: reads go through one
+`busctl` `GetManagedObjects` snapshot shaped by `jq`, connect / disconnect /
+forget / power are `busctl` calls verified by re-reading the property, and only
+scanning and pairing use `bluetoothctl`. Verified against a stub harness (fake
+`busctl`, `bluetoothctl`, `pikr` on `PATH`, canned D-Bus JSON), with each guard
+broken once to see its test fail. Pairing, bonding and forgetting were also run
+against real hardware (AirPods Pro 2 on junji-pc) and checked in an HCI trace;
+everything else below was not run against real hardware unless it says so.
+
+### Not covered
+
+- **Passkey and PIN pairing.** The picker pairs under bluetoothctl's
+  `KeyboardDisplay` agent, so bluez can negotiate a passkey or a numeric
+  comparison — but the script only ever writes `default-agent` and `pair` to
+  that session and never answers a prompt, so a device that asks for one times
+  out and is handed to bluetui with a notification. Doing it inline means
+  reading the session's prompts back and rendering them in a picker.
+- **Audio does not follow a fresh pairing.** Reported on junji-pc: connecting an
+  already-paired device moves the default sink, pairing a new one does not.
+  `module-switch-on-connect` is loaded
+  (`.config/pipewire/pipewire-pulse.conf.d/switch-on-connect.conf`) and
+  WirePlumber's `default-nodes` already names the device, so routing is
+  configured. Reading the module's source for the installed version,
+  `manager_added` looks the sink's card up in the manager and `return`s silently
+  when it is not there yet — before the `considering switching to` log line —
+  which would fire exactly when a card and its sink node appear together, as
+  they do on a first pairing. That is a candidate, not a finding: it was never
+  reproduced under instrumentation. To settle it, run pipewire-pulse with
+  `PIPEWIRE_DEBUG=mod.switch-on-connect#5` and pair a device: no
+  `considering switching to` line at all means the card lookup; a line followed
+  by `not switching to …` names a different check. Nothing in this script is
+  implicated either way — it is a pipewire question.
+- **A mouse cannot scan, forget or power off when pikr has `--kb-custom`.**
+  Those three are bound to keys (`^S`, `^O`, `Right`) and named in the prompt,
+  and `build_list` adds the row through to the actions list only when the keys
+  are absent. pikr makes nothing but a row clickable — its sole `Click` handler
+  is on the row stack in `ui/view.rs` — so a mouse route means an action row in
+  the device list, or a second waybar binding. Both were considered and
+  declined: the device lists are meant to hold devices and nothing else, and the
+  bar icon is meant to have one click. So with a fork pikr a mouse connects and
+  disconnects, and bluetui stays the fallback for the rest. This is a known
+  departure from "mouse + keyboard, both work, always"; reopening it means
+  giving up one of those two, or a pikr that can make something other than a row
+  clickable.
+- **Just Works has no MITM protection.** That is the protocol, not the script,
+  but it is what inline pairing amounts to.
+- **A second adapter.** The first `org.bluez.Adapter1` object (sorted by path)
+  is used; devices on another adapter are not listed.
+- **Nameless devices** are left out of the scan list (random-address LE beacons
+  mostly), so a device that advertises no name can't be paired from the picker.
+- **Block / unblock, untrust, rename, per-profile connect.** bluetui does the
+  first three; a blocked device is shown as such and refused.
+
+### Not verified
+
+- `bluetoothctl`'s exit status when the daemon returns a D-Bus error. The script
+  does not depend on it: success is the `Paired` / `Connected` property.
+- When `pair` returns relative to the trust and connect bluetoothctl does after
+  pairing. The script sets `Trusted` itself, polls `Connected`, and calls
+  `Connect` only if the device is still not connected.
+- That discovery ends when the scanning `bluetoothctl` is killed. It is why a
+  `busctl` `StartDiscovery` was not used; the BlueZ docs say sessions are per
+  client but not that a client's exit releases them.
+- `AuthenticationFailed` is broader than "needs a passkey"; handing those to
+  bluetui is still the useful response.
+- The pikr flags it uses when present (`--kb-custom`, `--loading`) are not in a
+  pikr release yet; the stock-pikr paths were exercised in the harness only.
+
+### Shared code with `.menu-wifi`
+
+`notify`, `uptime_ms`, the debounce / toggle / `flock` block and the
+rows-file-to-line-number pick mapping are the same logic in both scripts,
+written with the same names so they can move. Extract them to a sourced
+`.local/bin/.menu-lib` and convert both scripts in one pure-move change. The lib
+needs its own `[[link]]`; CI's shellcheck glob only lints executables, so either
+make it executable or prove it is reached through `shellcheck -x`.
+
 ## Decisions needed
 
 - **`.config/cargo/config.toml` is deployed where cargo never reads it.** cargo

@@ -60,10 +60,11 @@ steps = [
 [[command]]
 group       = "menu"
 name        = "bluetooth"
-description = "Bluetooth TUI (bluetui) in a floating alacritty window"
+description = "Bluetooth device picker via busctl/bluetoothctl + pikr"
 platform    = "linux"
 steps = [
-    { run = ["alacritty", "--class", "floating", "-e", "bluetui"] },
+    # D-Bus snapshot shaping + pair/connect flow — kept as single shell step.
+    { run = ["bash", "${HOME}/.local/bin/.menu-bluetooth"], ignore_failure = true },
 ]
 
 [[command]]
