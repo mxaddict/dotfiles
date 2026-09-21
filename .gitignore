@@ -1,11 +1,5 @@
-!.claude-work/CLAUDE.md
-!.claude-work/settings.json
-!.claude-work/settings.local.json
-!.claude-work/statusline-command.sh
-!.claude/CLAUDE.md
 !.claude/settings.json
 !.claude/statusline-command.sh
-!.codex/AGENTS.md
 !.codex/config.toml
 !.config/Vieb/colors
 !.config/Vieb/colors/tokyonight.css

@@ -254,11 +254,42 @@ platform = "linux"
 src_glob = ".config/opencode/**/*"
 dst = "${XDG_CONFIG}/opencode/"
 
-# A real file rather than a git symlink: Git for Windows checks symlinks out as
-# text files holding the target path.
+# --- LLM agents ---
+#
+# One source per file, deployed to every agent that reads it; the repo holds no
+# symlinks, which Git for Windows checks out as text files holding the target
+# path. ~/.claude-work is a second Claude Code config dir (CLAUDE_CONFIG_DIR in
+# the fish and PowerShell configs) sharing the same rules and settings.
 [[link]]
 src = ".config/agents/AGENTS.md"
 dst = "${XDG_CONFIG}/opencode/AGENTS.md"
+
+[[link]]
+src = ".config/agents/AGENTS.md"
+dst = "${HOME}/.claude/CLAUDE.md"
+
+[[link]]
+src = ".config/agents/AGENTS.md"
+dst = "${HOME}/.claude-work/CLAUDE.md"
+
+[[link]]
+src = ".config/agents/AGENTS.md"
+dst = "${HOME}/.codex/AGENTS.md"
+
+# settings.json runs the statusline as `bash ~/.claude/statusline-command.sh`
+# from both config dirs, so one copy serves both; on Windows `bash` is Git
+# Bash's, and the script needs jq (the core group).
+[[link]]
+src = ".claude/settings.json"
+dst = "${HOME}/.claude/settings.json"
+
+[[link]]
+src = ".claude/settings.json"
+dst = "${HOME}/.claude-work/settings.json"
+
+[[link]]
+src = ".claude/statusline-command.sh"
+dst = "${HOME}/.claude/statusline-command.sh"
 
 # --- PowerShell ---
 
