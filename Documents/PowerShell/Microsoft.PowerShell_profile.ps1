@@ -10,7 +10,14 @@
 # `alacritty --working-directory <dir>` and a terminal opened in any other
 # folder keep their folder. Alacritty's own `working_directory` setting would
 # need an absolute path per machine: it does not expand `~`.
+#
+# A `pwsh` from scoop runs through a shim, a small exe with a `.shim` file
+# beside it that starts the real pwsh as its child, so the launcher is the
+# first parent that is not a shim.
 $launcher = (Get-Process -Id $PID).Parent
+while ($launcher.Path -and (Test-Path ([IO.Path]::ChangeExtension($launcher.Path, '.shim')))) {
+    $launcher = $launcher.Parent
+}
 if ($launcher.ProcessName -eq 'alacritty' -and
     $PWD.Path -in @([Environment]::SystemDirectory, (Split-Path $launcher.Path))) {
     Set-Location ~
