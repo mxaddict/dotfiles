@@ -109,7 +109,11 @@ Homebrew/scoop catalogs, with no fix available inside the manifest:
   counts as installed, so `krypt deps` installs nothing on Windows. The fix is
   on krypt `main` (`feat(pkg): scoop buckets, state read from export`), which
   the dotfiles CI builds. Once a krypt release carries it, raise `krypt_min` in
-  `.krypt.toml` to that version and drop the README caveat.
+  `.krypt.toml` to that version and drop the README caveat. The same release
+  lets every command find the repo `krypt init` recorded (`fa88d56`,
+  `feat(cli): one repo lookup and a single adopt`), so the README's
+  `cd ~/.config/krypt/repo` step can go too, and `krypt adopt` replaces
+  `krypt adopt-edits` for syncing edits back.
 - **Not packaged for apt or dnf, and not a crate**: `opencode` (npm
   `opencode-ai`), `gemini-cli` (npm), `doctl` on apt, `lazygit` on dnf, and the
   kryptic-sh tools without a crates.io release (`pikr`, `buffr`, `inbx`, `hodl`,
@@ -157,8 +161,8 @@ Homebrew/scoop catalogs, with no fix available inside the manifest:
 - **Claude Code rewrites the deployed `~/.claude/settings.json`.** Changing a
   setting through `/config` writes to that file, so `krypt diff` reports it
   drifted and `krypt link` skips it as a conflict until the change is pulled
-  back with `krypt adopt-edits` or the file is replaced. Settings are meant to
-  be changed in `.claude/settings.json` here instead.
+  back with `krypt adopt ~/.claude/settings.json` or the file is replaced.
+  Settings are meant to be changed in `.claude/settings.json` here instead.
 - **`krypt setup` drops most template comments.** Writing `~/.gitconfig.local`
   from `.gitconfig.local.template` kept only the commented-out
   `; signingkey = ...` and `; gpgsign = true` lines; the explanatory comments
