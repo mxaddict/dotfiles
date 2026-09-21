@@ -165,11 +165,6 @@ dst = "${XDG_CONFIG}/mpv/"
 platform = ["linux", "macos"]
 
 [[link]]
-src_glob = ".config/mpv/**/*"
-dst = "${WIN_APPDATA}/mpv/"
-platform = "windows"
-
-[[link]]
 src_glob = ".config/nvim/**/*"
 dst = "${XDG_CONFIG}/nvim/"
 platform = ["linux", "macos"]

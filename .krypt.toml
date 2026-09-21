@@ -141,15 +141,6 @@ if             = "command_exists:fish"
 run            = ["fish", "-c", "curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish > /tmp/fisher.fish && source /tmp/fisher.fish && fisher update"]
 ignore_failure = true
 
-# PowerShell counterpart of fisher-update: PSFzf provides the fzf key bindings
-# the PowerShell profile loads, as fzf.fish does for fish.
-[[hook]]
-name           = "psfzf-update"
-when           = "post-update"
-if             = "platform:windows,command_exists:pwsh"
-run            = ["pwsh", "-NoProfile", "-Command", "if (Get-InstalledPSResource -Name PSFzf -ErrorAction Ignore) { Update-PSResource -Name PSFzf -TrustRepository -Quiet } else { Install-PSResource -Name PSFzf -TrustRepository -Quiet }"]
-ignore_failure = true
-
 [[hook]]
 name           = "nvim-plugin-sync"
 when           = "post-update"

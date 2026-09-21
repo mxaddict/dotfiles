@@ -38,8 +38,8 @@ brew = [
 # Windows uses scoop: per-user installs under ~/scoop, no UAC prompt. krypt adds
 # the buckets `bucket/app` entries name before installing a group.
 scoop = [
-    "bat", "btop", "extras/alacritty", "eza", "fastfetch", "fd", "fzf", "git",
-    "jq", "neovim", "pwsh", "ripgrep", "starship", "tealdeer",
+    "bat", "btop", "extras/alacritty", "extras/psfzf", "eza", "fastfetch", "fd",
+    "fzf", "git", "jq", "neovim", "pwsh", "ripgrep", "starship", "tealdeer",
     "uutils-coreutils", "zoxide",
 ]
 
@@ -106,7 +106,8 @@ pacman = [
 apt = ["mpv", "yt-dlp"]
 dnf = ["mpv", "yt-dlp"]
 brew = ["mpv", "yt-dlp"]
-scoop = ["extras/mpv", "yt-dlp"]
+# Windows plays media with its own player, so no mpv there.
+scoop = ["yt-dlp"]
 
 [[deps]]
 group = "system"

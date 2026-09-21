@@ -24,6 +24,15 @@ if ($launcher.ProcessName -eq 'alacritty' -and
 }
 Remove-Variable launcher
 
+# The exe a scoop shim starts: its `.shim` file beside it names the real exe.
+# Any other path is returned as it is.
+function Resolve-ShimTarget([string]$Path) {
+    $shim = [IO.Path]::ChangeExtension($Path, '.shim')
+    if (-not (Test-Path $shim)) { return $Path }
+    $target = Select-String -Path $shim -Pattern '^path = "(.+)"' | Select-Object -First 1
+    if ($target) { $target.Matches[0].Groups[1].Value }
+}
+
 # uutils coreutils: make every coreutils command win over PowerShell's
 # built-in aliases/functions (ls, rm, cp, mkdir, ...) and over same-named
 # System32 programs (sort.exe, more.com, timeout.exe, ...).
@@ -40,15 +49,9 @@ Remove-Variable launcher
 #
 # `link` is skipped: coreutils' link.exe would shadow MSVC's linker.
 $coreutilsDir = Get-Command b2sum.exe -CommandType Application -All -ErrorAction SilentlyContinue |
-    ForEach-Object {
-        $shim = [IO.Path]::ChangeExtension($_.Source, '.shim')
-        if (Test-Path $shim) {
-            $target = Select-String -Path $shim -Pattern '^path = "(.+)"' | Select-Object -First 1
-            if ($target) { Split-Path $target.Matches[0].Groups[1].Value }
-        } else {
-            Split-Path $_.Source
-        }
-    } |
+    ForEach-Object { Resolve-ShimTarget $_.Source } |
+    Where-Object { $_ } |
+    ForEach-Object { Split-Path $_ } |
     Where-Object { Test-Path (Join-Path $_ 'coreutils.exe') } |
     Select-Object -First 1
 if ($coreutilsDir) {
@@ -61,7 +64,7 @@ if ($coreutilsDir) {
 } else {
     Write-Warning 'uutils coreutils not found on PATH; Unix commands fall back to PowerShell aliases.'
 }
-Remove-Variable coreutilsDir, shim, target, skip -ErrorAction Ignore
+Remove-Variable coreutilsDir, skip -ErrorAction Ignore
 
 function Test-Command([string]$Name) {
     [bool](Get-Command $Name -CommandType Application -ErrorAction Ignore)
@@ -291,8 +294,9 @@ $purple = '#9d7cd8'
 $cyan = '#7dcfff'
 $pink = '#bb9af7'
 
-# Syntax Highlighting and Completion Pager Colors; turn on vi mode
-Set-PSReadLineOption -EditMode Vi -ViModeIndicator Cursor -Colors @{
+# Syntax Highlighting and Completion Pager Colors; turn on vi mode. No bell, as
+# in fish.
+Set-PSReadLineOption -EditMode Vi -ViModeIndicator Cursor -BellStyle None -HistorySearchCursorMovesToEnd -Colors @{
     Default                = $foreground
     Command                = $cyan
     Keyword                = $pink
@@ -309,6 +313,30 @@ Set-PSReadLineOption -EditMode Vi -ViModeIndicator Cursor -Colors @{
     ListPredictionTooltip  = $comment
 }
 Remove-Variable foreground, selection, comment, red, yellow, green, purple, cyan, pink
+
+# Grey suggestions from history as you type, like fish's autosuggestions.
+# PSReadLine refuses them when output is redirected (`pwsh -Command ... > file`),
+# failing the whole call, so they get a call of their own.
+if (-not [Console]::IsOutputRedirected) {
+    Set-PSReadLineOption -PredictionSource History -PredictionViewStyle InlineView
+}
+
+# fish keys in insert mode. The vi defaults for Right and End only move the
+# cursor; ForwardChar and EndOfLine also accept the suggestion when the cursor
+# is at the end of the line, and ForwardWord takes its next word. Tab opens a
+# menu of completions, and Up/Down search history for what is already typed.
+$fishKeys = [ordered]@{
+    RightArrow       = 'ForwardChar'
+    End              = 'EndOfLine'
+    'Alt+RightArrow' = 'ForwardWord'
+    Tab              = 'MenuComplete'
+    UpArrow          = 'HistorySearchBackward'
+    DownArrow        = 'HistorySearchForward'
+}
+foreach ($key in $fishKeys.Keys) {
+    Set-PSReadLineKeyHandler -Key $key -Function $fishKeys[$key] -ViMode Insert
+}
+Remove-Variable fishKeys, key
 
 # Alias for :q to exit terminal. PowerShell parses `:q` as a loop label, so no
 # function can catch it; rewrite the line to `exit` when it is submitted.
@@ -356,6 +384,36 @@ if ((Test-Command fzf) -and (Get-Module -ListAvailable PSFzf)) {
 if (Test-Command zoxide) {
     Invoke-Expression (& { (zoxide init powershell --cmd cd | Out-String) })
 }
+
+# Argument completers the tools print for PowerShell, as fish has for most
+# commands. Printing them takes some tools over a second, so each is cached and
+# printed again only when the tool's exe is newer than its cache. Dot-sourced
+# here, not in a function, because the completers call helper functions the
+# scripts define, which must outlive the call.
+$completions = [ordered]@{
+    doctl  = { doctl completion powershell }
+    gh     = { gh completion -s powershell }
+    glab   = { glab completion -s powershell }
+    rustup = { rustup completions powershell }
+}
+$completionCache = Join-Path $env:LOCALAPPDATA 'PowerShell/completions'
+foreach ($name in $completions.Keys) {
+    $cmd = Get-Command $name -CommandType Application -TotalCount 1 -ErrorAction Ignore
+    if (-not $cmd) { continue }
+    $exe = Resolve-ShimTarget $cmd.Source
+    $cache = Join-Path $completionCache "$name.ps1"
+    if (-not (Test-Path $cache) -or ($exe -and (Get-Item $cache).LastWriteTime -lt (Get-Item $exe).LastWriteTime)) {
+        $script = & $completions[$name] | Out-String
+        if ($LASTEXITCODE -or -not $script.Trim()) {
+            Write-Warning "$name printed no PowerShell completions (exit $LASTEXITCODE); skipped."
+            continue
+        }
+        New-Item -ItemType Directory -Force $completionCache | Out-Null
+        Set-Content -LiteralPath $cache -Value $script
+    }
+    . $cache
+}
+Remove-Variable completions, completionCache, name, cmd, exe, cache, script -ErrorAction Ignore
 
 # Load starship prompt
 if (Test-Command starship) {

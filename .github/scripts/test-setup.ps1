@@ -86,7 +86,6 @@ try {
         'AppData/Roaming/bat/config'                              = '.config/bat/config'
         'AppData/Roaming/GitHub CLI/config.yml'                   = '.config/gh/config.yml'
         'AppData/Roaming/tealdeer/config/config.toml'             = '.config/tealdeer/config.toml'
-        'AppData/Roaming/mpv/mpv.conf'                            = '.config/mpv/mpv.conf'
         'Documents/PowerShell/Microsoft.PowerShell_profile.ps1'   = 'Documents/PowerShell/Microsoft.PowerShell_profile.ps1'
         '.local/bin/.envup.ps1'                                   = '.local/bin/.envup.ps1'
     }
@@ -164,6 +163,11 @@ try {
                 if ((Get-Command $name).CommandType -ne 'Function') { throw "$name does not resolve to the profile function" }
             }
             if ((Get-PSReadLineOption).EditMode -ne 'Vi') { throw 'vi mode is not enabled' }
+            $bound = Get-PSReadLineKeyHandler -Bound
+            foreach ($key in @{ Tab = 'MenuComplete'; UpArrow = 'HistorySearchBackward'; RightArrow = 'ForwardChar' }.GetEnumerator()) {
+                $functions = ($bound | Where-Object Key -eq $key.Key).Function
+                if ($key.Value -notin $functions) { throw "$($key.Key) is not bound to $($key.Value)" }
+            }
         } -args $profilePath
         if ($LASTEXITCODE -ne 0) { $failures.Add('PowerShell profile failed to load cleanly') }
     }

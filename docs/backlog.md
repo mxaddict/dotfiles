@@ -21,20 +21,37 @@
   one: point `CLAUDE_CODE_GIT_BASH_PATH` at scoop's
   `apps\git\current\bin\bash.exe` before removing `Git.Git`). The Neovim and
   starship MSIs failed under `winget uninstall --silent` with 1603, but
-  `msiexec /x {product-code} /qn` run elevated removed them. Unverified: that
-  Terminal's default `PowerShell` profile moves to scoop's pwsh once winget's
-  `Microsoft.PowerShell` is gone.
-- **Tools the PowerShell profile wires up are not installed** (eza, bat, fzf,
-  zoxide, starship, fnm, PSFzf), so only the tool-absent branches of the profile
-  have been exercised, locally and in CI. `krypt deps --group core` plus the
-  `psfzf-update` hook install them.
+  `msiexec /x {product-code} /qn` run elevated removed them (so did GitHub CLI
+  and Node). Unverified: that Terminal's default `PowerShell` profile moves to
+  scoop's pwsh once winget's `Microsoft.PowerShell` is gone. Two traps:
+  - **rustup**: winget's uninstall runs `rustup self uninstall`, which deletes
+    `~/.cargo` and `~/.rustup` (toolchains and `cargo install`ed tools). Scoop's
+    rustup keeps both in `~/scoop/persist/rustup`, so move them there before
+    `scoop install rustup`, then delete only the `Rustup` key under
+    `HKCU\...\Uninstall` so winget forgets it.
+  - **Thunderbird/Firefox**: a new install location is a new "install" to
+    Mozilla, which makes itself a fresh profile. Before first start, point
+    `Default=` for the install in `profiles.ini` and `installs.ini` at the
+    existing profile (the install's hash only appears after one start, so start
+    once, close, fix, start again).
+- **fnm's profile branches have not run anywhere.** fnm is in no deps group. The
+  other tools' branches do run: `deps.yml` dot-sources the profile after
+  installing the scoop `core` group (checking only the coreutils aliases), and
+  `test-setup.ps1` loads it without them.
 
 ## PowerShell profile
 
-- **Interactive key handlers are untested**: the `:q` Enter rewrite and the
-  PSFzf bindings (Ctrl+T, Ctrl+R, Ctrl+F, Ctrl+G, Ctrl+S) need a real console.
-  CI only proves the profile loads, removes shadowing aliases and enables vi
-  mode.
+- **Interactive keys, partly verified.** Driven in a real Alacritty with
+  SendKeys on the first Windows machine: the grey history suggestion, → taking
+  it, ↑ searching for the typed prefix, and Tab opening gh's completion menu.
+  Not exercised: End, Alt+→, ↓, the `:q` Enter rewrite, and what the PSFzf
+  bindings (Ctrl+T, Ctrl+R, Ctrl+F, Ctrl+G, Ctrl+S) do once pressed; the profile
+  check only proves they are bound. CI checks Tab, ↑ and → are bound.
+- **Tool completions are cached** under `%LOCALAPPDATA%\PowerShell\completions`
+  and printed again when the tool's exe is newer than its cache. cobra-based
+  tools (gh, glab, doctl) print `Completion ended with directive: ...` on stderr
+  for every completion; an interactive shell does not show it, but a
+  `pwsh -Command` run whose stderr is captured does.
 - **fzf.fish's variables (Ctrl+V) and processes (Ctrl+P) pickers have no PSFzf
   equivalent** and were not ported; those keys keep PSReadLine defaults.
 - Left out as Linux-only: `MANGOHUD`, `GPG_TTY`, `PARU_PAGER`, `MANPAGER`, the
@@ -93,8 +110,7 @@
 ## Coverage gaps
 
 - **Post-update hooks are not run anywhere in CI**: `krypt update` needs a repo
-  it can pull, and `test-setup.ps1` uses `krypt link`. `psfzf-update` has not
-  been executed at all.
+  it can pull, and `test-setup.ps1` uses `krypt link`.
 - **Alacritty's macOS shell entry is unverified on a Mac.**
   `.config/alacritty/macos.toml` runs fish through `/usr/bin/env` with a PATH
   naming both Homebrew prefixes, because a configured shell is spawned with
