@@ -1,4 +1,5 @@
 {
+  "autoUpdatesChannel": "latest",
   "includeCoAuthoredBy": false,
   "permissions": {
     "allow": [
