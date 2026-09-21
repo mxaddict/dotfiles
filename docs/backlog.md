@@ -111,6 +111,12 @@
   naming both Homebrew prefixes, because a configured shell is spawned with
   Alacritty's own environment (checked in `alacritty_terminal`'s `tty/unix.rs`)
   and apps started from Finder get launchd's PATH. Alacritty cannot run in CI.
+- **The `developer-mode` hooks, partly verified.** On the first Windows machine,
+  with Developer Mode switched off, `krypt setup` turned it back on through the
+  `post-setup` hook (one UAC prompt), and `krypt system devmode` exits without
+  prompting when it is already on. The `post-update` hook runs the same command
+  but was not run through a real `krypt update`, and a declined UAC prompt was
+  not tried. CI never runs `krypt setup` or the hooks.
 - **Only the `core` group is installed in CI**; every other group is resolved
   with `krypt deps --check`, not installed.
 
