@@ -68,6 +68,13 @@ package through it, per-user under `~\scoop`, so nothing asks for elevation.
 Scoop support in `krypt deps` needs a krypt newer than 0.3.0; see
 `docs/backlog.md`.
 
+The `.gitconfig` sets `core.symlinks = true`, which on Windows needs Developer
+Mode (Settings → System → For developers) so that git can create symlinks;
+without it, cloning or checking out a repo that contains one fails with
+`unable to create symlink ... Permission denied`. Git for Windows also writes
+`core.symlinks = false` into the `.git/config` of each repo it clones where
+symlinks were not allowed, which overrides the global setting there.
+
 Verify: `krypt --version` should report `0.2.0` or newer.
 
 ### 2. Clone + link
