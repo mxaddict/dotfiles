@@ -15,7 +15,15 @@
   from winget to scoop, and nothing uninstalls the winget copies, so a machine
   that ran the old `krypt deps` has both (e.g. `Git.Git` under `Program Files`
   and scoop's `git`). Which one runs depends on `PATH` order; removing the
-  winget ones is a manual `winget uninstall` per package.
+  winget ones is a manual `winget uninstall` per package. Found while doing it
+  on the first Windows machine: close winget's Alacritty and anything running
+  its Git Bash first, since both are files in use (Claude Code's Bash tool is
+  one: point `CLAUDE_CODE_GIT_BASH_PATH` at scoop's
+  `apps\git\current\bin\bash.exe` before removing `Git.Git`). The Neovim and
+  starship MSIs failed under `winget uninstall --silent` with 1603, but
+  `msiexec /x {product-code} /qn` run elevated removed them. Unverified: that
+  Terminal's default `PowerShell` profile moves to scoop's pwsh once winget's
+  `Microsoft.PowerShell` is gone.
 - **Tools the PowerShell profile wires up are not installed** (eza, bat, fzf,
   zoxide, starship, fnm, PSFzf), so only the tool-absent branches of the profile
   have been exercised, locally and in CI. `krypt deps --group core` plus the
