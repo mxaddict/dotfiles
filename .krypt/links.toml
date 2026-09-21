@@ -291,6 +291,14 @@ dst = "${HOME}/.claude-work/settings.json"
 src = ".claude/statusline-command.sh"
 dst = "${HOME}/.claude/statusline-command.sh"
 
+# --- Windows Terminal ---
+# Only settings.json: the state.json beside it is runtime state Terminal writes
+# itself (generated profiles, a hash of the settings).
+[[link]]
+src = "AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json"
+dst = "${WIN_LOCALAPPDATA}/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json"
+platform = "windows"
+
 # --- PowerShell ---
 
 [[link]]

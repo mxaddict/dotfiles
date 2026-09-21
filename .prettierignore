@@ -2,6 +2,9 @@
 .agents/**
 
 # Vendored / generated
+# Windows Terminal rewrites its settings in its own format on every change made
+# in its settings UI, and `krypt adopt` copies that back as-is.
+AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json
 .config/nvim/lazy-lock.json
 .config/opencode/package-lock.json
 .config/opencode/bun.lock
