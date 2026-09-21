@@ -98,9 +98,6 @@
   `statusline-command.sh` runs under Git Bash with scoop's `jq` when fed sample
   JSON by hand; whether Claude Code on Windows finds `bash` for the `statusLine`
   command was not observed.
-- **The scoop profile check has only run in CI's design, not in CI.** The deps
-  workflow's `The profile aliases scoop's coreutils, not its shims` step is new;
-  its first run is the next push.
 
 ## Packages
 
