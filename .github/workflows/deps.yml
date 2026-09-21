@@ -74,6 +74,16 @@ jobs:
         with:
           cache-key: ${{ matrix.name }}
 
+      # The Windows groups install through scoop, which the runner does not
+      # ship. The runner's user is an administrator, which scoop's installer
+      # refuses without -RunAsAdmin.
+      - name: Install scoop
+        if: matrix.name == 'windows'
+        shell: pwsh
+        run: |
+          Invoke-Expression "& {$(Invoke-RestMethod https://get.scoop.sh)} -RunAsAdmin"
+          Join-Path $env:USERPROFILE 'scoop\shims' >> $env:GITHUB_PATH
+
       # Homebrew skips formulae from untrusted taps; trusting the kryptic-sh
       # tap is the same one-time step the README gives for a Mac.
       - name: Trust the kryptic-sh Homebrew tap
@@ -96,6 +106,19 @@ jobs:
           fi
           echo "$out" | grep -q '^already installed: ' ||
             { echo "::error::the second run reported nothing installed"; exit 1; }
+
+      # scoop puts coreutils.exe on PATH as a shim in its shared shims folder;
+      # the profile must alias the real coreutils folder, not every shim.
+      - name: The profile aliases scoop's coreutils, not its shims
+        if: matrix.name == 'windows'
+        shell: pwsh
+        run: |
+          . ./Documents/PowerShell/Microsoft.PowerShell_profile.ps1
+          # sort: the profile replaces ls and cat with eza and bat.
+          $sort = (Get-Alias sort).Definition
+          $sort
+          if ($sort -notlike '*\apps\uutils-coreutils\*\sort.exe') { throw "sort aliases $sort" }
+          if (Get-Alias git -ErrorAction Ignore) { throw 'a non-coreutils shim was aliased' }
 
       # links.toml deploys tealdeer's config to ~/.config on macOS, as on
       # Linux; ask the tealdeer that core installed where it actually reads it.

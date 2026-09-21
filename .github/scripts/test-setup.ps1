@@ -146,7 +146,7 @@ try {
 
     # Installing and resolving packages is the deps workflow's job; here only
     # that the included deps file is read for this OS's managers.
-    $managers = @{ windows = @('winget'); macos = @('brew'); linux = @('pacman', 'apt', 'dnf') }[$os]
+    $managers = @{ windows = @('scoop'); macos = @('brew'); linux = @('pacman', 'apt', 'dnf') }[$os]
     foreach ($manager in $managers) {
         $plan = Invoke-Krypt deps --config .krypt.toml --dry-run --manager $manager
         $plan

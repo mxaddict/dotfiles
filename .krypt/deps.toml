@@ -35,12 +35,12 @@ brew = [
     "neovim", "ripgrep", "starship", "stow", "tealdeer", "tmux", "unzip", "wget",
     "zoxide",
 ]
-winget = [
-    "Alacritty.Alacritty", "BurntSushi.ripgrep.MSVC", "Fastfetch-cli.Fastfetch",
-    "Git.Git", "Microsoft.PowerShell", "Neovim.Neovim", "Starship.Starship",
-    "ajeetdsouza.zoxide", "aristocratos.btop4win", "dbrgn.tealdeer",
-    "eza-community.eza", "jqlang.jq", "junegunn.fzf", "sharkdp.bat", "sharkdp.fd",
-    "uutils.coreutils",
+# Windows uses scoop: per-user installs under ~/scoop, no UAC prompt. krypt adds
+# the buckets `bucket/app` entries name before installing a group.
+scoop = [
+    "bat", "btop", "extras/alacritty", "eza", "fastfetch", "fd", "fzf", "git",
+    "jq", "neovim", "pwsh", "ripgrep", "starship", "tealdeer",
+    "uutils-coreutils", "zoxide",
 ]
 
 [[deps]]
@@ -59,9 +59,8 @@ dnf = [
 brew = [
     "bear", "doctl", "gh", "glab", "lazygit", "node", "opencode", "rustup",
 ]
-winget = [
-    "DigitalOcean.Doctl", "GLab.GLab", "GitHub.cli", "JesseDuffield.lazygit",
-    "OpenJS.NodeJS.LTS", "Rustlang.Rustup", "SST.opencode",
+scoop = [
+    "doctl", "gh", "glab", "lazygit", "nodejs-lts", "opencode", "rustup",
 ]
 
 [[deps]]
@@ -74,7 +73,8 @@ pacman = [
 apt = []
 dnf = []
 brew = ["font-hack-nerd-font"]
-winget = []
+# The Mono variant is the "Hack Nerd Font Mono" family Alacritty asks for.
+scoop = ["nerd-fonts/Hack-NF-Mono"]
 
 [[deps]]
 group = "hyprland"
@@ -106,7 +106,7 @@ pacman = [
 apt = ["mpv", "yt-dlp"]
 dnf = ["mpv", "yt-dlp"]
 brew = ["mpv", "yt-dlp"]
-winget = ["shinchiro.mpv", "yt-dlp.yt-dlp"]
+scoop = ["extras/mpv", "yt-dlp"]
 
 [[deps]]
 group = "system"
@@ -132,13 +132,14 @@ pacman = [
 apt = ["duf", "dysk"]
 dnf = ["cargo:dysk", "duf", "firefox", "thunderbird"]
 brew = ["duf", "dysk", "firefox", "thunderbird"]
-winget = ["Mozilla.Firefox", "Mozilla.Thunderbird", "muesli.duf"]
+scoop = ["duf", "extras/firefox", "extras/thunderbird"]
 
-# kryptic-sh tools. Arch uses the AUR -bin packages (via paru) and macOS the
-# kryptic-sh Homebrew tap. Other systems build the ones published on crates.io
-# with cargo, which needs a default Rust toolchain (the dev group's rustup).
-# pikr, buffr, inbx, hodl and krypt publish no crate or distro repository, and
-# gemini-cli is an npm package; see docs/backlog.md.
+# kryptic-sh tools. Arch uses the AUR -bin packages (via paru), macOS the
+# kryptic-sh Homebrew tap and Windows the kryptic-sh scoop bucket. Other systems
+# build the ones published on crates.io with cargo, which needs a default Rust
+# toolchain (the dev group's rustup). pikr, buffr, inbx, hodl and krypt publish
+# no crate or distro repository, and gemini-cli is an npm package; see
+# docs/backlog.md.
 [[deps]]
 group = "kryptic"
 pacman = [
@@ -152,4 +153,8 @@ brew = [
     "kryptic-sh/tap/hodl", "kryptic-sh/tap/hrdr", "kryptic-sh/tap/inbx",
     "kryptic-sh/tap/krypt", "kryptic-sh/tap/pikr", "kryptic-sh/tap/sqeel",
 ]
-winget = ["cargo:hjkl", "cargo:hrdr", "cargo:sqeel"]
+scoop = [
+    "kryptic-sh/buffr", "kryptic-sh/hrdr", "kryptic-sh/krypt", "kryptic-sh/pikr",
+    "cargo:hjkl", "cargo:sqeel",
+]
+scoop_buckets = { kryptic-sh = "https://github.com/kryptic-sh/scoop-bucket" }

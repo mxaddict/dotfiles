@@ -18,7 +18,7 @@ genuinely shell-shaped.
 
 - **OS**: Arch Linux is the primary target. `.krypt/deps.toml` also maps
   packages for Debian/Ubuntu (apt), Fedora (dnf), macOS (Homebrew) and Windows
-  (winget, with PowerShell 7 and uutils coreutils standing in for fish), and CI
+  (scoop, with PowerShell 7 and uutils coreutils standing in for fish), and CI
   resolves every package and installs the `core` group on each of them. Known
   gaps are in `docs/backlog.md`.
 - **Display server**: Wayland (Hyprland). X11 unsupported.
@@ -61,6 +61,12 @@ genuinely shell-shaped.
 | Windows  | `scoop bucket add kryptic-sh https://github.com/kryptic-sh/scoop-bucket` then `scoop install krypt` |
 | Any      | `cargo install krypt-cli`                                                                           |
 | Manual   | grab a binary from [GH Releases](https://github.com/kryptic-sh/krypt/releases)                      |
+
+On Windows, install [scoop](https://scoop.sh) first, in PowerShell as your own
+user (no admin): `irm get.scoop.sh | iex`. `krypt deps` installs every Windows
+package through it, per-user under `~\scoop`, so nothing asks for elevation.
+Scoop support in `krypt deps` needs a krypt newer than 0.3.0; see
+`docs/backlog.md`.
 
 Verify: `krypt --version` should report `0.2.0` or newer.
 

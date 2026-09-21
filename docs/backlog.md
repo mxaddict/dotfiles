@@ -11,11 +11,11 @@
   `krypt link --force`: run `krypt setup` so the `[user]` identity in the old
   `~/.gitconfig` moves to `~/.gitconfig.local`, and compare the gh and lazygit
   files, which hold state written by those tools.
-- **`Hack Nerd Font Mono` is not installed**, so Alacritty falls back to a
-  default font, and `krypt deps` cannot install it: winget has no Hack Nerd Font
-  package (`DEVCOM.HackNerdFont`, listed before, does not exist in
-  microsoft/winget-pkgs). Scoop's `nerd-fonts` bucket has `Hack-NF`; using it
-  means adding that bucket and a `scoop` list to the `fonts` group.
+- **Machines set up with winget keep those installs.** The Windows groups moved
+  from winget to scoop, and nothing uninstalls the winget copies, so a machine
+  that ran the old `krypt deps` has both (e.g. `Git.Git` under `Program Files`
+  and scoop's `git`). Which one runs depends on `PATH` order; removing the
+  winget ones is a manual `winget uninstall` per package.
 - **Tools the PowerShell profile wires up are not installed** (eza, bat, fzf,
   zoxide, starship, fnm, PSFzf), so only the tool-absent branches of the profile
   have been exercised, locally and in CI. `krypt deps --group core` plus the
@@ -94,27 +94,42 @@
   and apps started from Finder get launchd's PATH. Alacritty cannot run in CI.
 - **Only the `core` group is installed in CI**; every other group is resolved
   with `krypt deps --check`, not installed.
-- **Git symlinks still tracked** (`.claude/CLAUDE.md`, `.claude-work/*`,
-  `.codex/AGENTS.md`) check out as text files on Windows. krypt does not deploy
-  them, so nothing was changed.
+- **The Claude Code statusline is unverified inside Claude Code on Windows.**
+  `statusline-command.sh` runs under Git Bash with scoop's `jq` when fed sample
+  JSON by hand; whether Claude Code on Windows finds `bash` for the `statusLine`
+  command was not observed.
+- **The scoop profile check has only run in CI's design, not in CI.** The deps
+  workflow's `The profile aliases scoop's coreutils, not its shims` step is new;
+  its first run is the next push.
 
 ## Packages
 
 Gaps `krypt deps --check` confirmed against the distro repositories and
-Homebrew/winget catalogs, with no fix available inside the manifest:
+Homebrew/scoop catalogs, with no fix available inside the manifest:
 
+- **Scoop support needs an unreleased krypt.** krypt 0.3.0 — what
+  `scoop install krypt` gives today — reads scoop's state wrong: every app
+  counts as installed, so `krypt deps` installs nothing on Windows. The fix is
+  on krypt `main` (`feat(pkg): scoop buckets, state read from export`), which
+  the dotfiles CI builds. Once a krypt release carries it, raise `krypt_min` in
+  `.krypt.toml` to that version and drop the README caveat.
 - **Not packaged for apt or dnf, and not a crate**: `opencode` (npm
   `opencode-ai`), `gemini-cli` (npm), `doctl` on apt, `lazygit` on dnf, and the
   kryptic-sh tools without a crates.io release (`pikr`, `buffr`, `inbx`, `hodl`,
-  `krypt`). The same tools are missing on winget. pikr and buffr publish
-  `.deb`/`.rpm` release assets, which neither `krypt deps` nor apt/dnf can
-  install by name. Options: a kryptic-sh apt/rpm repository, an npm source in
-  krypt, or leaving them to the Arch/Homebrew lists.
-- **`cargo:` entries need a default Rust toolchain.** On apt, dnf and winget,
+  `krypt`). On Windows the kryptic-sh scoop bucket has pikr, buffr, hrdr and
+  krypt; `inbx`, `hodl` and `gemini-cli` are missing there. pikr and buffr
+  publish `.deb`/`.rpm` release assets, which neither `krypt deps` nor apt/dnf
+  can install by name. Options: a kryptic-sh apt/rpm repository, an npm source
+  in krypt, or leaving them to the Arch/Homebrew lists.
+- **`cargo:` entries need a default Rust toolchain.** On apt, dnf and scoop,
   `cargo:hjkl` and friends (and `cargo:starship` and `cargo:dysk` on dnf) build
   with `cargo`, which Debian's and Fedora's `rustup` packages leave without a
   default toolchain until `rustup default stable` runs — and the
-  `rustup-default-stable` hook only runs on `krypt update`, after deps.
+  `rustup-default-stable` hook only runs on `krypt update`, after deps. On
+  Windows, a `rustup` installed in the same `krypt deps` run is also not on
+  krypt's `PATH` yet (tracked in krypt's backlog), so the first run fails the
+  `cargo:` entries and a second run in a new shell installs them. The winget-era
+  setup failed them the same way (`program not found`).
 - **The kryptic-sh Homebrew tap must be trusted**
   (`brew trust --tap kryptic-sh/tap`) before Homebrew installs anything from it,
   including krypt itself. krypt does not trust taps on its own; the README and
@@ -125,10 +140,28 @@ Homebrew/winget catalogs, with no fix available inside the manifest:
   GitHub releases by hand, `cargo:alacritty` (a binary without the `.app`
   bundle, so no Dock/Finder launch), or another terminal on macOS. The macOS
   entry point in `.config/alacritty/` still deploys for a manual install.
-- **The scoop bucket is unused.** On a Windows machine with scoop, winget still
-  installs every group because none lists scoop packages; the kryptic-sh bucket
-  (pikr, buffr, hrdr, krypt) would need `scoop bucket add` before any `scoop`
-  list could use it.
+
+## Git
+
+- **A clone made before `.gitattributes` still has CRLF.** `.gitattributes`
+  (`* text=auto eol=lf`) now pins LF, but an existing Windows checkout made
+  under Git for Windows' system `core.autocrlf = true` keeps its CRLF working
+  tree, and `krypt link` copies those bytes out. Re-check it out once
+  (`git rm -rq --cached . && git reset -q --hard` on a clean tree), then
+  `krypt link`.
+- **`core.excludesfile = ~/.gitignore` names a file nothing deploys.** The
+  repo's `.gitignore` is repo-meta, not a global ignore list, so on a krypt-only
+  machine git has no global ignores. Options: a dedicated global ignore file
+  with a `[[link]]`, or drop the setting.
+- **gh rewrites the tracked `.config/gh/hosts.yml`.** `gh auth login` re-indents
+  it (4 spaces instead of 2, content otherwise identical), so `krypt diff`
+  reports it drifted and `krypt link` skips it as a conflict after every login.
+  Options: commit gh's formatting, or stop tracking a file gh owns.
+- **`krypt setup` drops most template comments.** Writing `~/.gitconfig.local`
+  from `.gitconfig.local.template` kept only the commented-out
+  `; signingkey = ...` and `; gpgsign = true` lines; the explanatory comments
+  and the `; [commit]` header above `gpgsign` are gone. Cosmetic here; belongs
+  in krypt's own backlog (the `gitconfig` writer).
 
 ## Decisions needed
 
@@ -141,11 +174,16 @@ Homebrew/winget catalogs, with no fix available inside the manifest:
   This machine was migrated from the whole-repo stow symlinks to krypt's
   copy-based deploy, but `.krypt/links.toml` covers only a curated subset. So
   `.config/nushell`, `.config/hjkl/config.toml`, `.config/hrdr/config.toml`,
-  `.claude`, `.codex`, `.agents`, plus repo-meta (`docs`, `.krypt.toml`,
+  `.agents`, `.codex/config.toml`, plus repo-meta (`docs`, `.krypt.toml`,
   `.gitignore`) are still `~ -> .files` symlinks, not krypt-managed. Decision:
   add the real configs among these to `[[link]]` entries so krypt owns them, or
   leave them symlinked deliberately. Repo-meta should stay out of krypt either
-  way.
+  way. `~/.claude`, `~/.claude-work` and `~/.codex` are now `[[link]]`
+  destinations (the agent rules, Claude settings and statusline), so on that
+  machine any `~ -> .files` symlink among those three has to become a real
+  directory before the next `krypt link`: through the symlink, krypt would write
+  its copies back into the repo's gitignored `.claude*/` and `.codex/`, and copy
+  `.claude/settings.json` onto itself.
 - **Runtime data still lives in the repo working tree after the migration.**
   Because the old model symlinked `~/.config/{tmux,fish,nvim,opencode}` into the
   repo, plugin managers wrote their clones there (gitignored): `~58M` of

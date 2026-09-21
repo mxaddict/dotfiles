@@ -9,15 +9,30 @@
 #
 # Aliases to the full exe path are used instead of reordering PATH, so this
 # only affects interactive PowerShell and leaves scripts, cmd and PATH lookup
-# by other programs untouched. The folder is found through PATH, so a
-# `winget upgrade uutils.coreutils` (new versioned folder) keeps working.
+# by other programs untouched. The folder is found through PATH, so an upgrade
+# that installs into a new versioned folder keeps working.
+#
+# It is found from one of its commands, b2sum. scoop puts no coreutils.exe on
+# PATH, only a shim per command in its shared shims folder, whose `.shim` file
+# names the real exe. Git's usr\bin has a GNU b2sum as well, so the folder must
+# also hold coreutils.exe.
 #
 # `link` is skipped: coreutils' link.exe would shadow MSVC's linker.
-$coreutils = Get-Command coreutils.exe -CommandType Application -ErrorAction SilentlyContinue |
+$coreutilsDir = Get-Command b2sum.exe -CommandType Application -All -ErrorAction SilentlyContinue |
+    ForEach-Object {
+        $shim = [IO.Path]::ChangeExtension($_.Source, '.shim')
+        if (Test-Path $shim) {
+            $target = Select-String -Path $shim -Pattern '^path = "(.+)"' | Select-Object -First 1
+            if ($target) { Split-Path $target.Matches[0].Groups[1].Value }
+        } else {
+            Split-Path $_.Source
+        }
+    } |
+    Where-Object { Test-Path (Join-Path $_ 'coreutils.exe') } |
     Select-Object -First 1
-if ($coreutils) {
+if ($coreutilsDir) {
     $skip = @('coreutils', 'link')
-    Get-ChildItem (Split-Path $coreutils.Source) -Filter *.exe |
+    Get-ChildItem $coreutilsDir -Filter *.exe |
         Where-Object { $_.BaseName -notin $skip } |
         # AllScope because some built-ins (cp, dir, echo) carry it and it
         # cannot be removed from an existing alias.
@@ -25,7 +40,7 @@ if ($coreutils) {
 } else {
     Write-Warning 'uutils coreutils not found on PATH; Unix commands fall back to PowerShell aliases.'
 }
-Remove-Variable coreutils, skip -ErrorAction Ignore
+Remove-Variable coreutilsDir, shim, target, skip -ErrorAction Ignore
 
 function Test-Command([string]$Name) {
     [bool](Get-Command $Name -CommandType Application -ErrorAction Ignore)
