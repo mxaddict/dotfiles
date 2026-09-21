@@ -65,8 +65,6 @@ genuinely shell-shaped.
 On Windows, install [scoop](https://scoop.sh) first, in PowerShell as your own
 user (no admin): `irm get.scoop.sh | iex`. `krypt deps` installs every Windows
 package through it, per-user under `~\scoop`, so nothing asks for elevation.
-Scoop support in `krypt deps` needs a krypt newer than 0.3.0; see
-`docs/backlog.md`.
 
 The `.gitconfig` sets `core.symlinks = true`, which on Windows needs Developer
 Mode (Settings → System → For developers) so that git can create symlinks;
@@ -75,13 +73,13 @@ without it, cloning or checking out a repo that contains one fails with
 `core.symlinks = false` into the `.git/config` of each repo it clones where
 symlinks were not allowed, which overrides the global setting there.
 
-Verify: `krypt --version` should report `0.2.0` or newer.
+Verify: `krypt --version` should report `0.4.1` or newer, the `krypt_min` in
+`.krypt.toml`.
 
 ### 2. Clone + link
 
 ```sh
 krypt init https://github.com/mxaddict/dotfiles
-cd ~/.config/krypt/repo
 krypt deps     # install this OS's packages
 krypt setup    # interactive: git identity, Hyprland defaults, keyboard layout
 krypt link     # copy this platform's files into place

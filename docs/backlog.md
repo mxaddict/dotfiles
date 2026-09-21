@@ -2,23 +2,18 @@
 
 ## Windows machine state
 
-- **Seven destinations were left as conflicts by `krypt link`** on the Windows
-  box: `~/.gitconfig`, `%APPDATA%\GitHub CLI\config.yml` and `hosts.yml`, the
-  PowerShell profile, `%LOCALAPPDATA%\lazygit\config.yml`, and both Alacritty
-  configs. The Alacritty files are byte-identical to the repo but untracked by
-  the manifest. The existing profile's uutils coreutils block is carried over
-  verbatim into `Documents/PowerShell/Microsoft.PowerShell_profile.ps1`. Before
-  `krypt link --force`: run `krypt setup` so the `[user]` identity in the old
-  `~/.gitconfig` moves to `~/.gitconfig.local`, and compare the gh and lazygit
-  files, which hold state written by those tools.
+- **`krypt diff` still lists a removed link.** Dropping the Windows mpv
+  `[[link]]` left `%APPDATA%\mpv\mpv.conf` in krypt's manifest, so it shows as
+  `missing` after the file was deleted. krypt has no command that forgets a
+  manifest entry whose link is gone (tracked in krypt's backlog).
 - **Machines set up with winget keep those installs.** The Windows groups moved
   from winget to scoop, and nothing uninstalls the winget copies, so a machine
   that ran the old `krypt deps` has both (e.g. `Git.Git` under `Program Files`
   and scoop's `git`). Which one runs depends on `PATH` order; removing the
-  winget ones is a manual `winget uninstall` per package. Found while doing it
-  on the first Windows machine: close winget's Alacritty and anything running
-  its Git Bash first, since both are files in use (Claude Code's Bash tool is
-  one: point `CLAUDE_CODE_GIT_BASH_PATH` at scoop's
+  winget ones is a manual `winget uninstall` per package. Done on the first
+  Windows machine on 2026-09-21, which found: close winget's Alacritty and
+  anything running its Git Bash first, since both are files in use (Claude
+  Code's Bash tool is one: point `CLAUDE_CODE_GIT_BASH_PATH` at scoop's
   `apps\git\current\bin\bash.exe` before removing `Git.Git`). The Neovim and
   starship MSIs failed under `winget uninstall --silent` with 1603, but
   `msiexec /x {product-code} /qn` run elevated removed them (so did GitHub CLI
@@ -75,13 +70,13 @@
 - **Dotfiles CI builds krypt `main`** (`.github/actions/krypt`) because the
   manifests used features unreleased at the time: per-platform `[[command]]`
   overrides, `platform` lists, `cargo:` deps entries and `krypt deps --check`.
-  These all shipped in krypt **0.3.0** (2026-09-19), which also added the
-  `src_glob` tracked-files fix this repo now relies on (`krypt_min = "0.3.0"`).
-  `setup.yml` can now switch from building `main` to the 0.3.0 release binary
-  once `krypt-bin` / the tap catch up. Tracking `main` unpinned still means a
-  krypt commit can turn this repo's CI red with no dotfiles change; pinning the
-  0.3.0 tag makes runs reproducible at the cost of no longer exercising new
-  krypt changes. Needs a decision.
+  Everything the manifests use has shipped as of krypt **0.4.1** (2026-09-21:
+  scoop buckets and state, the recorded-repo lookup, `krypt adopt`), which is
+  `krypt_min`, and it is on GitHub Releases, the tap, the scoop bucket and the
+  AUR. `setup.yml` can switch from building `main` to that release binary.
+  Tracking `main` unpinned still means a krypt commit can turn this repo's CI
+  red with no dotfiles change; pinning a tag makes runs reproducible at the cost
+  of no longer exercising new krypt changes. Needs a decision.
 - **krypt's own open items** (notify backends, interactive steps, CI toolchain)
   are tracked in `kryptic-sh/krypt` under `docs/backlog.md`.
 
@@ -118,26 +113,12 @@
   and apps started from Finder get launchd's PATH. Alacritty cannot run in CI.
 - **Only the `core` group is installed in CI**; every other group is resolved
   with `krypt deps --check`, not installed.
-- **The Claude Code statusline is unverified inside Claude Code on Windows.**
-  `statusline-command.sh` runs under Git Bash with scoop's `jq` when fed sample
-  JSON by hand; whether Claude Code on Windows finds `bash` for the `statusLine`
-  command was not observed.
 
 ## Packages
 
 Gaps `krypt deps --check` confirmed against the distro repositories and
 Homebrew/scoop catalogs, with no fix available inside the manifest:
 
-- **Scoop support needs an unreleased krypt.** krypt 0.3.0 — what
-  `scoop install krypt` gives today — reads scoop's state wrong: every app
-  counts as installed, so `krypt deps` installs nothing on Windows. The fix is
-  on krypt `main` (`feat(pkg): scoop buckets, state read from export`), which
-  the dotfiles CI builds. Once a krypt release carries it, raise `krypt_min` in
-  `.krypt.toml` to that version and drop the README caveat. The same release
-  lets every command find the repo `krypt init` recorded (`fa88d56`,
-  `feat(cli): one repo lookup and a single adopt`), so the README's
-  `cd ~/.config/krypt/repo` step can go too, and `krypt adopt` replaces
-  `krypt adopt-edits` for syncing edits back.
 - **Not packaged for apt or dnf, and not a crate**: `opencode` (npm
   `opencode-ai`), `gemini-cli` (npm), `doctl` on apt, `lazygit` on dnf, and the
   kryptic-sh tools without a crates.io release (`pikr`, `buffr`, `inbx`, `hodl`,
@@ -151,10 +132,8 @@ Homebrew/scoop catalogs, with no fix available inside the manifest:
   with `cargo`, which Debian's and Fedora's `rustup` packages leave without a
   default toolchain until `rustup default stable` runs — and the
   `rustup-default-stable` hook only runs on `krypt update`, after deps. On
-  Windows, a `rustup` installed in the same `krypt deps` run is also not on
-  krypt's `PATH` yet (tracked in krypt's backlog), so the first run fails the
-  `cargo:` entries and a second run in a new shell installs them. The winget-era
-  setup failed them the same way (`program not found`).
+  Windows, krypt 0.4.1 picks up the `PATH` a scoop `rustup` install adds, so the
+  `cargo:` entries no longer need a second run; not yet seen on a fresh machine.
 - **The kryptic-sh Homebrew tap must be trusted**
   (`brew trust --tap kryptic-sh/tap`) before Homebrew installs anything from it,
   including krypt itself. krypt does not trust taps on its own; the README and
