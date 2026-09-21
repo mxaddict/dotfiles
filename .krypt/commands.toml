@@ -288,6 +288,20 @@ steps = [
     { run = ["pwsh", "-NoProfile", "-Command", "[Environment]::ProcessorCount"] },
 ]
 
+# Developer Mode lets git create symlinks without admin rights, which the
+# .gitconfig's `core.symlinks = true` needs on Windows. Checks first, so only a
+# machine that has it off gets the one UAC prompt; fails if it is still off
+# afterwards (the prompt declined). Run by the developer-mode hooks in
+# .krypt.toml on `krypt setup` and `krypt update`.
+[[command]]
+group       = "system"
+name        = "devmode"
+description = "Turn on Windows Developer Mode (asks for elevation only if it is off)"
+platform    = "windows"
+steps = [
+    { run = ["pwsh", "-NoProfile", "-Command", '''$ErrorActionPreference = 'Stop'; $key = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock'; $name = 'AllowDevelopmentWithoutDevLicense'; function Test-DevMode {{ (Get-ItemProperty $key -ErrorAction Ignore).$name -eq 1 }}; if (Test-DevMode) {{ exit 0 }}; Start-Process reg -Verb RunAs -Wait -WindowStyle Hidden -ArgumentList 'add', ($key -replace ':', ''), '/v', $name, '/t', 'REG_DWORD', '/d', '1', '/f'; if (-not (Test-DevMode)) {{ throw 'Developer Mode is still off' }}'''] },
+]
+
 [[command]]
 group       = "system"
 name        = "swaync-test"

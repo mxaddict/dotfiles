@@ -14,7 +14,7 @@ include = [
 [meta]
 name           = "mxaddict dotfiles"
 description    = "Arch-first dotfiles for Hyprland, Neovim, Fish, Tmux, and friends."
-krypt_min      = "0.4.1"
+krypt_min      = "0.4.2"
 notify_backend = "auto"
 
 # ---------------------------------------------------------------------------
@@ -117,8 +117,24 @@ prompt  = "Keyboard layout (e.g. us, gb, de)"
 default = "us"
 
 # ---------------------------------------------------------------------------
-# [[hook]] — post-update lifecycle hooks
+# [[hook]] — post-setup and post-update lifecycle hooks
 # ---------------------------------------------------------------------------
+
+# Developer Mode (see `krypt system devmode` in .krypt/commands.toml): on a
+# fresh machine from `krypt setup`, and on machines set up before it existed
+# from `krypt update`, where a declined prompt must not stop the update.
+[[hook]]
+name = "developer-mode"
+when = "post-setup"
+if   = "platform:windows"
+run  = ["krypt", "system", "devmode"]
+
+[[hook]]
+name           = "developer-mode"
+when           = "post-update"
+if             = "platform:windows"
+run            = ["krypt", "system", "devmode"]
+ignore_failure = true
 
 [[hook]]
 name           = "ensure-user-dirs"

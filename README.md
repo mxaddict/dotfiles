@@ -67,13 +67,14 @@ user (no admin): `irm get.scoop.sh | iex`. `krypt deps` installs every Windows
 package through it, per-user under `~\scoop`, so nothing asks for elevation.
 
 The `.gitconfig` sets `core.symlinks = true`, which on Windows needs Developer
-Mode (Settings → System → For developers) so that git can create symlinks;
-without it, cloning or checking out a repo that contains one fails with
-`unable to create symlink ... Permission denied`. Git for Windows also writes
+Mode so that git can create symlinks; without it, cloning or checking out a repo
+that contains one fails with `unable to create symlink ... Permission denied`.
+`krypt setup` and `krypt update` turn it on (`krypt system devmode`, one UAC
+prompt, only when it is off). Git for Windows also writes
 `core.symlinks = false` into the `.git/config` of each repo it clones where
 symlinks were not allowed, which overrides the global setting there.
 
-Verify: `krypt --version` should report `0.4.1` or newer, the `krypt_min` in
+Verify: `krypt --version` should report `0.4.2` or newer, the `krypt_min` in
 `.krypt.toml`.
 
 ### 2. Clone + link
@@ -105,6 +106,8 @@ Hooks declared in `.krypt.toml` (`[[hook]] when = "post-update"`) cover:
 - bat cache rebuild, tldr cache refresh
 - dconf load from `dconf/user.ini`
 - `hyprctl reload` (gated on hyprland running)
+- Windows Developer Mode (`krypt system devmode`), which `krypt setup` also runs
+  as a `post-setup` hook
 
 ### Forking
 
