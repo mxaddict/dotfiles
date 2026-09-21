@@ -3,6 +3,20 @@
 # settings (MANGOHUD, GPG_TTY, PARU_PAGER, MANPAGER, batcat) have no Windows
 # counterpart and are left out.
 
+# Alacritty starts the shell in the folder it was itself started in. Launched
+# from a shortcut, that is System32 (a shortcut with no "Start in", like the
+# Alacritty installer's) or Alacritty's own install folder (scoop's shortcut),
+# and never where a new terminal is wanted, so start those at home instead.
+# `alacritty --working-directory <dir>` and a terminal opened in any other
+# folder keep their folder. Alacritty's own `working_directory` setting would
+# need an absolute path per machine: it does not expand `~`.
+$launcher = (Get-Process -Id $PID).Parent
+if ($launcher.ProcessName -eq 'alacritty' -and
+    $PWD.Path -in @([Environment]::SystemDirectory, (Split-Path $launcher.Path))) {
+    Set-Location ~
+}
+Remove-Variable launcher
+
 # uutils coreutils: make every coreutils command win over PowerShell's
 # built-in aliases/functions (ls, rm, cp, mkdir, ...) and over same-named
 # System32 programs (sort.exe, more.com, timeout.exe, ...).
