@@ -154,6 +154,11 @@ Homebrew/scoop catalogs, with no fix available inside the manifest:
   it (4 spaces instead of 2, content otherwise identical), so `krypt diff`
   reports it drifted and `krypt link` skips it as a conflict after every login.
   Options: commit gh's formatting, or stop tracking a file gh owns.
+- **Claude Code rewrites the deployed `~/.claude/settings.json`.** Changing a
+  setting through `/config` writes to that file, so `krypt diff` reports it
+  drifted and `krypt link` skips it as a conflict until the change is pulled
+  back with `krypt adopt-edits` or the file is replaced. Settings are meant to
+  be changed in `.claude/settings.json` here instead.
 - **`krypt setup` drops most template comments.** Writing `~/.gitconfig.local`
   from `.gitconfig.local.template` kept only the commented-out
   `; signingkey = ...` and `; gpgsign = true` lines; the explanatory comments
