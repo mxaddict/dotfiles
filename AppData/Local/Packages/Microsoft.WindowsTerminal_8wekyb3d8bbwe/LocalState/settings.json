@@ -38,7 +38,7 @@
         {
             "antialiasingMode": "grayscale",
             "bellStyle": "none",
-            "closeOnExit": "graceful",
+            "closeOnExit": "always",
             "colorScheme": "Dark+"
         },
         "list": 
