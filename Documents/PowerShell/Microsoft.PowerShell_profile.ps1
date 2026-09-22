@@ -380,11 +380,6 @@ if ((Test-Command fzf) -and (Get-Module -ListAvailable PSFzf)) {
     Remove-Variable insertSelection
 }
 
-# Load zoxide
-if (Test-Command zoxide) {
-    Invoke-Expression (& { (zoxide init powershell --cmd cd | Out-String) })
-}
-
 # Argument completers the tools print for PowerShell, as fish has for most
 # commands. Printing them takes some tools over a second, so each is cached and
 # printed again only when the tool's exe is newer than its cache. Dot-sourced
@@ -423,4 +418,11 @@ if (Test-Command starship) {
 # FNM setup env
 if (Test-Command fnm) {
     fnm env --shell powershell | Out-String | Invoke-Expression
+}
+
+# Load zoxide. It records directories from a hook in the `prompt` function, so
+# it must come after anything that redefines `prompt` (starship does), or the
+# hook is dropped and the database never fills.
+if (Test-Command zoxide) {
+    Invoke-Expression (& { (zoxide init powershell --cmd cd | Out-String) })
 }
