@@ -26,7 +26,7 @@ genuinely shell-shaped.
 - **CLI bootstrap**: `git`, `bash`, `curl`. Everything else `krypt setup`
   installs.
 
-### Runtime assets (installed via `krypt update`'s deps step)
+### Runtime assets (installed via `krypt deps`)
 
 - **Font**: [Hack Nerd Font](https://www.nerdfonts.com/) (`ttf-hack-nerd`).
 - **Cursor**: `Breeze_Light` (`breeze`).
@@ -94,7 +94,7 @@ deploys only the entries whose `platform` matches this OS.
 ### 3. Daily updates
 
 ```sh
-krypt update          # pull repo, install missing deps, run post-update hooks
+krypt update          # pull repo, relink, run post-update hooks
 krypt update --dry-run         # show plan, change nothing
 krypt update --skip-hooks      # skip nvim/tmux/dconf/bat/etc. plugin syncs
 ```
@@ -108,6 +108,9 @@ Hooks declared in `.krypt.toml` (`[[hook]] when = "post-update"`) cover:
 - `hyprctl reload` (gated on hyprland running)
 - Windows Developer Mode (`krypt system devmode`), which `krypt setup` also runs
   as a `post-setup` hook
+- the kryptic-sh tools (`krypt deps --group kryptic`: hjkl, hrdr, gpur, ...),
+  also a `post-setup` hook; every other deps group is installed only by running
+  `krypt deps`
 
 ### Forking
 

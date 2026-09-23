@@ -144,18 +144,19 @@ scoop = ["duf", "extras/firefox", "extras/thunderbird"]
 [[deps]]
 group = "kryptic"
 pacman = [
-    "buffr-bin", "gemini-cli", "hjkl-bin", "hodl-bin", "hrdr-bin", "inbx-bin",
-    "krypt-bin", "pikr-bin", "sqeel-bin",
+    "buffr-bin", "gemini-cli", "gpur-bin", "hjkl-bin", "hodl-bin", "hrdr-bin",
+    "inbx-bin", "krypt-bin", "pikr-bin", "sqeel-bin",
 ]
-apt = ["cargo:hjkl", "cargo:hrdr", "cargo:sqeel"]
-dnf = ["cargo:hjkl", "cargo:hrdr", "cargo:sqeel"]
+apt = ["cargo:gpur", "cargo:hjkl", "cargo:hrdr", "cargo:sqeel"]
+dnf = ["cargo:gpur", "cargo:hjkl", "cargo:hrdr", "cargo:sqeel"]
 brew = [
-    "gemini-cli", "kryptic-sh/tap/buffr", "kryptic-sh/tap/hjkl",
-    "kryptic-sh/tap/hodl", "kryptic-sh/tap/hrdr", "kryptic-sh/tap/inbx",
-    "kryptic-sh/tap/krypt", "kryptic-sh/tap/pikr", "kryptic-sh/tap/sqeel",
+    "gemini-cli", "kryptic-sh/tap/buffr", "kryptic-sh/tap/gpur",
+    "kryptic-sh/tap/hjkl", "kryptic-sh/tap/hodl", "kryptic-sh/tap/hrdr",
+    "kryptic-sh/tap/inbx", "kryptic-sh/tap/krypt", "kryptic-sh/tap/pikr",
+    "kryptic-sh/tap/sqeel",
 ]
 scoop = [
-    "kryptic-sh/buffr", "kryptic-sh/hrdr", "kryptic-sh/krypt", "kryptic-sh/pikr",
-    "cargo:hjkl", "cargo:sqeel",
+    "kryptic-sh/buffr", "kryptic-sh/gpur", "kryptic-sh/hrdr", "kryptic-sh/krypt",
+    "kryptic-sh/pikr", "cargo:hjkl", "cargo:sqeel",
 ]
 scoop_buckets = { kryptic-sh = "https://github.com/kryptic-sh/scoop-bucket" }

@@ -217,6 +217,22 @@ if             = "command_exists:rustup"
 run            = ["rustup", "default", "stable"]
 ignore_failure = true
 
+# Install the kryptic-sh tools (the kryptic group in .krypt/deps.toml), so a new
+# one lands on every machine with its next `krypt setup` or `krypt update`. The
+# other groups stay a manual `krypt deps`. Declared after rustup-default-stable,
+# which the group's `cargo:` entries need; a failed install does not stop an
+# update.
+[[hook]]
+name = "kryptic-deps"
+when = "post-setup"
+run  = ["krypt", "deps", "--group", "kryptic"]
+
+[[hook]]
+name           = "kryptic-deps"
+when           = "post-update"
+run            = ["krypt", "deps", "--group", "kryptic"]
+ignore_failure = true
+
 # Install cargo tools used by the dotfiles workflow (quoty, fnm, rtk).
 [[hook]]
 name           = "cargo-install-quoty"

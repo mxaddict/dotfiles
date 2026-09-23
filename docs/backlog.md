@@ -137,9 +137,13 @@ Homebrew/scoop catalogs, with no fix available inside the manifest:
   `cargo:hjkl` and friends (and `cargo:starship` and `cargo:dysk` on dnf) build
   with `cargo`, which Debian's and Fedora's `rustup` packages leave without a
   default toolchain until `rustup default stable` runs — and the
-  `rustup-default-stable` hook only runs on `krypt update`, after deps. On
-  Windows, krypt 0.4.1 picks up the `PATH` a scoop `rustup` install adds, so the
-  `cargo:` entries no longer need a second run; not yet seen on a fresh machine.
+  `rustup-default-stable` hook only runs on `krypt update`, never on a manual
+  `krypt deps`. So on a fresh apt or dnf machine the `kryptic-deps` post-setup
+  hook (`cargo:gpur`, `cargo:hjkl`, ...) fails until the first `krypt update`,
+  whose `kryptic-deps` hook runs after `rustup-default-stable`. Unverified: no
+  apt/dnf machine has run either hook yet. On Windows, krypt 0.4.1 picks up the
+  `PATH` a scoop `rustup` install adds, so the `cargo:` entries no longer need a
+  second run; not yet seen on a fresh machine.
 - **The kryptic-sh Homebrew tap must be trusted**
   (`brew trust --tap kryptic-sh/tap`) before Homebrew installs anything from it,
   including krypt itself. krypt does not trust taps on its own; the README and
