@@ -38,6 +38,13 @@ git log @{u}..HEAD --format=%B | grep -inE 'claude-session|claude\.ai/code|co-au
 Any hit is a stop: amend or reword the local commits first. The message ends
 with its last real paragraph — no trailer block at all.
 
+**The rule covers only work we make, not other people's.** Commits, PRs,
+comments and releases written by someone else — a contributor's PR, an upstream
+merge, a cherry-pick or rebase of another author's commits — keep their
+attribution exactly as they wrote it. Never strip, reword or rewrite it: that is
+their record, not ours. The check above can match such commits; a hit in a
+commit whose author is not the user is not a stop.
+
 ## Commit Messages
 
 Use `git commit -m "$(quoty)"` only in the `.files` repo. All other repos:
