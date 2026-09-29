@@ -1,5 +1,37 @@
 # Backlog
 
+## Agent CLIs (`krypt system agents`)
+
+- **The Linux/macOS variant has never run.** Only the Windows one was run (first
+  Windows machine, 2026-09-29: claude 2.1.284, codex 0.158.0, opencode 1.18.33,
+  all resolving to `~/.local/bin`). CI runs no `[[command]]` or hook, so the
+  bash steps, including krypt's `{{ }}` unescaping in the opencode one, are
+  unverified.
+- **Package-manager opencode stays installed on existing machines.** opencode
+  left the `dev` group (pacman, brew, scoop), but nothing uninstalls it, and
+  opencode's installer skips when the `opencode` on PATH is already the latest,
+  which makes `krypt system agents` fail with a message naming it. Remove it by
+  hand (`sudo pacman -Rns opencode`, `brew uninstall opencode`); scoop's was
+  removed on the first Windows machine.
+- **opencode cannot update itself on Windows.** Its self-update pipes
+  `opencode.ai/install` into bare `bash`, which on Windows is the WSL launcher:
+  with WSL installed, the install lands inside WSL. `krypt update` keeps it
+  current instead (the Windows variant runs opencode's installer on every call).
+  Option: put Git's `bin` ahead of `WindowsApps` on `PATH` in the PowerShell
+  profile, which makes `bash` there mean Git Bash instead of WSL. Needs a
+  decision.
+- **codex's Windows installer adds its own bin dir to the user `PATH`**, ahead
+  of `~/.local/bin`, so outside the PowerShell profile `codex` resolves there
+  directly. Same binary as the shim, so harmless.
+- **Declined: `CODEX_INSTALL_DIR=~/.local/bin` on Windows.** The installer turns
+  its install dir into a junction to the current release, which would replace
+  `~/.local/bin` and everything in it.
+- **Shims, not symlinks, on Windows.** Windows gives a symlinked exe the link's
+  path as its own: pwsh started through one looked for its DLLs beside the link
+  and failed. A symlinked codex still ran its sandbox in a test, but the shim
+  makes that independent of how codex finds `codex-resources` and `codex-path`.
+  The shims use scoop's `kiennq` shim.exe, so they need scoop.
+
 ## Windows machine state
 
 - **`krypt diff` still lists a removed link.** Dropping the Windows mpv
@@ -125,14 +157,14 @@
 Gaps `krypt deps --check` confirmed against the distro repositories and
 Homebrew/scoop catalogs, with no fix available inside the manifest:
 
-- **Not packaged for apt or dnf, and not a crate**: `opencode` (npm
-  `opencode-ai`), `gemini-cli` (npm), `doctl` on apt, `lazygit` on dnf, and the
-  kryptic-sh tools without a crates.io release (`pikr`, `buffr`, `inbx`, `hodl`,
-  `krypt`). On Windows the kryptic-sh scoop bucket has pikr, buffr, hrdr and
-  krypt; `inbx`, `hodl` and `gemini-cli` are missing there. pikr and buffr
-  publish `.deb`/`.rpm` release assets, which neither `krypt deps` nor apt/dnf
-  can install by name. Options: a kryptic-sh apt/rpm repository, an npm source
-  in krypt, or leaving them to the Arch/Homebrew lists.
+- **Not packaged for apt or dnf, and not a crate**: `gemini-cli` (npm), `doctl`
+  on apt, `lazygit` on dnf, and the kryptic-sh tools without a crates.io release
+  (`pikr`, `buffr`, `inbx`, `hodl`, `krypt`). On Windows the kryptic-sh scoop
+  bucket has pikr, buffr, hrdr and krypt; `inbx`, `hodl` and `gemini-cli` are
+  missing there. pikr and buffr publish `.deb`/`.rpm` release assets, which
+  neither `krypt deps` nor apt/dnf can install by name. Options: a kryptic-sh
+  apt/rpm repository, an npm source in krypt, or leaving them to the
+  Arch/Homebrew lists.
 - **`cargo:` entries need a default Rust toolchain.** On apt, dnf and scoop,
   `cargo:hjkl` and friends (and `cargo:starship` and `cargo:dysk` on dnf) build
   with `cargo`, which Debian's and Fedora's `rustup` packages leave without a

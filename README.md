@@ -111,6 +111,9 @@ Hooks declared in `.krypt.toml` (`[[hook]] when = "post-update"`) cover:
 - the kryptic-sh tools (`krypt deps --group kryptic`: hjkl, hrdr, gpur, ...),
   also a `post-setup` hook; every other deps group is installed only by running
   `krypt deps`
+- the claude, codex and opencode CLIs (`krypt system agents`), also a
+  `post-setup` hook: each is installed by its own script into `~/.local/bin` (or
+  linked there) and then updates itself
 
 ### Forking
 

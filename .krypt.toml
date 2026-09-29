@@ -233,6 +233,20 @@ when           = "post-update"
 run            = ["krypt", "deps", "--group", "kryptic"]
 ignore_failure = true
 
+# The claude, codex and opencode CLIs (`krypt system agents` in
+# .krypt/commands.toml), installed by their own scripts so they update
+# themselves. A failed install does not stop an update.
+[[hook]]
+name = "agent-clis"
+when = "post-setup"
+run  = ["krypt", "system", "agents"]
+
+[[hook]]
+name           = "agent-clis"
+when           = "post-update"
+run            = ["krypt", "system", "agents"]
+ignore_failure = true
+
 # Install cargo tools used by the dotfiles workflow (quoty, fnm, rtk).
 [[hook]]
 name           = "cargo-install-quoty"

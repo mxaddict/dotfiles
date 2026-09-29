@@ -302,6 +302,52 @@ steps = [
     { run = ["pwsh", "-NoProfile", "-Command", '''$ErrorActionPreference = 'Stop'; $key = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock'; $name = 'AllowDevelopmentWithoutDevLicense'; function Test-DevMode {{ (Get-ItemProperty $key -ErrorAction Ignore).$name -eq 1 }}; if (Test-DevMode) {{ exit 0 }}; Start-Process reg -Verb RunAs -Wait -WindowStyle Hidden -ArgumentList 'add', ($key -replace ':', ''), '/v', $name, '/t', 'REG_DWORD', '/d', '1', '/f'; if (-not (Test-DevMode)) {{ throw 'Developer Mode is still off' }}'''] },
 ]
 
+# The claude, codex and opencode CLIs, each from its own install script so it
+# can update itself in userspace, exposed in ~/.local/bin. A CLI already
+# installed is left to its own updater. Run by the agent-clis hooks in
+# .krypt.toml on `krypt setup` and `krypt update`.
+#
+# opencode's installer and self-update always write ~/.opencode/bin, so
+# ~/.local/bin gets a symlink to it; --no-modify-path keeps it out of the
+# krypt-managed fish config. Its installer also skips when the opencode found on
+# PATH is already the latest, which the last check catches. codex puts its own
+# symlink in ~/.local/bin, and only edits a shell profile when that is not on
+# PATH.
+[[command]]
+group       = "system"
+name        = "agents"
+description = "Install the claude, codex and opencode CLIs into ~/.local/bin"
+platform    = ["linux", "macos"]
+steps = [
+    { if = "!file_exists:${LOCAL_BIN}/claude", run = ["bash", "-c", "curl -fsSL https://claude.ai/install.sh | bash"] },
+    { if = "!file_exists:${LOCAL_BIN}/codex", run = ["bash", "-c", "curl -fsSL https://chatgpt.com/codex/install.sh | PATH=\"$HOME/.local/bin:$PATH\" CODEX_NON_INTERACTIVE=1 sh"] },
+    { if = "!file_exists:${HOME}/.opencode/bin/opencode", run = ["bash", "-c", "curl -fsSL https://opencode.ai/install | bash -s -- --no-modify-path; test -x \"$HOME/.opencode/bin/opencode\" || {{ echo \"opencode is not in ~/.opencode/bin: its installer skips when $(command -v opencode) is already the latest; remove that one\" >&2; exit 1; }}"] },
+    { run = ["ln", "-sfn", "${HOME}/.opencode/bin/opencode", "${LOCAL_BIN}/opencode"] },
+]
+
+# Windows: claude installs ~/.local/bin/claude.exe itself. codex's installer
+# makes its bin dir a junction to the current release, so it must keep its own
+# dir, and opencode's is ~/.opencode/bin as above. ~/.local/bin gets a scoop
+# shim for each rather than a symlink: a shim starts the real exe at its real
+# path, which codex needs to find the codex-resources and codex-path dirs beside
+# its release (checked on Windows 11 with codex 0.158.0).
+#
+# opencode's installer is a bash script; `bash` on PATH is the WSL launcher, so
+# it runs under Git's bash. opencode's self-update runs bare `bash` too, and so
+# never reaches this install, which is why the installer runs on every call
+# here: it exits early when the installed version is the latest.
+[[command]]
+group       = "system"
+name        = "agents"
+description = "Install the claude, codex and opencode CLIs into ~/.local/bin"
+platform    = "windows"
+steps = [
+    { if = "!file_exists:${LOCAL_BIN}/claude.exe", run = ["pwsh", "-NoProfile", "-Command", "irm https://claude.ai/install.ps1 | iex"] },
+    { if = "!file_exists:${WIN_LOCALAPPDATA}/Programs/OpenAI/Codex/bin/codex.exe", run = ["pwsh", "-NoProfile", "-Command", "$env:CODEX_NON_INTERACTIVE = '1'; irm https://chatgpt.com/codex/install.ps1 | iex"] },
+    { run = ["pwsh", "-NoProfile", "-Command", '''$ErrorActionPreference = 'Stop'; $bash = Join-Path (git --exec-path) '..\..\..\bin\bash.exe'; if (-not (Test-Path $bash)) {{ throw "Git's bash is not at $bash" }}; & $bash -c 'curl -fsSL https://opencode.ai/install | bash -s -- --no-modify-path'; if ($LASTEXITCODE) {{ exit $LASTEXITCODE }}'''] },
+    { run = ["pwsh", "-NoProfile", "-Command", '''$ErrorActionPreference = 'Stop'; $shim = Join-Path (scoop prefix scoop) 'supporting\shims\kiennq\shim.exe'; $bin = Join-Path $HOME '.local\bin'; $targets = [ordered]@{{ codex = Join-Path $env:LOCALAPPDATA 'Programs\OpenAI\Codex\bin\codex.exe'; opencode = Join-Path $HOME '.opencode\bin\opencode.exe' }}; foreach ($name in $targets.Keys) {{ $target = $targets[$name]; if (-not (Test-Path $target)) {{ throw "$name is not at $($target): its installer skips when the $name on PATH is already the latest; remove that one" }}; $exe = Join-Path $bin "$name.exe"; if (-not (Test-Path $exe)) {{ Copy-Item $shim $exe }}; Set-Content (Join-Path $bin "$name.shim") "path = `"$target`"" }}'''] },
+]
+
 [[command]]
 group       = "system"
 name        = "swaync-test"

@@ -43,11 +43,13 @@ scoop = [
     "uutils-coreutils", "zoxide",
 ]
 
+# The claude, codex and opencode CLIs are not packages here: `krypt system
+# agents` installs them with their own scripts, so they update themselves.
 [[deps]]
 group = "dev"
 pacman = [
     "bear", "doctl", "github-cli", "glab", "lazygit", "nodejs", "npm",
-    "opencode", "python-tldextract", "rustup",
+    "python-tldextract", "rustup",
 ]
 apt = [
     "bear", "gh", "glab", "lazygit", "libssl-dev", "nodejs", "npm", "pkg-config",
@@ -57,10 +59,10 @@ dnf = [
     "bear", "doctl", "gh", "glab", "nodejs", "npm", "python3", "rustup",
 ]
 brew = [
-    "bear", "doctl", "gh", "glab", "lazygit", "node", "opencode", "rustup",
+    "bear", "doctl", "gh", "glab", "lazygit", "node", "rustup",
 ]
 scoop = [
-    "doctl", "gh", "glab", "lazygit", "nodejs-lts", "opencode", "rustup",
+    "doctl", "gh", "glab", "lazygit", "nodejs-lts", "rustup",
 ]
 
 [[deps]]
