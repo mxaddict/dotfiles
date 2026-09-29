@@ -13,6 +13,7 @@ fish_add_path -g ~/.config/composer/vendor/bin
 fish_add_path -g ~/.dotnet/tools
 fish_add_path -g ~/.local/bin
 fish_add_path -g ~/.local/share/nvim/mason/bin
+fish_add_path -g ~/.opencode/bin
 
 # Set default editor to vim
 set -gx EDITOR hjkl

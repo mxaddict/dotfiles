@@ -112,8 +112,9 @@ Hooks declared in `.krypt.toml` (`[[hook]] when = "post-update"`) cover:
   also a `post-setup` hook; every other deps group is installed only by running
   `krypt deps`
 - the claude, codex and opencode CLIs (`krypt system agents`), also a
-  `post-setup` hook: each is installed by its own script into `~/.local/bin` (or
-  linked there) and then updates itself
+  `post-setup` hook: each is installed by its own script and then updates
+  itself, claude and codex in `~/.local/bin` and opencode in `~/.opencode/bin`,
+  which the fish and PowerShell configs put on `PATH`
 
 ### Forking
 

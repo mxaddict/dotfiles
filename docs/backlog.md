@@ -2,11 +2,21 @@
 
 ## Agent CLIs (`krypt system agents`)
 
-- **The Linux/macOS variant has never run.** Only the Windows one was run (first
-  Windows machine, 2026-09-29: claude 2.1.284, codex 0.158.0, opencode 1.18.33,
-  all resolving to `~/.local/bin`). CI runs no `[[command]]` or hook, so the
-  bash steps, including krypt's `{{ }}` unescaping in the opencode one, are
-  unverified.
+- **CI covers the install, not the hooks or the self-updates.** The `agents`
+  workflow (`.github/scripts/test-agents.ps1`) runs `krypt system agents` twice
+  on Ubuntu, macOS and Windows runners and checks each CLI's path and
+  `--version`, codex's sandbox through the Windows shim, and that the fish
+  config or PowerShell profile resolves each first on `PATH`. Not covered: the
+  `agent-clis` hooks inside a real `krypt setup` or `krypt update`, and each CLI
+  updating itself afterwards.
+- **opencode's README and its served installer disagree.** The README says the
+  install script honours `OPENCODE_INSTALL_DIR`, `XDG_BIN_DIR` and `~/bin`; the
+  script served at `opencode.ai/install` (checked 2026-09-29) hardcodes
+  `~/.opencode/bin`, and its self-update re-runs that script. If the script
+  starts honouring them, installs move and the `!file_exists` step and the
+  `PATH` lines miss them; the `agents` job would fail on that. opencode's docs
+  give the script for macOS and Linux only (choco, scoop, npm or mise on
+  Windows), but it handles Git Bash on Windows (`MINGW*` → `windows-x64`).
 - **Package-manager opencode stays installed on existing machines.** opencode
   left the `dev` group (pacman, brew, scoop), but nothing uninstalls it, and
   opencode's installer skips when the `opencode` on PATH is already the latest,

@@ -1,0 +1,15 @@
+name: Install scoop
+description: >
+  Install scoop on a Windows runner, which does not ship it, and put its shims
+  on PATH for the steps after.
+
+runs:
+  using: composite
+  steps:
+    # The runner's user is an administrator, which scoop's installer refuses
+    # without -RunAsAdmin.
+    - name: Install scoop
+      shell: pwsh
+      run: |
+        Invoke-Expression "& {$(Invoke-RestMethod https://get.scoop.sh)} -RunAsAdmin"
+        Join-Path $env:USERPROFILE 'scoop\shims' >> $env:GITHUB_PATH

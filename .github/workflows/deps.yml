@@ -74,15 +74,9 @@ jobs:
         with:
           cache-key: ${{ matrix.name }}
 
-      # The Windows groups install through scoop, which the runner does not
-      # ship. The runner's user is an administrator, which scoop's installer
-      # refuses without -RunAsAdmin.
-      - name: Install scoop
+      # The Windows groups install through scoop.
+      - uses: ./.github/actions/scoop
         if: matrix.name == 'windows'
-        shell: pwsh
-        run: |
-          Invoke-Expression "& {$(Invoke-RestMethod https://get.scoop.sh)} -RunAsAdmin"
-          Join-Path $env:USERPROFILE 'scoop\shims' >> $env:GITHUB_PATH
 
       # Homebrew skips formulae from untrusted taps; trusting the kryptic-sh
       # tap is the same one-time step the README gives for a Mac.

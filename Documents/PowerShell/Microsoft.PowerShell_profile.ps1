@@ -78,6 +78,7 @@ foreach ($dir in @(
         "$HOME/.dotnet/tools"
         "$HOME/.local/bin"
         "$env:LOCALAPPDATA/nvim-data/mason/bin"
+        "$HOME/.opencode/bin"
     )) {
     if (-not (Test-Path $dir)) { continue }
     $full = (Resolve-Path $dir).ProviderPath

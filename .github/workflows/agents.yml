@@ -1,0 +1,54 @@
+name: agents
+
+# Installs the claude, codex and opencode CLIs with `krypt system agents` and
+# smoke-tests each. Their install scripts change upstream independent of any
+# change here, so this runs weekly as well as on changes.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '41 6 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  agents:
+    name: agents (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          cache: false
+          rustflags: ''
+
+      - uses: ./.github/actions/krypt
+
+      # The codex shim in ~/.local/bin is a copy of scoop's shim.exe.
+      - uses: ./.github/actions/scoop
+        if: runner.os == 'Windows'
+
+      # The fish config is what puts the CLIs on PATH on Linux and macOS.
+      - name: Install fish
+        if: runner.os == 'Linux'
+        run: sudo apt-get install -y --no-install-recommends fish
+
+      - name: Install fish
+        if: runner.os == 'macOS'
+        run: brew install fish
+
+      - name: Install and smoke-test the agent CLIs
+        run: ./.github/scripts/test-agents.ps1
