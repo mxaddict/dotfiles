@@ -61,17 +61,32 @@ try {
         if ($LASTEXITCODE -ne 0 -or $sandbox -notmatch 'sandbox-ok') {
             $failures.Add("codex: sandbox through the shim exited $LASTEXITCODE")
         }
+    }
 
+    # Take every dir the CLIs live in off PATH (the runner's PATH already has
+    # ~/.local/bin), so only the shell config can put them back. Each lookup
+    # prints one line, empty when the name is not found, to keep the order.
+    $sep = [IO.Path]::PathSeparator
+    $cliDirs = @($expected.Values | ForEach-Object { Split-Path -Parent $_ })
+    if ($os -eq 'windows') { $cliDirs += Join-Path $env:LOCALAPPDATA 'Programs\OpenAI\Codex\bin' }
+    $cliDirs = $cliDirs | ForEach-Object { [IO.Path]::GetFullPath($_).TrimEnd('\', '/') }
+    $env:PATH = ($env:PATH -split $sep | Where-Object {
+            $_ -and [IO.Path]::GetFullPath($_).TrimEnd('\', '/') -notin $cliDirs
+        }) -join $sep
+
+    if ($os -eq 'windows') {
         $resolved = pwsh -NoProfile -NonInteractive -Command {
             param($ProfilePath, $Names)
             . $ProfilePath
             foreach ($name in $Names) {
-                (Get-Command $name -CommandType Application -TotalCount 1).Source
+                "$((Get-Command $name -CommandType Application -TotalCount 1 -ErrorAction Ignore).Source)"
             }
         } -args (Join-Path $repo 'Documents/PowerShell/Microsoft.PowerShell_profile.ps1'), @($expected.Keys)
     } else {
+        # Not --no-config: that also skips fish's own startup, which is what
+        # turns fish_add_path's fish_user_paths into PATH entries.
         $names = $expected.Keys -join ' '
-        $resolved = fish --no-config -c "source '$repo/.config/fish/config.fish'; for name in $names; command -s `$name; end"
+        $resolved = fish -c "source '$repo/.config/fish/config.fish'; for name in $names; echo (command -s `$name); end"
     }
     $resolved = @($resolved)
     $i = 0
