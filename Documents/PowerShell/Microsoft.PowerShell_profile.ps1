@@ -73,7 +73,10 @@ function Test-Command([string]$Name) {
 # Set some stuff for our path; like fish_add_path, only directories that exist
 foreach ($dir in @(
         "$HOME/.foundry/bin"
-        "$HOME/.cargo/bin"
+        # Where `cargo install` puts binaries: CARGO_INSTALL_ROOT, else
+        # CARGO_HOME (scoop's rustup sets it), else ~/.cargo. An `install.root`
+        # in cargo's own config is not read here.
+        "$($env:CARGO_INSTALL_ROOT ?? $env:CARGO_HOME ?? "$HOME/.cargo")/bin"
         "$env:APPDATA/Composer/vendor/bin"
         "$HOME/.dotnet/tools"
         "$HOME/.local/bin"
