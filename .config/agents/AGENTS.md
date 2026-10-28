@@ -682,3 +682,33 @@ Whether one or several are running:
 - **A sub-agent's report is a claim, not evidence.** Read the diff and re-run
   the verification yourself — a task whose own checks failed can still report
   success, and reading its report is not checking its work.
+
+## Performance measurements
+
+**Other agents share the machine, so coordinate a quiet window before any perf
+or profiling run.** A timing taken while another session runs a test suite, a
+fuzzer, a bench or a release build measures that session as much as yours: one
+GPU device creation went from 0.3 s to 14.6 s that way, and a startup profile
+taken at load average 15 is not one taken at 2. Nothing in the numbers says
+which they were.
+
+Before taking numbers:
+
+1. **Build first.** Your own release build is heavy work too; have every binary
+   you will compare on disk before the window opens.
+2. **Ask every local session to pause.** `ListAgents`, then message each
+   interactive session on this machine — Remote Control rows on other machines
+   do not share its CPU — asking it to pause builds, test suites, fuzzers,
+   benches and GPU work for a stated window (about 20 minutes), to reply
+   "paused", and to wait for your "done". Say who asked for the measurement.
+3. **Confirm it, don't trust it.** A reply is a claim. Sample per-process CPU
+   over a few seconds (`top -b -n 2 -d 3`) and read what is actually running;
+   desktop apps you cannot stop are fine to note and measure around.
+4. **Measure inside the window**, interleaving the builds you compare (A, B, A,
+   B, …) so drift lands on both, and record the load average beside the numbers.
+5. **Send "done" to every session you paused**, as soon as you finish — also
+   when you abort. A session left waiting on a "done" that never comes is work
+   stalled for nothing.
+
+A number taken without a quiet window is labelled with its load wherever it is
+written, or retaken in one; never compare figures from different windows.
