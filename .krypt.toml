@@ -14,11 +14,14 @@ include = [
 [meta]
 name           = "mxaddict dotfiles"
 description    = "Arch-first dotfiles for Hyprland, Neovim, Fish, tmxr, and friends."
-krypt_min      = "0.4.2"
+krypt_min      = "0.5.0"
 notify_backend = "auto"
 
 # ---------------------------------------------------------------------------
 # [[template]] — user-local files seeded from templates; never committed.
+# Once edited on a machine, krypt keeps them: `link` counts them as "templates
+# kept" (even with --force) and `diff` as "edited", neither as a problem.
+# Delete one to seed it again.
 # ---------------------------------------------------------------------------
 
 [[template]]
