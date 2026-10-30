@@ -540,6 +540,18 @@ shipped. Guessing gets a version that never existed, one with a known advisory,
 or one whose API is not the one you are coding against. `cargo add`,
 `npm install`, `uv add`, `go get`, `composer require` — every ecosystem has one.
 
+**That includes scaffolding a new project.** Never copy a `[dependencies]`
+block, a `package.json` dependency list or version pins from another repo, and
+never seed `Cargo.lock` / `package-lock.json` from another repo's lockfile: that
+is hand-editing too, with someone else's stale snapshot in place of your memory.
+Add each dependency with the manager — `cargo add` (with `--features`,
+`--no-default-features`, `--dev`, `--path` as needed), `npm install` /
+`npm install --save-dev` (or the pnpm/yarn equivalent the project uses),
+`uv add`, `go get`, `composer require` — let it resolve the latest stable
+release and write the lockfile itself, then commit that lockfile. Another repo
+is a fine reference for WHICH packages and features to add; its versions are
+not.
+
 **Taking on a NEW dependency is the user's decision, not yours.** Solve it with
 what the project already depends on, or the standard library, first. If the task
 genuinely needs something new, say which and why, and ask. Upgrading or removing
@@ -645,26 +657,59 @@ Keeping it honest:
 
 Run `prettier --write docs/backlog.md`, per the markdown rule above.
 
+## Planning
+
+Every project keeps its plans under `docs/plan/`, next to `docs/backlog.md`. The
+two split the work: **the plan says what we intend to build and in what order;
+the backlog says what was raised and not done.**
+
+- **`docs/plan/00-index.md` is the list of plans:** one line per phase, linking
+  to its file, with its status.
+- **Each phase gets its own file**, `docs/plan/NN-name-of-phase.md`, numbered in
+  build order (`01-…`, `02-…`) with a kebab-case name.
+
+**A new project starts with both.** `docs/backlog.md`, `docs/plan/00-index.md`
+and the first phase files are part of the initial scaffold, not something added
+once the work gets messy.
+
+**When a phase ships, close it out:** move whatever it left undone to the
+backlog, delete the phase file, and mark its index line done without the link.
+Same hygiene as the backlog — a plan directory full of finished phases is one
+nobody reads, and `git log` keeps the history.
+
+Run `prettier --write` on every file under `docs/plan/`, per the markdown rule
+above.
+
 ## Agents
 
-**At most 2 read-only sub-agents and 1 write-capable at a time** — hrdr's own
-defaults (`max_readonly_subagents` / `max_write_subagents`, raisable by config,
-env or flag). Raising either is a deliberate call, never a default.
+**At most 1 read-only sub-agent and 1 write-capable sub-agent per project at a
+time** — per repo the session is touching, not per session. A session working in
+two repos may run up to four: one reader and one writer in each. Raising either
+is a deliberate call, never a default.
 
-The two caps are different numbers because they exist for different reasons:
+**A write agent's scope is its own repo.** That keeps write sets disjoint across
+repos by construction, and within one repo there is still only one writer, so no
+two writers ever share a working tree.
 
-- **Writes are capped at one because they race.** Every sub-agent shares the
-  parent's working tree — no isolation, no hand-back step, every edit
+hrdr's `max_readonly_subagents` / `max_write_subagents` are session-wide totals:
+hrdr has no notion of a project, so it cannot enforce this rule. Treat them as
+an outer ceiling and keep the per-repo count yourself. A multi-repo session that
+needs the full allowance raises the totals for that run (config, env or flag) to
+one of each per repo, and still holds each repo to its own pair.
+
+The two caps exist for different reasons:
+
+- **Writes are capped at one per repo because they race.** Every sub-agent
+  shares the parent's working tree — no isolation, no hand-back step, every edit
   immediately live for the others — so two writers are two processes editing the
   same files with nothing between them, and one's formatter run or
   `git checkout` undoes the other's work mid-flight. The cap is the only thing
   that actually prevents that; a brief saying "touch only these paths" is a
   convention, and a convention is not a lock.
-- **Reads are capped at two for review burden**, not racing — they change
-  nothing and cannot collide. But each holds a model context, spends tokens, and
-  lands a report you have to read and verify. Five at once is a fan-out too wide
-  to review carefully, which is what makes a wide read fan-out worse than a
-  narrow one.
+- **Reads are capped at one per repo for review burden**, not racing — they
+  change nothing and cannot collide. But each holds a model context, spends
+  tokens, and lands a report you have to read and verify. A wide fan-out is one
+  too wide to review carefully, which is what makes it worse than a narrow one.
 
 Whether one or several are running:
 
