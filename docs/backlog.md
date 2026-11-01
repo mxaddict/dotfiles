@@ -268,7 +268,10 @@ An audit of the Arch machine removed every orphan `pacman -Qtd` reported (59
 packages, ~940 MiB) after checking that no installed ELF file under `/usr/bin`,
 `/usr/lib`, `/usr/lib32`, `/usr/libexec` or `/opt` names any of their sonames.
 `.config/paru/paru.conf` now enables `RemoveMake` and `CleanAfter`, which was
-the cause of most of them. What the audit raised and did not settle:
+the cause of most of them. That file replaces `/etc/paru.conf` instead of
+extending it, so it `Include`s the system config first; dropping that line
+silently turns off `PgpFetch`, `Devel`, `Provides` and `DevelSuffixes`. What the
+audit raised and did not settle:
 
 - **`sway` and `rofi` are installed but in no deps group.** The machine runs
   Hyprland (the `hyprland` group); `sway` pulls `wlroots0.20`, and `rofi` is
