@@ -262,6 +262,51 @@ Homebrew/scoop catalogs, with no fix available inside the manifest:
   bundle, so no Dock/Finder launch), or another terminal on macOS. The macOS
   entry point in `.config/alacritty/` still deploys for a manual install.
 
+### Arch machine package state (audited 2026-11-01)
+
+An audit of the Arch machine removed every orphan `pacman -Qtd` reported (59
+packages, ~940 MiB) after checking that no installed ELF file under `/usr/bin`,
+`/usr/lib`, `/usr/lib32`, `/usr/libexec` or `/opt` names any of their sonames.
+`.config/paru/paru.conf` now enables `RemoveMake` and `CleanAfter`, which was
+the cause of most of them. What the audit raised and did not settle:
+
+- **`sway` and `rofi` are installed but in no deps group.** The machine runs
+  Hyprland (the `hyprland` group); `sway` pulls `wlroots0.20`, and `rofi` is
+  configured under `.config/rofi/` while the `hyprland` group never names it.
+  Decision: add both to a group, or uninstall them. `sway`'s old `wlroots0.19`
+  was removed in the audit, so nothing depends on the leftover.
+- **`wpebackend-fdo` and `libwpe` exist in no repository and no AUR package any
+  more.** Both are marked foreign; `wpebackend-fdo` is explicitly installed and
+  `libwpe` is its only dependant. No installed binary names
+  `libWPEBackend-fdo-1.0.so`, so nothing uses them, and neither can be
+  reinstalled or upgraded once removed. Probably left from a `webkit2gtk` WPE
+  backend that moved on. Not removed: they were explicit, so the intent behind
+  installing them is unknown.
+- **`paru-debug` 2.1.0 is a stale debug package** from a local `paru` build;
+  `paru` itself is 2.2.0, and no other `-debug` package is installed. Removable
+  with no effect on `paru`.
+- **`breeze` (38.79 MiB) is declared in the `apps` group, but only its
+  `breeze-cursors` dependency is in use** — the `Breeze_Light` cursor named by
+  `.config/gtk-3.0/settings.ini`, `.config/gtk-4.0/settings.ini`,
+  `.config/dconf/user.ini` and `hyprland.lua`. Its other dependency,
+  `breeze-icons`, is required by `kiconthemes` for `hyprqt6engine`, so it stays
+  either way; nothing reads the Plasma style itself, since
+  `QT_QPA_PLATFORMTHEME` is `hyprqt6engine`. Option: swap `breeze` for
+  `breeze-cursors` in the group. Unverified: whether `hyprqt6engine` falls back
+  to the Breeze style for anything.
+- **`vieb-bin` is declared in the `apps` group but is not installed** on this
+  machine, and `openbox` was installed by hand and removed in the audit (it
+  shipped eleven GTK2 themes under `/usr/share/themes` that nothing selects).
+- **The caches were not cleaned**: `/var/cache/pacman/pkg` holds 5.1 GiB over
+  1638 package files and `~/.cache/paru` 1.2 GiB. `CleanAfter` only covers paru
+  builds from now on; the existing 1.2 GiB and the pacman cache need `paru -Sc`
+  / `paccache -r` by hand. No retention policy is configured and no `paccache`
+  timer is enabled.
+- **Not reviewed:** the 181 packages `pacman -Qt` lists that are kept only by
+  another package's `optdepends`. They are not orphans and were left alone; no
+  judgement was formed about whether the optional features they serve are
+  wanted.
+
 ## Git
 
 - **A clone made before `.gitattributes` still has CRLF.** `.gitattributes`

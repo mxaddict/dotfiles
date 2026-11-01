@@ -179,6 +179,13 @@ src_glob = ".config/nwg-look/**/*"
 dst = "${XDG_CONFIG}/nwg-look/"
 platform = "linux"
 
+# paru reads ~/.config/paru/paru.conf on top of /etc/paru.conf, which it owns
+# as a package file; keeping our options here leaves that copy alone.
+[[link]]
+src_glob = ".config/paru/**/*"
+dst = "${XDG_CONFIG}/paru/"
+platform = "linux"
+
 [[link]]
 src_glob = ".config/rofi/**/*"
 dst = "${XDG_CONFIG}/rofi/"
