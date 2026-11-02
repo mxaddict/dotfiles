@@ -182,7 +182,7 @@ notification, Wi-Fi, audio and Bluetooth binds and the `krypt menu` commands run
   swaync, which keeps the name, and lyr leaves notifications to it. Removing it
   takes `sudo pacman -Rns swaync`, then `systemctl --user stop swaync` if it is
   running, then restarting lyr so it claims the name. Done on `slowassdell`
-  (2026-10-26).
+  (2026-10-26) and `mxaddict-pc` (2026-11-02).
 - **lyr is off by default on macOS and Windows**, by the owner's choice on
   2026-10-26: the `kryptic` group installs it there (`kryptic-sh/tap/lyr`,
   `kryptic-sh/lyr`), but nothing starts it, since only `hyprland.lua` runs it.
