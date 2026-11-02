@@ -335,7 +335,7 @@ end
 
 # FNM setup env
 if command -v -q fnm
-    fnm env --shell fish | source
+    fnm env --use-on-cd --shell fish | source
 end
 
 # Cap cargo at half the system threads to keep desktop responsive
