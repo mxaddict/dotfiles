@@ -162,6 +162,7 @@ try {
             }
             if ((Get-Command t).Definition.Trim() -ne 'tmxr @args') { throw 't is not the tmxr alias' }
             if ((Get-Command ta).Definition.Trim() -ne 'tmxr attach @args') { throw 'ta is not the tmxr attach alias' }
+            if ((Get-Command tn).Definition.Trim() -ne 'tmxr new @args') { throw 'tn is not the tmxr new alias' }
             if ((Get-PSReadLineOption).EditMode -ne 'Vi') { throw 'vi mode is not enabled' }
             $bound = Get-PSReadLineKeyHandler -Bound
             foreach ($key in @{ Tab = 'MenuComplete'; UpArrow = 'HistorySearchBackward'; RightArrow = 'ForwardChar' }.GetEnumerator()) {

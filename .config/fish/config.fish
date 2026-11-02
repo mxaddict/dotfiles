@@ -212,6 +212,9 @@ end
 function ta
     tmxr attach $argv
 end
+function tn
+    tmxr new $argv
+end
 
 # Add navcoin alias
 function nav
