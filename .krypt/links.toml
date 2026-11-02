@@ -192,11 +192,6 @@ dst = "${XDG_CONFIG}/rofi/"
 platform = "linux"
 
 [[link]]
-src_glob = ".config/swaync/**/*"
-dst = "${XDG_CONFIG}/swaync/"
-platform = "linux"
-
-[[link]]
 src_glob = ".config/tealdeer/**/*"
 dst = "${XDG_CONFIG}/tealdeer/"
 platform = ["linux", "macos"]
@@ -432,8 +427,8 @@ dst = "${LOCAL_BIN}/.swap"
 platform = "linux"
 
 [[link]]
-src = ".local/bin/.swaync-test"
-dst = "${LOCAL_BIN}/.swaync-test"
+src = ".local/bin/.notify-test"
+dst = "${LOCAL_BIN}/.notify-test"
 platform = "linux"
 
 

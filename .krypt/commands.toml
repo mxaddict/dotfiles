@@ -336,11 +336,11 @@ steps = [
 
 [[command]]
 group       = "system"
-name        = "swaync-test"
+name        = "notify-test"
 description = "Fire a suite of test notifications"
 platform    = "linux"
 steps = [
-    { run = ["bash", "${HOME}/.local/bin/.swaync-test"], ignore_failure = true },
+    { run = ["bash", "${HOME}/.local/bin/.notify-test"], ignore_failure = true },
 ]
 
 # ---------------------------------------------------------------------------
