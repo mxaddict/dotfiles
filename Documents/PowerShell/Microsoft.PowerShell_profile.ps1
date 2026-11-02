@@ -265,6 +265,7 @@ function sql { sqeel @args }
 
 # Alias for tmxr
 function t { tmxr @args }
+function ta { tmxr attach @args }
 
 # Add navcoin alias
 function nav { navcoin-cli @args }
