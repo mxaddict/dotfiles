@@ -164,8 +164,8 @@ brew = [
     "kryptic-sh/tap/pikr", "kryptic-sh/tap/sqeel", "kryptic-sh/tap/tmxr",
 ]
 scoop = [
-    "kryptic-sh/buffr", "kryptic-sh/gpur", "kryptic-sh/hrdr", "kryptic-sh/krypt",
-    "kryptic-sh/lyr", "kryptic-sh/pikr", "kryptic-sh/tmxr", "cargo:hjkl",
+    "kryptic-sh/buffr", "kryptic-sh/gpur", "kryptic-sh/hjkl", "kryptic-sh/hrdr",
+    "kryptic-sh/krypt", "kryptic-sh/lyr", "kryptic-sh/pikr", "kryptic-sh/tmxr",
     "cargo:sqeel",
 ]
 scoop_buckets = { kryptic-sh = "https://github.com/kryptic-sh/scoop-bucket" }
