@@ -142,7 +142,7 @@ local workspace_rules = {
   { "3 silent", { "org.mozilla.Thunderbird" } },
   { "7 silent", { "Exodus", "Navcoin-Qt" } },
   { "8 silent", { "lutris", "steam" } },
-  { "9 silent", { "^(.*)open.spotify.com(.*)$", "obs", "spotify" } },
+  { "9 silent", { "^(.*)open.spotify.com(.*)$", "obs", "Spotify" } },
 }
 for _, entry in ipairs(workspace_rules) do
   local ws, classes = entry[1], entry[2]
