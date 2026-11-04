@@ -197,6 +197,13 @@ notification, Wi-Fi, audio and Bluetooth binds and the `krypt menu` commands run
 
 ## CI
 
+- **`deps (fedora)` fails: dnf no longer resolves `tealdeer`.**
+  `krypt deps --check` reports `missing: tealdeer` on the Fedora runner. It
+  passed at 8b0882e on 2026-11-02 and failed on a rerun of that same commit
+  later that day, so the change is in Fedora's repositories, not in this repo.
+  Why the package went missing (retired, renamed, or a mirror gap) has not been
+  checked. One option is to switch the `dnf` list to `cargo:tealdeer`, the way
+  starship already is.
 - **PSScriptAnalyzer enforces only `ParseError` and `Error` severity** (the
   `psscriptanalyzer` job in `lint.yml`). Warning-level rules are not enforced;
   how many warnings the existing `.ps1` files raise has not been measured, so
