@@ -23,10 +23,11 @@ apt = [
     "fzf", "git", "jq", "neovim", "ripgrep", "starship", "stow", "tealdeer",
     "unzip", "wget", "zoxide",
 ]
+# Fedora retired its tealdeer package before Fedora 45, so cargo builds it.
 dnf = [
-    "alacritty", "bat", "btop", "cargo:starship", "curl", "eza", "fastfetch",
-    "fd-find", "fish", "fzf", "git", "jq", "neovim", "ripgrep", "stow",
-    "tealdeer", "unzip", "wget", "zoxide",
+    "alacritty", "bat", "btop", "cargo:starship", "cargo:tealdeer", "curl",
+    "eza", "fastfetch", "fd-find", "fish", "fzf", "git", "jq", "neovim",
+    "ripgrep", "stow", "unzip", "wget", "zoxide",
 ]
 # Homebrew disabled its alacritty cask on 2026-09-01 (fails Gatekeeper); see
 # docs/backlog.md.
