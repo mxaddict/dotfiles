@@ -46,6 +46,16 @@ for unit in ly@tty2.service kanata.service power-check.timer power-profiles-daem
     [[ $(systemctl is-enabled "$unit" 2>&1) == enabled ]] || failures+=("not enabled: $unit")
 done
 
+# The firewall is on, drops incoming traffic and lets in SSH alone.
+ufw_status=$(ufw status verbose)
+grep -qx 'Status: active' <<<"$ufw_status" || failures+=("ufw is not active")
+grep -q '^Default: deny (incoming), allow (outgoing)' <<<"$ufw_status" ||
+    failures+=("ufw's defaults are not deny incoming, allow outgoing")
+# The rule lines after the table's "--" rule, whitespace squeezed.
+rules=$(ufw status | awk 'table && NF { $1 = $1; print } /^--/ { table = 1 }')
+expected=$'22/tcp ALLOW Anywhere\n22/tcp (v6) ALLOW Anywhere (v6)'
+[[ "$rules" == "$expected" ]] || failures+=("ufw rules are not SSH alone: $rules")
+
 # A second run finds nothing to do: it rewrites no file and does not rebuild
 # the UKI, so none of their modification times move.
 uki=/boot/EFI/Linux/arch-linux.efi

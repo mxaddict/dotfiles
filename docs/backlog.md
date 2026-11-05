@@ -336,16 +336,16 @@ audit raised and did not settle:
 
 - **Not carried over from the old `.local/bin/.deps`** (deleted in dfe7f99),
   which applied `.root/` before krypt did:
-  - ufw's rules and `ufw enable`. The step enables `ufw.service`, but the
-    firewall stays off until `ufw enable`. The old script allowed http, https,
-    ssh, mdns, 42069, 9993/udp (zerotier), 11434 (ollama) and Steam's
-    27031-27036/udp and 27040/tcp before enabling it. Which ports a new machine
-    should open is a decision; none of them is applied today.
   - Signing fwupd's EFI binary with `sbctl sign` for Secure Boot, which
     `fwupd.conf`'s `DisableShimForSecureBoot` relies on. Needs sbctl keys
     enrolled first, so it is per machine.
   - `pass-secret-service` (a user unit) and the `vi`/`vim`/`v` → nvim symlinks
     in `/usr/local/bin`.
+- **ufw opens SSH alone, by decision (2026-11-05).** The old script also allowed
+  http, https, mdns (5353), 42069, 9993/udp (zerotier), 11434 (ollama) and
+  Steam's 27031-27036/udp and 27040/tcp. The step does not remove rules a
+  machine already has, so machines set up by the old script keep those ports
+  until `sudo ufw delete` removes them.
 - **`auto-power-profile` assumes a laptop.** It reads
   `/sys/class/power_supply/BAT0` and `AC`, and the step enables
   `power-check.timer` (every minute) and installs the udev rule everywhere. On a

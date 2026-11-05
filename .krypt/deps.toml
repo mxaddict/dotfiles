@@ -162,17 +162,23 @@ scoop = ["duf", "extras/firefox", "extras/thunderbird"]
 # docs/backlog.md.
 [[deps]]
 group = "kryptic"
+# lyr and pikr render with Vulkan. Their packages bring the loader but no
+# driver, so the Linux lists add mesa's: the vendor drivers each load only on
+# their own GPU, and lavapipe (vulkan-swrast, part of mesa-vulkan-drivers) is a
+# CPU fallback for machines without one. NVIDIA's proprietary driver brings its
+# own (nvidia-utils).
 pacman = [
     "buffr-bin", "gemini-cli", "gpur-bin", "hjkl-bin", "hodl-bin", "hrdr-bin",
     "inbx-bin", "krypt-bin", "lyr-bin", "pikr-bin", "sqeel-bin", "tmxr-bin",
+    "vulkan-intel", "vulkan-nouveau", "vulkan-radeon", "vulkan-swrast",
 ]
 apt = [
     "cargo:gpur", "cargo:hjkl", "cargo:hrdr", "cargo:lyr-bin", "cargo:sqeel",
-    "cargo:tmxr-cli",
+    "cargo:tmxr-cli", "mesa-vulkan-drivers",
 ]
 dnf = [
     "cargo:gpur", "cargo:hjkl", "cargo:hrdr", "cargo:lyr-bin", "cargo:sqeel",
-    "cargo:tmxr-cli",
+    "cargo:tmxr-cli", "mesa-vulkan-drivers",
 ]
 brew = [
     "gemini-cli", "kryptic-sh/tap/buffr", "kryptic-sh/tap/gpur",

@@ -41,7 +41,10 @@ jobs:
   root:
     name: root (arch)
     runs-on: ubuntu-latest
-    container: archlinux:latest
+    # ufw loads its rules into the kernel when enabled, which needs NET_ADMIN.
+    container:
+      image: archlinux:latest
+      options: --cap-add=NET_ADMIN
     defaults:
       run:
         shell: bash

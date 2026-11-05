@@ -197,7 +197,14 @@ runs paru under sudo, and paru refuses to build AUR packages as root.
    changed;
 4. enables ly on tty2 (replacing any other display manager), kanata,
    NetworkManager, bluetooth, cups, avahi, ufw, power-profiles-daemon and the
-   `power-check` timer that picks a power profile from the battery level.
+   `power-check` timer that picks a power profile from the battery level;
+5. turns the firewall on: ufw drops incoming traffic except SSH (`22/tcp`) and
+   allows outgoing. Rules a machine already has stay, so on a fresh install SSH
+   is the only open port.
+
+`krypt setup` also installs the kryptic-sh tools. lyr (the bar) and pikr (the
+launcher) render with Vulkan, so that group brings mesa's Vulkan drivers for
+AMD, Intel and NVIDIA (nouveau), plus lavapipe as a CPU fallback.
 
 ### 4. First boot
 
@@ -214,8 +221,11 @@ rebuilds that initramfs any more, so the entry breaks at the next kernel update.
   `/etc/cmdline.d/root.conf` and rebuilds the UKI.
 - **Microcode.** Install `intel-ucode` or `amd-ucode` for your CPU and run
   `sudo mkinitcpio -P`; the `microcode` hook adds it to the UKI.
-- **Firewall.** The setup enables `ufw.service`, but the firewall stays off
-  until you add rules and run `sudo ufw enable`.
+- **Firewall.** Open another port with `sudo ufw allow <port>`;
+  `sudo ufw status` lists what is open.
+- **NVIDIA's driver.** Install `nvidia-open` and `nvidia-utils`, which brings
+  its Vulkan driver; mesa's nouveau one only drives the open nouveau kernel
+  driver.
 - **Changes to `.root/`.** `krypt update` does not reapply it, because it would
   overwrite deliberate local edits in `/etc`. Run `krypt system root` after a
   change you want.
