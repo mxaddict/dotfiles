@@ -14,7 +14,7 @@ include = [
 [meta]
 name           = "mxaddict dotfiles"
 description    = "Arch-first dotfiles for Hyprland, Neovim, Fish, tmxr, and friends."
-krypt_min      = "0.5.0"
+krypt_min      = "0.6.1"
 notify_backend = "auto"
 
 # ---------------------------------------------------------------------------
@@ -235,6 +235,16 @@ name           = "agent-clis"
 when           = "post-update"
 run            = ["krypt", "system", "agents"]
 ignore_failure = true
+
+# The Arch system configs in .root/ (`krypt system root` in
+# .krypt/commands.toml). Setup only: they replace files in /etc that a machine
+# may have changed on purpose, and rebuild the initramfs, so updates leave them
+# alone and `krypt system root` reapplies them on request.
+[[hook]]
+name = "root-configs"
+when = "post-setup"
+if   = "file_exists:/etc/arch-release"
+run  = ["krypt", "system", "root"]
 
 # Install cargo tools used by the dotfiles workflow (quoty, fnm).
 [[hook]]

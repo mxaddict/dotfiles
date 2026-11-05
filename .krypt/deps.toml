@@ -126,6 +126,22 @@ apt = []
 dnf = []
 brew = []
 
+# What the Arch configs in .root/ need, installed by `krypt system root` before
+# it copies them: the programs they configure or call, binutils for the objcopy
+# that builds linux.preset's UKI, terminus-font for vconsole.conf's FONT,
+# brightnessctl for ly's brightness keys, and the services the step enables.
+[[deps]]
+group = "root"
+required_platforms = ["linux"]
+pacman = [
+    "avahi", "binutils", "bluez", "brightnessctl", "cups", "fwupd", "kanata",
+    "linux", "ly", "mkinitcpio", "networkmanager", "power-profiles-daemon",
+    "terminus-font", "ufw",
+]
+apt = []
+dnf = []
+brew = []
+
 [[deps]]
 group = "apps"
 pacman = [

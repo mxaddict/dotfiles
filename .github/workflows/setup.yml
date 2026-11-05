@@ -34,3 +34,31 @@ jobs:
 
       - name: Deploy and verify
         run: ./.github/scripts/test-setup.ps1
+
+  # `krypt system root` on Arch: the root deps group through paru as a non-root
+  # user (kanata is AUR-only), then .root/ copied into / and its services
+  # enabled. Arch only, because .root/ holds Arch configs.
+  root:
+    name: root (arch)
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Prepare pacman
+        run: pacman -Syu --noconfirm --needed base-devel git sudo
+
+      - uses: actions/checkout@v5
+
+      - name: Install Rust
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+
+      - uses: ./.github/actions/krypt
+        with:
+          cache-key: arch
+
+      - name: Install the root configs and verify
+        run: ./.github/scripts/test-root.sh
