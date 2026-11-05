@@ -91,6 +91,14 @@ systemctl enable \
     cups.service \
     ufw.service
 
+# Firewall: incoming traffic is dropped except SSH, outgoing is allowed, and
+# ufw is switched on (it stays inactive after install). Rules a machine already
+# has are left alone, so only a fresh install ends with SSH as its one port.
+ufw default deny incoming
+ufw default allow outgoing
+ufw allow 22/tcp
+ufw --force enable
+
 if [[ ${#changed[@]} -eq 0 ]]; then
     echo "Root configs already up to date."
 else
