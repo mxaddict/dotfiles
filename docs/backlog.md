@@ -346,6 +346,13 @@ audit raised and did not settle:
   Steam's 27031-27036/udp and 27040/tcp. The step does not remove rules a
   machine already has, so machines set up by the old script keep those ports
   until `sudo ufw delete` removes them.
+- **Vulkan drivers are not picked by GPU, by decision (2026-11-05).** The
+  kryptic group installs mesa's drivers for every vendor, and the loader uses
+  only those matching a GPU, so one fixed list works everywhere. Detecting the
+  vendor (`/sys/class/drm/card*/device/vendor`) would need a script step, since
+  deps groups are fixed lists, and was declined. The cost: NVIDIA's own driver
+  (`nvidia-open` with `nvidia-utils`, which carries its Vulkan driver) stays a
+  manual install, as the README says.
 - **`auto-power-profile` assumes a laptop.** It reads
   `/sys/class/power_supply/BAT0` and `AC`, and the step enables
   `power-check.timer` (every minute) and installs the udev rule everywhere. On a
