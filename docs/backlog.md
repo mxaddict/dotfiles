@@ -332,6 +332,38 @@ audit raised and did not settle:
   and the `; [commit]` header above `gpgsign` are gone. Cosmetic here; belongs
   in krypt's own backlog (the `gitconfig` writer).
 
+## Root configs (`krypt system root`)
+
+- **Not carried over from the old `.local/bin/.deps`** (deleted in dfe7f99),
+  which applied `.root/` before krypt did:
+  - ufw's rules and `ufw enable`. The step enables `ufw.service`, but the
+    firewall stays off until `ufw enable`. The old script allowed http, https,
+    ssh, mdns, 42069, 9993/udp (zerotier), 11434 (ollama) and Steam's
+    27031-27036/udp and 27040/tcp before enabling it. Which ports a new machine
+    should open is a decision; none of them is applied today.
+  - Signing fwupd's EFI binary with `sbctl sign` for Secure Boot, which
+    `fwupd.conf`'s `DisableShimForSecureBoot` relies on. Needs sbctl keys
+    enrolled first, so it is per machine.
+  - `pass-secret-service` (a user unit) and the `vi`/`vim`/`v` → nvim symlinks
+    in `/usr/local/bin`.
+- **`auto-power-profile` assumes a laptop.** It reads
+  `/sys/class/power_supply/BAT0` and `AC`, and the step enables
+  `power-check.timer` (every minute) and installs the udev rule everywhere. On a
+  machine without those it fails each time it runs. Not checked on a desktop.
+- **No microcode package.** `mkinitcpio.conf` has the `microcode` hook, but
+  neither `intel-ucode` nor `amd-ucode` is in a deps group, since which one
+  depends on the CPU. Without one the hook adds nothing.
+- **Only the default clone path.** `krypt system root` runs the script from
+  `${XDG_CONFIG}/krypt/repo`, because krypt has no variable for its repo path
+  and `krypt setup` runs hooks before the first `krypt link`. A repo placed
+  elsewhere with `krypt init --repo-path` has to run its own
+  `.local/bin/.root-configs`.
+- **Nothing reports drift in `/`.** `krypt update` does not reapply `.root/` (it
+  would overwrite deliberate local changes and rebuild the initramfs), and
+  `krypt diff` covers only `[[link]]` destinations. On the Arch machine checked
+  on 2026-11-05 every `.root/` file matched except `/etc/gai.conf`, which lacks
+  the repo's `precedence ::ffff:0:0/96 100` (prefer IPv4).
+
 ## Decisions needed
 
 - **`.config/cargo/config.toml` is deployed where cargo never reads it.** cargo

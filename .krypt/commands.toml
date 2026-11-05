@@ -334,6 +334,27 @@ steps = [
     { run = ["pwsh", "-NoProfile", "-Command", '''$ErrorActionPreference = 'Stop'; $bash = Join-Path (git --exec-path) '..\..\..\bin\bash.exe'; if (-not (Test-Path $bash)) {{ throw "Git's bash is not at $bash" }}; & $bash -c 'curl -fsSL https://opencode.ai/install | bash -s -- --no-modify-path'; if ($LASTEXITCODE) {{ exit $LASTEXITCODE }}; $target = Join-Path $HOME '.opencode\bin\opencode.exe'; if (-not (Test-Path $target)) {{ throw "opencode is not at $($target): its installer skips when the opencode on PATH is already the latest; remove that one" }}'''] },
 ]
 
+# The Arch system configs in .root/ (pacman, mkinitcpio and its UKI preset,
+# logind, sleep, ly, kanata, the power-profile timer and udev rule), copied
+# into / with the services they belong to enabled. The script refuses to run
+# outside Arch, or without the ESP at /boot that the UKI preset needs. Run by
+# the root-configs hook in .krypt.toml on `krypt setup`; rerun it by hand
+# after .root/ changes.
+#
+# The script runs from krypt's clone, not ~/.local/bin: `krypt setup` runs
+# its hooks before the first `krypt link`. That is the clone's default path;
+# a repo placed elsewhere with `krypt init --repo-path` has to run its own
+# copy of .local/bin/.root-configs.
+[[command]]
+group       = "system"
+name        = "root"
+description = "Install the Arch configs in .root/ and enable their services (requires root)"
+platform    = "linux"
+steps = [
+    { run = ["krypt", "deps", "--group", "root"] },
+    { run = ["bash", "${XDG_CONFIG}/krypt/repo/.local/bin/.root-configs"] },
+]
+
 [[command]]
 group       = "system"
 name        = "notify-test"

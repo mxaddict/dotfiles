@@ -54,6 +54,11 @@ genuinely shell-shaped.
 
 ## Install
 
+Setting up a new Arch machine from scratch? Follow
+[Fresh Arch install](#fresh-arch-install) instead: it covers the base system
+these dotfiles expect, bootstrapping paru, and the system configs in `.root/`,
+and includes the steps below.
+
 ### 1. Install krypt
 
 | Platform | Command                                                                                             |
@@ -76,8 +81,8 @@ prompt, only when it is off). Git for Windows also writes
 `core.symlinks = false` into the `.git/config` of each repo it clones where
 symlinks were not allowed, which overrides the global setting there.
 
-Verify: `krypt --version` should report `0.4.2` or newer, the `krypt_min` in
-`.krypt.toml`.
+Verify: `krypt --version` should report the `krypt_min` in `.krypt.toml` or
+newer.
 
 ### 2. Clone + link
 
@@ -92,6 +97,10 @@ krypt link     # copy this platform's files into place
 answers to the `[[template]]` destinations; sections whose templates belong to
 another platform (the Hyprland ones outside Linux) are skipped. `krypt link`
 deploys only the entries whose `platform` matches this OS.
+
+On Arch, `krypt setup` also installs the system configs in `.root/` into `/`
+(`krypt system root`); see [Fresh Arch install](#fresh-arch-install) for what
+that needs and does.
 
 ### 3. Daily updates
 
@@ -121,6 +130,95 @@ Hooks declared in `.krypt.toml` (`[[hook]] when = "post-update"`) cover:
 ### Forking
 
 `krypt init` accepts any HTTPS / SSH git URL. Point it at your fork.
+
+## Fresh Arch install
+
+The steps from a newly installed Arch system to a working desktop. The system
+configs in `.root/` replace files in `/etc`, so this assumes a machine set up
+for them; read step 1 before installing Arch.
+
+### 1. Base system
+
+Install Arch with [archinstall](https://wiki.archlinux.org/title/Archinstall) or
+by hand, with:
+
+- **UEFI, the ESP mounted at `/boot`, and systemd-boot** (`bootctl install`).
+  `.root/`'s mkinitcpio preset builds a unified kernel image (UKI) into
+  `/boot/EFI/Linux` and no separate initramfs, and systemd-boot finds UKIs there
+  without a loader entry. GRUB, or an ESP mounted elsewhere, will not boot it;
+  `krypt system root` stops before changing anything when `/boot/EFI` is
+  missing.
+- **The `linux` kernel.** The preset is for it (`/boot/vmlinuz-linux`).
+- **A user in `wheel` with sudo**, and a network connection for the first boot.
+  The setup installs NetworkManager and enables it.
+- **Optional: LUKS.** `.root/`'s `mkinitcpio.conf` uses the systemd hooks with
+  `sd-encrypt`, so an encrypted root is unlocked from the kernel command line
+  (`rd.luks.name=…`).
+
+The UKI embeds a kernel command line: `/etc/kernel/cmdline` or
+`/etc/cmdline.d/*.conf` when present, else the one the machine booted with
+(`/proc/cmdline`). On a fresh install the booted one is right, so there is
+nothing to do; to change it later (`root=`, `rd.luks.name=`, `quiet`), write it
+to `/etc/kernel/cmdline` and run `sudo mkinitcpio -P`.
+
+### 2. paru
+
+`krypt deps` installs AUR packages (`kanata`, the kryptic-sh tools) through
+paru, so build paru first, as your user:
+
+```sh
+sudo pacman -S --needed base-devel git rustup
+rustup default stable
+git clone https://aur.archlinux.org/paru.git /tmp/paru
+cd /tmp/paru && makepkg -si
+```
+
+### 3. krypt and the dotfiles
+
+```sh
+paru -S krypt-bin
+krypt init https://github.com/mxaddict/dotfiles
+krypt deps     # every package group, through paru
+krypt setup    # prompts, then the post-setup hooks below
+krypt link     # copy the dotfiles into place
+```
+
+`krypt --version` must be at least the `krypt_min` in `.krypt.toml`: older krypt
+runs paru under sudo, and paru refuses to build AUR packages as root.
+
+`krypt setup` ends with its post-setup hooks. On Arch, one runs
+`krypt system root`, which asks for your sudo password once and:
+
+1. installs the `root` deps group: what the `.root/` configs need or call;
+2. copies each file in `.root/` to the same path under `/`, skipping the ones
+   that already match and keeping the first version it replaces as
+   `<file>.orig`;
+3. rebuilds the UKI when `mkinitcpio.conf`, the preset or `vconsole.conf`
+   changed;
+4. enables ly on tty2 (replacing any other display manager), kanata,
+   NetworkManager, bluetooth, cups, avahi, ufw, power-profiles-daemon and the
+   `power-check` timer that picks a power profile from the battery level.
+
+### 4. First boot
+
+Reboot. systemd-boot lists the UKI as Arch Linux, and the machine boots to ly on
+tty2. Once it does, delete the loader entry the base install made
+(`/boot/loader/entries/*.conf`) and its `/boot/initramfs-linux*.img`: nothing
+rebuilds that initramfs any more, so the entry breaks at the next kernel update.
+
+### 5. Afterwards
+
+- **Hibernation.** `logind.conf` and `sleep.conf` use suspend-then-hibernate,
+  which needs swap at least the size of RAM and the resume parameters in the
+  UKI. `krypt system swap` creates `/swap`, writes those parameters to
+  `/etc/cmdline.d/root.conf` and rebuilds the UKI.
+- **Microcode.** Install `intel-ucode` or `amd-ucode` for your CPU and run
+  `sudo mkinitcpio -P`; the `microcode` hook adds it to the UKI.
+- **Firewall.** The setup enables `ufw.service`, but the firewall stays off
+  until you add rules and run `sudo ufw enable`.
+- **Changes to `.root/`.** `krypt update` does not reapply it, because it would
+  overwrite deliberate local edits in `/etc`. Run `krypt system root` after a
+  change you want.
 
 ## Migration from the old stow-bash version
 

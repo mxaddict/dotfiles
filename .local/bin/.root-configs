@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+# vi: ft=bash
+# Install the repo's .root/ tree into / on Arch, then enable the services those
+# configs belong to. Run by `krypt system root` after it installs the `root`
+# deps group. Usage: .root-configs [SOURCE_DIR], where SOURCE_DIR defaults to
+# the .root/ of the checkout this script sits in.
+set -euo pipefail
+
+SRC="${1:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/.root}"
+
+if [[ ! -f /etc/arch-release ]]; then
+    echo "error: .root/ holds Arch configs (pacman.conf, mkinitcpio); this is not Arch" >&2
+    exit 1
+fi
+
+# linux.preset builds a UKI into /boot/EFI/Linux and drops the separate
+# initramfs, so the machine must boot UKIs from an ESP mounted at /boot
+# (systemd-boot finds them there). Check before anything is changed.
+if [[ ! -d /boot/EFI ]]; then
+    echo "error: /boot/EFI does not exist; linux.preset needs the ESP mounted at /boot" >&2
+    exit 1
+fi
+
+if [[ ! -d "$SRC" ]]; then
+    echo "error: $SRC does not exist" >&2
+    exit 1
+fi
+
+if [[ $EUID -ne 0 ]]; then
+    echo "This script requires root. Elevating with sudo..."
+    exec sudo "$0" "$SRC"
+fi
+
+changed=()
+while IFS= read -r -d '' file; do
+    rel="${file#"$SRC"/}"
+    dst="/$rel"
+    if [[ -f "$dst" ]] && cmp -s "$file" "$dst"; then
+        continue
+    fi
+    # Keep the first version we replace, so a local edit can be recovered.
+    if [[ -f "$dst" && ! -e "$dst.orig" ]]; then
+        cp -p "$dst" "$dst.orig"
+    fi
+    mode=644
+    [[ -x "$file" ]] && mode=755
+    install -D -m "$mode" "$file" "$dst"
+    changed+=("$rel")
+    echo "Updated $dst"
+done < <(find "$SRC" -type f -print0 | sort -z)
+
+for rel in "${changed[@]}"; do
+    case "$rel" in
+    etc/mkinitcpio.conf | etc/mkinitcpio.d/* | etc/vconsole.conf) initramfs=1 ;;
+    etc/udev/rules.d/*) udev=1 ;;
+    etc/systemd/system/*) units=1 ;;
+    esac
+done
+
+if [[ -n "${initramfs:-}" ]]; then
+    echo "Rebuilding the initramfs..."
+    # mkinitcpio does not create the directory linux.preset's UKI goes in.
+    mkdir -p /boot/EFI/Linux
+    mkinitcpio -P
+fi
+# Running daemons reload what changed. Without a booted systemd (a chroot or a
+# container) there is nothing running to tell, and the next boot reads the
+# new files anyway.
+if [[ -d /run/systemd/system ]]; then
+    if [[ -n "${udev:-}" ]]; then
+        udevadm control --reload-rules
+    fi
+    if [[ -n "${units:-}" ]]; then
+        systemctl daemon-reload
+    fi
+fi
+
+# ly takes over from any other display manager (display-manager.service is the
+# alias the enabled one installs); ly@tty2 replaces tty2's getty.
+if [[ -L /etc/systemd/system/display-manager.service ]]; then
+    systemctl disable display-manager.service
+fi
+systemctl enable \
+    ly@tty2.service \
+    kanata.service \
+    power-check.timer \
+    power-profiles-daemon.service \
+    NetworkManager.service \
+    avahi-daemon.service \
+    bluetooth.service \
+    cups.service \
+    ufw.service
+
+if [[ ${#changed[@]} -eq 0 ]]; then
+    echo "Root configs already up to date."
+else
+    echo "Updated ${#changed[@]} file(s). logind, sleep and ly changes apply after a reboot."
+fi
