@@ -52,7 +52,11 @@ uki=/boot/EFI/Linux/arch-linux.efi
 before=$(stat -c '%n %y' "${installed[@]}" "$uki" 2>&1)
 as_user krypt system root
 after=$(stat -c '%n %y' "${installed[@]}" "$uki" 2>&1)
-[[ "$before" == "$after" ]] || failures+=("the second run rewrote files: $(diff <(echo "$before") <(echo "$after") | grep '^>' | tr '\n' ' ')")
+if [[ "$before" != "$after" ]]; then
+    failures+=("the second run rewrote files (diff above)")
+    # diff exits 1 when the inputs differ, which they do here.
+    diff <(echo "$before") <(echo "$after") || (($? == 1))
+fi
 
 if ((${#failures[@]})); then
     printf '::error::%s\n' "${failures[@]}"
