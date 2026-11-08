@@ -167,7 +167,8 @@ notification, Wi-Fi, audio and Bluetooth binds and the `krypt menu` commands run
 - **waybar's package stays installed until removed by hand on each machine.**
   The dotfiles dropped waybar on 2026-11-08, but `krypt deps` only installs, so
   machines that had it keep it; nothing starts it, so it is only disk space.
-  `sudo pacman -Rns waybar` removes it. Done on `slowassdell` (2026-10-26).
+  `sudo pacman -Rns waybar` removes it. Done on `slowassdell` (2026-10-26) and
+  `mxaddict-pc` (2026-11-08).
 - **swaync's package stays installed until removed by hand on each machine.**
   The dotfiles dropped swaync on 2026-11-02, but `krypt deps` only installs, so
   machines that had it keep it, and with it a D-Bus activation file
