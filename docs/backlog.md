@@ -164,16 +164,10 @@ lyr replaced waybar and swaync on 2026-10-26: Hyprland starts it, and the
 notification, Wi-Fi, audio and Bluetooth binds and the `krypt menu` commands run
 `lyr` subcommands.
 
-- **waybar is still deployed as a fallback**, by the owner's choice, though not
-  installed everywhere: on `slowassdell` the package was removed with
-  `paru -Rns` on 2026-10-26, and its config is still deployed there. In the repo
-  `.config/waybar/`, its `src_glob` link and the `waybar` pacman package stay;
-  its `custom/notification` module still calls `swaync-client`, guarded by
-  `exec-if`, so it hides once swaync is gone. lyr's plan
-  (`docs/plan/05-layout-and-config.md` in kryptic-sh/lyr) removes waybar once
-  lyr has run as the daily bar for a while. Retiring it means deleting
-  `.config/waybar/`, its `[[link]]`, the package and the fallback line under
-  "Bar" in the README. Needs the owner's call on when.
+- **waybar's package stays installed until removed by hand on each machine.**
+  The dotfiles dropped waybar on 2026-11-08, but `krypt deps` only installs, so
+  machines that had it keep it; nothing starts it, so it is only disk space.
+  `sudo pacman -Rns waybar` removes it. Done on `slowassdell` (2026-10-26).
 - **swaync's package stays installed until removed by hand on each machine.**
   The dotfiles dropped swaync on 2026-11-02, but `krypt deps` only installs, so
   machines that had it keep it, and with it a D-Bus activation file

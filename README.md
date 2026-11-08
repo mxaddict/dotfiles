@@ -41,7 +41,7 @@ genuinely shell-shaped.
 - **Editor**: [Neovim](https://neovim.io/) +
   [LazyVim](https://www.lazyvim.org/).
 - **Bar**: [lyr](https://github.com/kryptic-sh/lyr), with its own Wi-Fi,
-  Bluetooth, audio and power menus. Waybar stays installed as a fallback.
+  Bluetooth, audio and power menus.
 - **Launcher**: [pikr](https://github.com/kryptic-sh/pikr) — vim-like fuzzy
   picker.
 - **Notifications**: lyr, which is the notification daemon and keeps the history
