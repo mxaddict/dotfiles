@@ -417,11 +417,6 @@ dst = "${LOCAL_BIN}/.pull-all-models.ps1"
 platform = "windows"
 
 [[link]]
-src = ".local/bin/.start"
-dst = "${LOCAL_BIN}/.start"
-platform = "linux"
-
-[[link]]
 src = ".local/bin/.swap"
 dst = "${LOCAL_BIN}/.swap"
 platform = "linux"

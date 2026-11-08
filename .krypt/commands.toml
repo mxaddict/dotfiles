@@ -239,15 +239,6 @@ steps = [
 
 [[command]]
 group       = "system"
-name        = "start"
-description = "Launch daily-driver apps (thunderbird, steam, Telegram)"
-platform    = "linux"
-steps = [
-    { run = ["bash", "${HOME}/.local/bin/.start"] },
-]
-
-[[command]]
-group       = "system"
 name        = "clearkeys"
 description = "Delete all GitLab deploy keys across accessible projects (interactive)"
 platform    = ["linux", "macos"]
