@@ -150,11 +150,6 @@ end
 local mod = "SUPER"
 
 -- krypt shortcuts
-hl.bind(
-  mod .. " + SHIFT + G",
-  hl.dsp.exec_cmd("krypt system start"),
-  { description = "Launch daily apps (krypt system start)" }
-)
 hl.bind("CTRL + SHIFT + K", hl.dsp.exec_cmd("krypt kanata toggle"), { description = "Toggle kanata keyboard remapper" })
 
 -- Notification center
