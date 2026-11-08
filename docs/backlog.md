@@ -296,9 +296,8 @@ audit raised and did not settle:
   `QT_QPA_PLATFORMTHEME` is `hyprqt6engine`. Option: swap `breeze` for
   `breeze-cursors` in the group. Unverified: whether `hyprqt6engine` falls back
   to the Breeze style for anything.
-- **`vieb-bin` is declared in the `apps` group but is not installed** on this
-  machine, and `openbox` was installed by hand and removed in the audit (it
-  shipped eleven GTK2 themes under `/usr/share/themes` that nothing selects).
+- **`openbox` was installed by hand and removed in the audit** (it shipped
+  eleven GTK2 themes under `/usr/share/themes` that nothing selects).
 - **The caches were not cleaned**: `/var/cache/pacman/pkg` holds 5.1 GiB over
   1638 package files and `~/.cache/paru` 1.2 GiB. `CleanAfter` only covers paru
   builds from now on; the existing 1.2 GiB and the pacman cache need `paru -Sc`

@@ -147,7 +147,7 @@ group = "apps"
 pacman = [
     "adw-gtk-theme", "breeze", "chromium", "cmatrix", "duf", "dysk", "firefox",
     "libadwaita", "nautilus", "papirus-icon-theme", "pass", "pass-otp",
-    "pass-secret-service", "qalculate-qt", "thunderbird", "vieb-bin",
+    "pass-secret-service", "qalculate-qt", "thunderbird",
 ]
 apt = ["duf", "dysk"]
 dnf = ["cargo:dysk", "duf", "firefox", "thunderbird"]

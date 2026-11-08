@@ -2,7 +2,6 @@
 # vi: ft=bash
 
 notify-send "Join them not beat them"
-vieb &
 thunderbird &
 steam &
 Telegram &

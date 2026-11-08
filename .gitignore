@@ -1,9 +1,6 @@
 !.claude/settings.json
 !.claude/statusline-command.sh
 !.codex/config.toml
-!.config/Vieb/colors
-!.config/Vieb/colors/tokyonight.css
-!.config/Vieb/viebrc
 !.config/opencode/opencode.json
 !.config/opencode/package-lock.json
 !.config/opencode/tui.json
@@ -18,7 +15,6 @@
 .claude-work/*
 .claude/*
 .codex/*
-.config/Vieb/*
 .config/dconf/user
 .config/dconf/user/
 .config/fish/completions/

@@ -63,7 +63,7 @@ validation on every push and PR (see `.github/workflows/lint.yml`).
    ```
 3. If the app stores per-machine state (caches, lockfiles, history) in the same
    directory, add a denylist + allowlist pair in `.gitignore` like the existing
-   `.config/Vieb/*` block:
+   `.config/opencode/*` block:
    ```
    !.config/<app>/<file-to-track>
    .config/<app>/*

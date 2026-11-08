@@ -47,7 +47,7 @@ genuinely shell-shaped.
 - **Notifications**: lyr, which is the notification daemon and keeps the history
   under its clock panel's calendar.
 - **File Manager**: [Nautilus](https://help.gnome.org/users/nautilus/).
-- **Browser**: [Vieb](https://github.com/Jelmerro/Vieb).
+- **Browser**: [Chromium](https://www.chromium.org/).
 - **Screenshot**: [Grimblast](https://github.com/hyprwm/contrib).
 - **System monitor**: [btop](https://github.com/aristocratos/btop).
 - **Prompt**: [Starship](https://starship.rs/).
