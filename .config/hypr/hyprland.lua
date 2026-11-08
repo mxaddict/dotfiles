@@ -130,19 +130,12 @@ hl.window_rule({ match = share, workspace = "10 silent" })
 local workspace_rules = {
   {
     "2 silent",
-    {
-      "^(.*)discord.com(.*)$",
-      "^(.*)teams.microsoft.com(.*)$",
-      "^(.*)teams.cloud.microsoft(.*)$",
-      "discord",
-      "org.telegram.desktop",
-      "teams-for-linux",
-    },
+    { "discord", "org.telegram.desktop", "teams-for-linux" },
   },
   { "3 silent", { "org.mozilla.Thunderbird" } },
   { "7 silent", { "Exodus", "Navcoin-Qt" } },
   { "8 silent", { "lutris", "steam" } },
-  { "9 silent", { "^(.*)open.spotify.com(.*)$", "obs", "Spotify" } },
+  { "9 silent", { "obs", "Spotify" } },
 }
 for _, entry in ipairs(workspace_rules) do
   local ws, classes = entry[1], entry[2]

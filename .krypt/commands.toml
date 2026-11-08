@@ -240,7 +240,7 @@ steps = [
 [[command]]
 group       = "system"
 name        = "start"
-description = "Launch daily-driver apps (vieb, thunderbird, steam, Telegram, Discord, Teams, Spotify)"
+description = "Launch daily-driver apps (vieb, thunderbird, steam, Telegram)"
 platform    = "linux"
 steps = [
     { run = ["bash", "${HOME}/.local/bin/.start"] },

@@ -442,8 +442,3 @@ platform = "linux"
 src = ".local/share/emojis"
 dst = "${HOME}/.local/share/emojis"
 platform = "linux"
-
-[[link]]
-src_glob = ".local/share/applications/**/*"
-dst = "${HOME}/.local/share/applications/"
-platform = "linux"
