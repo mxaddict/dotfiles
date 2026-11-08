@@ -83,7 +83,7 @@ scoop = ["nerd-fonts/Hack-NF-Mono"]
 group = "hyprland"
 required_platforms = ["linux"]
 pacman = [
-    "brightnessctl", "dex", "grim", "hypridle", "hyprland", "hyprlock",
+    "brightnessctl", "grim", "hypridle", "hyprland", "hyprlock",
     "hyprpaper", "hyprpicker", "hyprpolkitagent", "hyprqt6engine",
     "libnotify", "nwg-displays", "nwg-look", "qt5-wayland",
     "qt6-wayland", "slurp", "swayosd", "waybar", "wl-clipboard",
