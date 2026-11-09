@@ -739,15 +739,18 @@ the session the user's naming, and `c` gives Claude the user's flags.
 - **`t`** is bare `tmxr`, which runs `new-session -A -s <directory name>` (a `:`
   in the name becomes `_`), so the session is named after the directory it is
   run in. From a shell with no terminal, such as an agent's, it creates the
-  session and returns without attaching (checked on Linux, 2026-11-10).
+  session and returns without attaching (checked on Linux, 2026-11-10; Windows
+  takes the same path, through Rust's `IsTerminal`, but has not been run).
 - **`c`** is `claude --continue`, falling back to a fresh `claude` when the
   directory has no conversation yet, and the `claude` shell function adds the
   flags the user runs with (`--dangerously-skip-permissions --remote-control`).
   `cw` is the same for the work account (`CLAUDE_CONFIG_DIR=~/.claude-work`).
 
-All three are defined in the fish config and the PowerShell profile. They are
-shell functions, so an agent's bash runs `t` through fish; `c` is typed into the
-session's own shell.
+All three exist under the same names on every OS: in the fish config on Linux
+and macOS, in the PowerShell profile on Windows. They are shell functions, not
+programs, so an agent runs `t` through the shell that defines it, and types `c`
+into the session's own shell: tmxr panes start `$SHELL` on Unix, and `pwsh`
+(else Windows PowerShell) on Windows, which loads the profile.
 
 1. **Check the name is free.** The session will be named after the directory's
    last component (`ce.sickw` for `~/Projects/mxaddict/ce.sickw`).
@@ -757,7 +760,11 @@ session's own shell.
 2. **Create it with `t` in the directory, and confirm where it landed:**
 
    ```bash
+   # Linux, macOS
    fish -c 'cd <absolute dir>; and t'
+   # Windows (from Git Bash or PowerShell; -NoProfile would leave t undefined)
+   pwsh -Command "Set-Location -LiteralPath '<absolute dir>'; t"
+   # Then, on any OS
    tmxr display-message -p -t <name> '#{pane_current_path} #{pane_current_command}'
    ```
 
@@ -769,8 +776,10 @@ session's own shell.
    Enter alone quits. Send `Down`, capture the pane and confirm
    `❯ Yes, I trust this folder` is the selected line, then send `Enter`.
 5. **Verify, don't assume.** Capture the pane until Claude's interface has
-   loaded, and check the trust was saved: `~/.claude.json` has
-   `projects["<absolute dir>"].hasTrustDialogAccepted` set to `true`.
+   loaded, and check the trust was saved: `~/.claude.json`
+   (`%USERPROFILE%\.claude.json` on Windows) has `hasTrustDialogAccepted` set to
+   `true` in the directory's entry under `projects`. How that key spells a
+   Windows path is unverified, so match it there rather than build it.
 6. **Report** the session name, how to attach (`tmxr attach -t <name>`, or
    `ta -t <name>`), and the remote-control URL the pane shows.
 
