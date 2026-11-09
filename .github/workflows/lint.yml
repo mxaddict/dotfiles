@@ -136,6 +136,27 @@ jobs:
           [ "${#files[@]}" -gt 0 ] || { echo "no .lua files found"; exit 1; }
           stylua --check "${files[@]}"
 
+  actionlint:
+    name: actionlint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install actionlint
+        env:
+          ACTIONLINT_VERSION: 1.7.12
+        working-directory: ${{ runner.temp }}
+        run: |
+          base="https://github.com/rhysd/actionlint/releases/download/v$ACTIONLINT_VERSION"
+          tarball="actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz"
+          curl -fsSLO "$base/$tarball"
+          curl -fsSLO "$base/actionlint_${ACTIONLINT_VERSION}_checksums.txt"
+          grep " $tarball\$" "actionlint_${ACTIONLINT_VERSION}_checksums.txt" | sha256sum -c -
+          tar -xzf "$tarball" actionlint
+          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+      # Also runs shellcheck over each `run:` script; the runner image has it.
+      - name: Check workflows
+        run: actionlint
+
   psscriptanalyzer:
     name: PSScriptAnalyzer
     runs-on: ubuntu-latest

@@ -53,8 +53,8 @@ clang-format -i <file>
 ```
 
 CI runs `shellcheck`, `prettier --check`, `stylua --check`, `krypt validate`,
-and JSON/TOML validation on every push and PR (see
-`.github/workflows/lint.yml`).
+`actionlint` on the workflows, and JSON/TOML validation on every push and PR
+(see `.github/workflows/lint.yml`).
 
 ## Adding a new app config
 
