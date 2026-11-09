@@ -115,6 +115,27 @@ jobs:
           [ "$count" -gt 0 ] || { echo "no .fish files found"; exit 1; }
           exit "$fail"
 
+  stylua:
+    name: stylua
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install stylua
+        env:
+          STYLUA_VERSION: 2.4.1
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/stylua.zip" \
+            "https://github.com/JohnnyMorganz/StyLua/releases/download/v$STYLUA_VERSION/stylua-linux-x86_64.zip"
+          unzip -q "$RUNNER_TEMP/stylua.zip" -d "$RUNNER_TEMP/stylua"
+          echo "$RUNNER_TEMP/stylua" >> "$GITHUB_PATH"
+      # Neovim's Lua takes its style from .config/nvim/stylua.toml, the rest
+      # from .editorconfig.
+      - name: Check Lua formatting
+        run: |
+          mapfile -t files < <(git ls-files '*.lua')
+          [ "${#files[@]}" -gt 0 ] || { echo "no .lua files found"; exit 1; }
+          stylua --check "${files[@]}"
+
   psscriptanalyzer:
     name: PSScriptAnalyzer
     runs-on: ubuntu-latest

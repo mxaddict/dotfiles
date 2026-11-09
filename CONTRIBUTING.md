@@ -42,6 +42,9 @@ prettier --write <file>
 # Shell scripts
 shellcheck .local/bin/.<script>
 
+# Lua (Hyprland, Neovim)
+stylua <file>
+
 # .krypt.toml + included sub-files
 krypt validate
 
@@ -49,8 +52,9 @@ krypt validate
 clang-format -i <file>
 ```
 
-CI runs `shellcheck`, `prettier --check`, `krypt validate`, and JSON/TOML
-validation on every push and PR (see `.github/workflows/lint.yml`).
+CI runs `shellcheck`, `prettier --check`, `stylua --check`, `krypt validate`,
+and JSON/TOML validation on every push and PR (see
+`.github/workflows/lint.yml`).
 
 ## Adding a new app config
 
