@@ -739,8 +739,7 @@ the session the user's naming, and `c` gives Claude the user's flags.
 - **`t`** is bare `tmxr`, which runs `new-session -A -s <directory name>` (a `:`
   in the name becomes `_`), so the session is named after the directory it is
   run in. From a shell with no terminal, such as an agent's, it creates the
-  session and returns without attaching (checked on Linux, 2026-11-10; Windows
-  takes the same path, through Rust's `IsTerminal`, but has not been run).
+  session and returns without attaching.
 - **`c`** is `claude --continue`, falling back to a fresh `claude` when the
   directory has no conversation yet, and the `claude` shell function adds the
   flags the user runs with (`--dangerously-skip-permissions --remote-control`).
@@ -750,7 +749,9 @@ All three exist under the same names on every OS: in the fish config on Linux
 and macOS, in the PowerShell profile on Windows. They are shell functions, not
 programs, so an agent runs `t` through the shell that defines it, and types `c`
 into the session's own shell: tmxr panes start `$SHELL` on Unix, and `pwsh`
-(else Windows PowerShell) on Windows, which loads the profile.
+(else Windows PowerShell) on Windows, which loads the profile. The dotfiles'
+`session` workflow runs this flow on Linux, macOS and Windows, with a stub in
+place of claude.
 
 1. **Check the name is free.** The session will be named after the directory's
    last component (`ce.sickw` for `~/Projects/mxaddict/ce.sickw`).

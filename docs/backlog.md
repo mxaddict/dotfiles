@@ -211,6 +211,13 @@ notification, Wi-Fi, audio and Bluetooth binds and the `krypt menu` commands run
   prompting when it is already on. The `post-update` hook runs the same command
   but was not run through a real `krypt update`, and a declined UAC prompt was
   not tried. CI never runs `krypt setup` or the hooks.
+- **The `session` workflow runs a stub, not Claude Code.** It checks the flow in
+  AGENTS.md's "Starting a Claude session" with the real tmxr, `t`, `c` and shell
+  configs, but `claude` is `.github/scripts/claude-stub.ps1`, since the CLI
+  cannot log in in CI. Not covered: the real trust prompt's wording and keys,
+  and how Claude Code spells a Windows path as its key in `.claude.json` (the
+  stub writes `(Get-Location).Path`). Covering them needs a credential in CI,
+  which is the owner's call.
 - **Only the `core` group is installed in CI**; every other group is resolved
   with `krypt deps --check`, not installed.
 
