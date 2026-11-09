@@ -730,8 +730,8 @@ Whether one or several are running:
 
 ## Starting a Claude session
 
-**When the user says "start a new session in <some dir>"** (or a Claude session
-for a project), follow this flow and start it: a detached tmxr session in that
+**When the user says `start a new session in <dir>`** (or a Claude session for a
+project), follow this flow and start it: a detached tmxr session in that
 directory, with Claude started there by the user's `c` alias, never a bare
 `claude`. `c` is `claude --continue`, falling back to a fresh `claude` when the
 directory has no conversation yet, and the `claude` shell function adds the
