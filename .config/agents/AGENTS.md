@@ -731,23 +731,33 @@ Whether one or several are running:
 ## Starting a Claude session
 
 **When the user says `start a new session in <dir>`** (or a Claude session for a
-project), follow this flow and start it: a detached tmxr session in that
-directory, with Claude started there by the user's `c` alias, never a bare
-`claude`. `c` is `claude --continue`, falling back to a fresh `claude` when the
-directory has no conversation yet, and the `claude` shell function adds the
-flags the user runs with (`--dangerously-skip-permissions --remote-control`).
-`cw` is the same for the work account (`CLAUDE_CONFIG_DIR=~/.claude-work`). Both
-are defined in the fish config and the PowerShell profile.
+project), follow this flow and start it: a tmxr session made with the user's `t`
+alias in that directory, and Claude started in it with the user's `c` alias. Use
+the aliases, not a hand-built `tmxr new-session` or a bare `claude`: `t` gives
+the session the user's naming, and `c` gives Claude the user's flags.
 
-1. **Name the session after the directory** (`ce.sickw` for
-   `~/Projects/mxaddict/ce.sickw`; tmxr accepts the dot), the name tmxr's bare
-   `t` would give it. Check it is free first: `tmxr has-session -t <name>` exits
-   0 when one exists, and that one may be someone's running work, so never reuse
-   or kill it; ask.
-2. **Create it detached, in the directory, and confirm where it landed:**
+- **`t`** is bare `tmxr`, which runs `new-session -A -s <directory name>` (a `:`
+  in the name becomes `_`), so the session is named after the directory it is
+  run in. From a shell with no terminal, such as an agent's, it creates the
+  session and returns without attaching (checked on Linux, 2026-11-10).
+- **`c`** is `claude --continue`, falling back to a fresh `claude` when the
+  directory has no conversation yet, and the `claude` shell function adds the
+  flags the user runs with (`--dangerously-skip-permissions --remote-control`).
+  `cw` is the same for the work account (`CLAUDE_CONFIG_DIR=~/.claude-work`).
+
+All three are defined in the fish config and the PowerShell profile. They are
+shell functions, so an agent's bash runs `t` through fish; `c` is typed into the
+session's own shell.
+
+1. **Check the name is free.** The session will be named after the directory's
+   last component (`ce.sickw` for `~/Projects/mxaddict/ce.sickw`).
+   `tmxr has-session -t <name>` exits 0 when one exists; that one may be
+   someone's running work, and keys sent to it land in their pane, so never
+   reuse or kill it: ask.
+2. **Create it with `t` in the directory, and confirm where it landed:**
 
    ```bash
-   tmxr new-session -d -s <name> -c <absolute dir>
+   fish -c 'cd <absolute dir>; and t'
    tmxr display-message -p -t <name> '#{pane_current_path} #{pane_current_command}'
    ```
 
