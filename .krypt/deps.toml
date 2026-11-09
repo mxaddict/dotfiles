@@ -15,26 +15,25 @@
 group = "core"
 pacman = [
     "alacritty", "bat", "btop", "curl", "eza", "fastfetch", "fd", "fish",
-    "fzf", "git", "jq", "neovim", "ripgrep", "starship", "stow", "tealdeer",
-    "unzip", "wget", "zoxide",
+    "fzf", "git", "jq", "neovim", "ripgrep", "starship", "tealdeer", "unzip",
+    "wget", "zoxide",
 ]
 apt = [
     "alacritty", "bat", "btop", "curl", "eza", "fastfetch", "fd-find", "fish",
-    "fzf", "git", "jq", "neovim", "ripgrep", "starship", "stow", "tealdeer",
-    "unzip", "wget", "zoxide",
+    "fzf", "git", "jq", "neovim", "ripgrep", "starship", "tealdeer", "unzip",
+    "wget", "zoxide",
 ]
 # Fedora retired its tealdeer package before Fedora 45, so cargo builds it.
 dnf = [
     "alacritty", "bat", "btop", "cargo:starship", "cargo:tealdeer", "curl",
     "eza", "fastfetch", "fd-find", "fish", "fzf", "git", "jq", "neovim",
-    "ripgrep", "stow", "unzip", "wget", "zoxide",
+    "ripgrep", "unzip", "wget", "zoxide",
 ]
 # Homebrew disabled its alacritty cask on 2026-09-01 (fails Gatekeeper); see
 # docs/backlog.md.
 brew = [
     "bat", "btop", "eza", "fastfetch", "fd", "fish", "fzf", "git", "jq",
-    "neovim", "ripgrep", "starship", "stow", "tealdeer", "unzip", "wget",
-    "zoxide",
+    "neovim", "ripgrep", "starship", "tealdeer", "unzip", "wget", "zoxide",
 ]
 # Windows uses scoop: per-user installs under ~/scoop, no UAC prompt. krypt adds
 # the buckets `bucket/app` entries name before installing a group.
