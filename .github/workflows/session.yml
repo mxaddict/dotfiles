@@ -80,8 +80,10 @@ jobs:
             echo "$PWD/tmxr" >>"$GITHUB_PATH"
           fi
 
+      # Over the runner's own copies (the macOS and Windows images ship a
+      # .gitconfig), which nothing after checkout needs.
       - name: Deploy the dotfiles
-        run: krypt link --config .krypt.toml
+        run: krypt link --config .krypt.toml --force
 
       - name: Start a Claude session as an agent would
         run: bash .github/scripts/test-session.sh
