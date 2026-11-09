@@ -115,13 +115,6 @@
   Tracking `main` unpinned still means a krypt commit can turn this repo's CI
   red with no dotfiles change; pinning a tag makes runs reproducible at the cost
   of no longer exercising new krypt changes. Needs a decision.
-- **`krypt diff` lists template destinations as drifted.** On `slowassdell`
-  (Arch, krypt 0.4.4, 2026-10-26) it reports `~/.config/hypr/apps.lua`,
-  `~/.config/hypr/input.lua` and `~/.gitconfig.local`, which `krypt setup`
-  renders from their `[[template]]` sources, so they differ from the repo on
-  purpose. krypt 0.4.3 stopped counting a destination that already matches its
-  source as a conflict, and 0.4.4 forgot the 15 entries this repo had deleted,
-  which cleared the 31 dirty entries recorded on 2026-10-21.
 - **krypt's own open items** (notify backends, interactive steps, CI toolchain)
   are tracked in `kryptic-sh/krypt` under `docs/backlog.md`.
 
