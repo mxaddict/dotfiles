@@ -69,11 +69,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - name: Install validators
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y python3 python3-pip jq
-          pip3 install --user tomli
+      # The runner image ships jq and a Python with tomllib (3.11+).
       - name: Validate JSON files
         run: |
           fail=0
@@ -92,7 +88,7 @@ jobs:
           while IFS= read -r f; do
             [ -f "$f" ] || { echo "== skip (missing) $f =="; continue; }
             echo "== toml $f =="
-            python3 -c "import sys, tomli; tomli.loads(open(sys.argv[1], 'rb').read().decode())" "$f" || fail=1
+            python3 -c "import sys, tomllib; tomllib.load(open(sys.argv[1], 'rb'))" "$f" || fail=1
           done < <(git ls-files '*.toml')
           exit "$fail"
 
