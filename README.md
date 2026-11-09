@@ -402,7 +402,7 @@ Top-level `.krypt.toml` declares `[meta]`, `[paths]`, `[prompts.*]`, and
 
 | File                   | Holds                                                                  |
 | ---------------------- | ---------------------------------------------------------------------- |
-| `.krypt/links.toml`    | `[[link]]` symlink rules (`stow` replacement)                          |
+| `.krypt/links.toml`    | `[[link]]` rules: which repo files are copied where in `$HOME`         |
 | `.krypt/deps.toml`     | `[[deps]]` groups: cross-distro package mappings                       |
 | `.krypt/commands.toml` | `[[command]] group=… name=…` — every `krypt <group> <name>` invocation |
 

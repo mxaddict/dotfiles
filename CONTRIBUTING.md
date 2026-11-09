@@ -71,13 +71,14 @@ validation on every push and PR (see `.github/workflows/lint.yml`).
 4. If the config has user-specific content (paths, credentials, hardware names,
    identity), follow the **template pattern** below.
 5. Run `krypt validate` to catch schema mistakes, then `krypt link --dry-run` to
-   preview the symlink plan.
+   preview the files it would copy.
 
 ## Template pattern (user-configurable files)
 
 Anything a user is expected to edit lives as a `*.template.*` file in the repo
 and is copied to `$HOME` on first run by `krypt setup`. The real file lives at
-the destination and is **not tracked** by git or symlinked.
+the destination and is **not tracked** by git; once edited there, `krypt link`
+leaves it alone.
 
 To add a new templated file:
 
