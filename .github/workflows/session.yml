@@ -1,0 +1,87 @@
+name: session
+
+# Runs the "Starting a Claude session" flow from .config/agents/AGENTS.md the
+# way an agent does (.github/scripts/test-session.sh): `t` creates a tmxr
+# session from a shell with no terminal, `c` starts claude in it, and the trust
+# menu is answered. tmxr, fish, the PowerShell profile and the aliases are the
+# real ones krypt deploys; claude is a stub, since the real CLI cannot log in.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  session:
+    name: session (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            archive: tar.gz
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            archive: tar.gz
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            archive: zip
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          cache: false
+          rustflags: ''
+
+      - uses: ./.github/actions/krypt
+
+      - name: Install fish
+        if: runner.os == 'Linux'
+        run: sudo apt-get install -y --no-install-recommends fish
+
+      - name: Install fish
+        if: runner.os == 'macOS'
+        run: brew install fish
+
+      # The latest release, as the kryptic deps group installs on a machine.
+      - name: Install tmxr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET: ${{ matrix.target }}
+          ARCHIVE: ${{ matrix.archive }}
+        working-directory: ${{ runner.temp }}
+        run: |
+          gh release download --repo kryptic-sh/tmxr \
+            --pattern "tmxr-v*-$TARGET.$ARCHIVE" \
+            --pattern "tmxr-v*-$TARGET.$ARCHIVE.sha256"
+          if command -v sha256sum >/dev/null; then
+            sha256sum -c tmxr-v*-"$TARGET.$ARCHIVE.sha256"
+          else
+            shasum -a 256 -c tmxr-v*-"$TARGET.$ARCHIVE.sha256"
+          fi
+          mkdir tmxr
+          if [ "$ARCHIVE" = zip ]; then
+            unzip -q tmxr-v*-"$TARGET.zip" -d tmxr
+            cygpath -w "$PWD/tmxr" >>"$GITHUB_PATH"
+          else
+            tar -xzf tmxr-v*-"$TARGET.tar.gz" -C tmxr
+            echo "$PWD/tmxr" >>"$GITHUB_PATH"
+          fi
+
+      - name: Deploy the dotfiles
+        run: krypt link --config .krypt.toml
+
+      - name: Start a Claude session as an agent would
+        run: bash .github/scripts/test-session.sh
