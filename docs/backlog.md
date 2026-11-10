@@ -361,9 +361,10 @@ audit raised and did not settle:
   `.local/bin/.root-configs`.
 - **Nothing reports drift in `/`.** `krypt update` does not reapply `.root/` (it
   would overwrite deliberate local changes and rebuild the initramfs), and
-  `krypt diff` covers only `[[link]]` destinations. On the Arch machine checked
-  on 2026-11-05 every `.root/` file matched except `/etc/gai.conf`, which lacks
-  the repo's `precedence ::ffff:0:0/96 100` (prefer IPv4).
+  `krypt diff` covers only `[[link]]` destinations, so a machine's `/etc` can
+  drift unnoticed: `slowassdell`'s `/etc/gai.conf` lacked the repo's
+  `precedence ::ffff:0:0/96 100` (prefer IPv4) until it was reinstalled on
+  2026-11-11.
 
 ## Decisions needed
 
