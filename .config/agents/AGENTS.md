@@ -140,6 +140,13 @@ User says "**BCTP**", execute in order:
    - PHP: `composer.json` (regenerate `composer.lock` with
      `composer update --lock`)
    - Generic: `VERSION` file or language equivalent
+
+   Then **update dependencies** to their latest compatible releases with the
+   project's own manager (`cargo update`, `npm update`, `uv lock --upgrade`,
+   `poetry update`, `composer update`, `go get -u ./... && go mod tidy`), and
+   run the project's formatter, linter and tests again. A new major version is
+   its own change, not part of a cut; note any that are waiting in the backlog.
+
 2. **Update CHANGELOG** before committing. If `CHANGELOG.md` (or equivalent:
    `CHANGES.md`, `HISTORY.md`, `RELEASES.md`) exists in the repo:
    - Move entries under `## [Unreleased]` to a new `## [X.Y.Z] - YYYY-MM-DD`
@@ -170,13 +177,12 @@ User says "**BCTP**", execute in order:
      `## [Unreleased]` heading above them.
 
 3. **C**ommit version bump with message `chore: bump version`. Stage only
-   manifest, lockfile, and changelog.
+   manifest, lockfile(s), and changelog.
 4. **T**ag commit as `vX.Y.Z` matching new version. The tree must be green first
    — a tag is not something you can take back, and never move or reuse one that
    already exists; cut the next version instead.
-5. **P**ush commit and tag to remote. When the bump commit carries dependency
-   updates (see Defaults), push the commit alone first, wait for its CI run on
-   the default branch to go green, and only then push the tag.
+5. **P**ush the commit alone first, wait for its CI run on the default branch to
+   go green, and only then push the tag.
 6. **Watch the tag's CI run to completion, and confirm it published.** A push
    succeeding means the tag exists, nothing more. Release pipelines gate their
    publish jobs on the build jobs, so one red check does not fail loudly — it
@@ -193,10 +199,10 @@ Defaults:
   when the caller is in the same workspace. A minor bump also means updating any
   internal dependency pins that name the old version, which a patch bump never
   surfaces.
-- Dependency updates during a cut are fine: the lockfile regen in step 1 may
-  move dependencies to newer compatible releases, and they ride in the bump
-  commit. The condition is a green CI run on the default branch for that commit
-  before the tag is pushed — the tag deploys code that no other run has tested.
+- Every cut updates dependencies (step 1), so they never fall far behind between
+  releases. The condition is a green CI run on the default branch for the bump
+  commit before the tag is pushed — the tag deploys code that no other run has
+  tested.
 - Never skip hooks or force-push.
 - No version field → ask before proceeding.
 - CI/deploy triggered by version tags → push starts the release; step 6 is what
