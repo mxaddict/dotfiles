@@ -109,6 +109,14 @@ jobs:
           echo "$out" | grep -q '^already installed: ' ||
             { echo "::error::the second run reported nothing installed"; exit 1; }
 
+      # md2adf needs only the Python that core installs; the Arch, Debian and
+      # Ubuntu images have none of their own.
+      - name: md2adf's tests pass on the core group's Python
+        run: |
+          if [ "${{ matrix.name }}" = windows ]; then python=python; else python=python3; fi
+          command -v "$python"
+          "$python" -I .github/scripts/test_md2adf.py
+
       # scoop puts coreutils.exe on PATH as a shim in its shared shims folder;
       # the profile must alias the real coreutils folder, not every shim.
       - name: The profile aliases scoop's coreutils, not its shims

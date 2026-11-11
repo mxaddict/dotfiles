@@ -32,6 +32,14 @@ jobs:
 
       - uses: ./.github/actions/krypt
 
+      # The converter, and the command as this OS runs it (by its shebang, or
+      # md2adf.ps1 on Windows), on the runner's own Python.
+      - name: md2adf tests
+        run: |
+          $python = if ($IsWindows) { 'python' } else { 'python3' }
+          & $python -I .github/scripts/test_md2adf.py
+          if ($LASTEXITCODE -ne 0) { throw "md2adf tests failed on $python" }
+
       - name: Deploy and verify
         run: ./.github/scripts/test-setup.ps1
 

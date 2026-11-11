@@ -77,6 +77,7 @@ try {
         Assert-Absent '.config/alacritty/alacritty.toml'
     }
     Assert-Deployed '.config/opencode/AGENTS.md' '.config/agents/AGENTS.md'
+    Assert-Deployed '.local/bin/md2adf' '.local/bin/md2adf'
     if (-not (Test-Path (Join-Path $sandbox '.gitconfig.local'))) { $failures.Add('missing: .gitconfig.local') }
 
     $windowsOnly = [ordered]@{
@@ -88,6 +89,7 @@ try {
         'AppData/Roaming/tealdeer/config/config.toml'             = '.config/tealdeer/config.toml'
         'Documents/PowerShell/Microsoft.PowerShell_profile.ps1'   = 'Documents/PowerShell/Microsoft.PowerShell_profile.ps1'
         '.local/bin/.envup.ps1'                                   = '.local/bin/.envup.ps1'
+        '.local/bin/md2adf.ps1'                                   = '.local/bin/md2adf.ps1'
     }
     # ~/.config copies of tools that read a native folder on Windows, and
     # shell tooling Windows has no use for.
@@ -119,6 +121,31 @@ try {
         foreach ($entry in $set.Entries.GetEnumerator()) {
             if ($os -in $set.On) { Assert-Deployed $entry.Key $entry.Value } else { Assert-Absent $entry.Key }
         }
+    }
+
+    # md2adf from the deployed bin folder, found on PATH the way a shell finds
+    # it: by its shebang and executable bit on Unix, as md2adf.ps1 on Windows.
+    $bin = Join-Path $sandbox '.local' 'bin'
+    $savedPath = $env:PATH
+    $env:PATH = $bin + [IO.Path]::PathSeparator + $env:PATH
+    try {
+        $command = Get-Command md2adf -ErrorAction Ignore
+        $expectedName = if ($os -eq 'windows') { 'md2adf.ps1' } else { 'md2adf' }
+        if (-not $command -or $command.Source -ne (Join-Path $bin $expectedName)) {
+            $failures.Add("md2adf resolves to '$($command.Source)', not the deployed $expectedName")
+        } else {
+            $sample = Join-Path $sandbox 'md2adf-sample.md'
+            Set-Content -LiteralPath $sample -Value "## Title`n`n- item with **bold**"
+            $json = & md2adf $sample
+            $exit = $LASTEXITCODE
+            $json
+            $types = if ($exit -eq 0) { (($json | Out-String) | ConvertFrom-Json).content.type -join ',' }
+            if ($types -ne 'heading,bulletList') {
+                $failures.Add("deployed md2adf exited $exit with top-level nodes '$types'")
+            }
+        }
+    } finally {
+        $env:PATH = $savedPath
     }
 
     # Commands: the per-OS entry runs, and a Linux-only one refuses elsewhere.
