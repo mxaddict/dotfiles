@@ -13,34 +13,36 @@
 
 [[deps]]
 group = "core"
+# python runs .local/bin/md2adf.
 pacman = [
     "alacritty", "bat", "btop", "curl", "eza", "fastfetch", "fd", "fish",
-    "fzf", "git", "jq", "neovim", "ripgrep", "starship", "tealdeer", "unzip",
-    "wget", "zoxide",
+    "fzf", "git", "jq", "neovim", "python", "ripgrep", "starship", "tealdeer",
+    "unzip", "wget", "zoxide",
 ]
 apt = [
     "alacritty", "bat", "btop", "curl", "eza", "fastfetch", "fd-find", "fish",
-    "fzf", "git", "jq", "neovim", "ripgrep", "starship", "tealdeer", "unzip",
-    "wget", "zoxide",
+    "fzf", "git", "jq", "neovim", "python3", "ripgrep", "starship", "tealdeer",
+    "unzip", "wget", "zoxide",
 ]
 # Fedora retired its tealdeer package before Fedora 45, so cargo builds it.
 dnf = [
     "alacritty", "bat", "btop", "cargo:starship", "cargo:tealdeer", "curl",
     "eza", "fastfetch", "fd-find", "fish", "fzf", "git", "jq", "neovim",
-    "ripgrep", "unzip", "wget", "zoxide",
+    "python3", "ripgrep", "unzip", "wget", "zoxide",
 ]
 # Homebrew disabled its alacritty cask on 2026-09-01 (fails Gatekeeper); see
 # docs/backlog.md.
 brew = [
     "bat", "btop", "eza", "fastfetch", "fd", "fish", "fzf", "git", "jq",
-    "neovim", "ripgrep", "starship", "tealdeer", "unzip", "wget", "zoxide",
+    "neovim", "python", "ripgrep", "starship", "tealdeer", "unzip", "wget",
+    "zoxide",
 ]
 # Windows uses scoop: per-user installs under ~/scoop, no UAC prompt. krypt adds
 # the buckets `bucket/app` entries name before installing a group.
 scoop = [
     "bat", "btop", "extras/alacritty", "extras/psfzf", "eza", "fastfetch", "fd",
-    "fzf", "git", "jq", "neovim", "pwsh", "ripgrep", "starship", "tealdeer",
-    "uutils-coreutils", "zoxide",
+    "fzf", "git", "jq", "neovim", "pwsh", "python", "ripgrep", "starship",
+    "tealdeer", "uutils-coreutils", "zoxide",
 ]
 
 # The claude, codex and opencode CLIs are not packages here: `krypt system
@@ -53,10 +55,10 @@ pacman = [
 ]
 apt = [
     "bear", "gh", "glab", "lazygit", "libssl-dev", "nodejs", "npm", "pkg-config",
-    "python3", "python3-venv", "rustup",
+    "python3-venv", "rustup",
 ]
 dnf = [
-    "bear", "doctl", "gh", "glab", "nodejs", "npm", "python3", "rustup",
+    "bear", "doctl", "gh", "glab", "nodejs", "npm", "rustup",
 ]
 brew = [
     "bear", "doctl", "gh", "glab", "lazygit", "node", "rustup",

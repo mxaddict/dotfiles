@@ -423,11 +423,16 @@ platform = "linux"
 
 
 # Markdown to Atlassian Document Format, for Jira's acli: `md2adf in.md >
-# out.json`, then `--description-file out.json` or `--body-adf out.json`.
+# out.json`, then `--description-file out.json` or `--body-adf out.json`. A
+# Python script (the core group's python); Windows runs it through md2adf.ps1.
 [[link]]
 src = ".local/bin/md2adf"
 dst = "${LOCAL_BIN}/md2adf"
-platform = ["linux", "macos"]
+
+[[link]]
+src = ".local/bin/md2adf.ps1"
+dst = "${LOCAL_BIN}/md2adf.ps1"
+platform = "windows"
 
 [[link]]
 src = ".local/bin/grimblast"
