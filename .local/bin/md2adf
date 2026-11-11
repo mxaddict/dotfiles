@@ -1,0 +1,129 @@
+#!/usr/bin/env python3
+"""Convert a small Markdown subset to Atlassian Document Format (ADF) JSON.
+
+Supported: `#`..`######` headings, paragraphs, `-`/`*` bullet lists,
+`1.` ordered lists (one nesting level by two-space indent), fenced code
+blocks, and inline `code`, **bold**, *italic* and [text](url) links.
+Usage: md2adf in.md > out.json
+"""
+
+import json
+import re
+import sys
+
+INLINE = re.compile(r"(`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*|\[[^\]]+\]\([^)]+\))")
+LINK = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
+LIST_ITEM = re.compile(r"^(\s*)([-*]|\d+\.)\s+(.*)$")
+HEADING = re.compile(r"^#{1,6} ")
+
+
+def text(value, *marks):
+    node = {"type": "text", "text": value}
+    if marks:
+        node["marks"] = list(marks)
+    return node
+
+
+def inline(source):
+    nodes = []
+    for part in INLINE.split(source):
+        if not part:
+            continue
+        if part.startswith("`") and part.endswith("`"):
+            nodes.append(text(part[1:-1], {"type": "code"}))
+        elif part.startswith("**") and part.endswith("**"):
+            nodes.append(text(part[2:-2], {"type": "strong"}))
+        elif part.startswith("*") and part.endswith("*") and len(part) > 2:
+            nodes.append(text(part[1:-1], {"type": "em"}))
+        elif link := LINK.fullmatch(part):
+            label, url = link.groups()
+            nodes.append(text(label, {"type": "link", "attrs": {"href": url}}))
+        else:
+            nodes.append(text(part))
+    return nodes
+
+
+def para(source):
+    return {"type": "paragraph", "content": inline(source)}
+
+
+def parse_list(lines, i, first):
+    """Parse the list that starts at lines[i], whose LIST_ITEM match is first."""
+    indent = len(first.group(1))
+    kind = "orderedList" if first.group(2)[0].isdigit() else "bulletList"
+    node = {"type": kind, "content": []}
+    while i < len(lines):
+        m = LIST_ITEM.match(lines[i])
+        if not m or len(m.group(1)) != indent:
+            continuation = lines[i].startswith(" " * (indent + 2)) and lines[i].strip()
+            if not m and continuation and node["content"]:
+                last = node["content"][-1]["content"][0]
+                last["content"].extend(inline(" " + lines[i].strip()))
+                i += 1
+                continue
+            if m and len(m.group(1)) > indent and node["content"]:
+                sub, i = parse_list(lines, i, m)
+                node["content"][-1]["content"].append(sub)
+                continue
+            break
+        node["content"].append({"type": "listItem", "content": [para(m.group(3))]})
+        i += 1
+    return node, i
+
+
+def convert(md):
+    lines = md.splitlines()
+    out, i, buf = [], 0, []
+
+    def flush():
+        if buf:
+            out.append(para(" ".join(s.strip() for s in buf)))
+            buf.clear()
+
+    while i < len(lines):
+        line = lines[i]
+        if line.startswith("```"):
+            flush()
+            lang = line[3:].strip() or None
+            code, i = [], i + 1
+            while i < len(lines) and not lines[i].startswith("```"):
+                code.append(lines[i])
+                i += 1
+            block = {"type": "codeBlock", "content": [text("\n".join(code))]}
+            if lang:
+                block["attrs"] = {"language": lang}
+            out.append(block)
+            i += 1
+        elif HEADING.match(line):
+            flush()
+            level = len(line) - len(line.lstrip("#"))
+            out.append(
+                {
+                    "type": "heading",
+                    "attrs": {"level": level},
+                    "content": inline(line[level + 1 :].strip()),
+                }
+            )
+            i += 1
+        elif not buf and (item := LIST_ITEM.match(line)):
+            node, i = parse_list(lines, i, item)
+            out.append(node)
+        elif not line.strip():
+            flush()
+            i += 1
+        else:
+            buf.append(line)
+            i += 1
+    flush()
+    return {"type": "doc", "version": 1, "content": out}
+
+
+def main():
+    if len(sys.argv) != 2:
+        sys.exit("usage: md2adf in.md > out.json")
+    with open(sys.argv[1], encoding="utf-8") as f:
+        print(json.dumps(convert(f.read())))
+
+
+if __name__ == "__main__":
+    main()

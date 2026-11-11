@@ -28,7 +28,8 @@ Scripts in `.local/bin/` use a leading `.` (e.g. `.menu-apps`, `.kanata`,
 `.envup`). This hides them from `ls` while keeping them invocable from
 `.krypt/commands.toml`. New scripts should follow the same pattern.
 
-Exception: third-party binaries (`grimblast`) keep their upstream name.
+Exceptions: third-party binaries (`grimblast`) keep their upstream name, and
+commands meant to be typed (`md2adf`) have no leading `.`.
 
 ## Lint / format
 

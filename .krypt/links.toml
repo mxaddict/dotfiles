@@ -422,6 +422,13 @@ dst = "${LOCAL_BIN}/.notify-test"
 platform = "linux"
 
 
+# Markdown to Atlassian Document Format, for Jira's acli: `md2adf in.md >
+# out.json`, then `--description-file out.json` or `--body-adf out.json`.
+[[link]]
+src = ".local/bin/md2adf"
+dst = "${LOCAL_BIN}/md2adf"
+platform = ["linux", "macos"]
+
 [[link]]
 src = ".local/bin/grimblast"
 dst = "${LOCAL_BIN}/grimblast"
