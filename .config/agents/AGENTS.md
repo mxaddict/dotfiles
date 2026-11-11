@@ -450,6 +450,40 @@ value (a float's NaN payloads and signed zero). This is how a determinism check
 ends up reporting identical states as different and different states as
 identical.
 
+## Secrets
+
+**Never print a secret, and never read one you don't need.** This covers `.env`
+/ `.env.*` files, CI/CD variables, vault entries, tokens, passwords and
+connection strings.
+
+- Never `cat`, `echo` or log a secret's value, and never paste it into chat, a
+  commit, a ticket or a file inside a repo.
+- `.env` files are never read at all. Verify claims about them from tracked
+  files and git history instead.
+
+**Copying a secret from one place to another** (for example, one GitLab
+project's CI variable into another's):
+
+1. Fetch the value straight into a temporary file in the session's scratch
+   directory, under `umask 077`, with nothing echoed. For example:
+   `glab api projects/:id/variables/NAME | python3 -c 'import json, sys; sys.stdout.write(json.load(sys.stdin)["value"])' > "$F"`.
+2. Write it to the destination from that file, through the tool's API (a JSON
+   body built from the file). Never put it on a command line, where it lands in
+   shell history and process listings.
+3. **Verify by comparison, never by looking:** read the destination back into
+   another temporary file and compare its **length** (`wc -c`) and its **full
+   SHA-256 digest** (`sha256sum`) with the source's. A prefix of the digest is
+   not enough. Report only the two lengths and whether the digests match, never
+   the value or the digest itself: a full digest of a short secret can be
+   brute-forced offline. Also check the destination's flags (masked, protected,
+   raw/expand, environment scope) against the source's.
+4. Delete the temporary files by name as soon as the comparison is done, and
+   confirm they're gone.
+
+**Comparing two secrets** ("are these the same?", "did the rotation land?")
+works the same way: the length and full SHA-256 digest of each, never the
+values.
+
 ## Verification
 
 **A check that cannot fail is not a check.** Every test, assertion, hash,
