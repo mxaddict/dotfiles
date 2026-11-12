@@ -316,6 +316,12 @@ If the task is ambiguous in a way that changes what you would build, ask before
 building it. If it's ambiguous in a way that doesn't, pick the obvious option
 and say which you picked.
 
+**A question for the user does not stop the work.** When something comes up that
+needs the user's feedback, ask it, then keep going on whatever else is
+actionable — the other slices of the task, the parts the answer cannot change,
+the checks and bookkeeping still owed. Wait for the answer only when nothing
+actionable is left; then stop and say plainly what is blocked on it.
+
 ## Code style
 
 **Write code that reads like the code around it** — its naming, its idioms, its
