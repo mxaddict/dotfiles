@@ -467,6 +467,11 @@ connection strings.
 - `.env` files are never read at all. Verify claims about them from tracked
   files and git history instead.
 
+**Sample env files are the exception.** `.env.sample` / `.env.example`, the
+committed template with placeholder values only, is safe to read, and it must be
+kept up to date: a change that adds, renames or removes a setting updates the
+sample in the same commit, with a placeholder and never a real value.
+
 **Copying a secret from one place to another** (for example, one GitLab
 project's CI variable into another's):
 
