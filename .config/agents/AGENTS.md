@@ -870,3 +870,36 @@ Before taking numbers:
 
 A number taken without a quiet window is labelled with its load wherever it is
 written, or retaken in one; never compare figures from different windows.
+
+## Disk space
+
+**The main session cleans up build output and temporary files as it goes, so
+disk use stays in check.** Build directories only grow: every toolchain update,
+feature set and profile adds another copy, and a Rust `target/` reaches tens of
+gigabytes on its own. Nothing else on the machine removes them.
+
+- **When:** as each task in a repo finishes, before ending the session, and
+  whenever free space runs low. Not in the middle of work in a repo you are
+  about to build again: a clean throws away the incremental state, and the next
+  build starts from nothing.
+- **What:** build output (`cargo clean`, the project's own `clean` script,
+  `mvn clean`, `gradle clean`) and the temporary files the session made —
+  scratch files it no longer needs, throwaway clones, a separate `CARGO_HOME` or
+  `CARGO_TARGET_DIR`, rebuilds made to compare against. Use the project's clean
+  command, which knows what it built, rather than deleting the directory by
+  hand; where there is none, delete by name as the Destructive operations rules
+  say.
+- **Not what:** anything untracked that could be work (`git clean` stays under
+  Destructive operations), and caches shared across projects
+  (`~/.cargo/registry`, the npm and pip caches, `~/.cache/go-build` when other
+  sessions build Go). Clearing a shared cache makes every session download it
+  again; ask first.
+- **Whose:** only projects no other session is working in. A clean under a
+  running build breaks that build. `ListAgents` first; a project with a running
+  session is that session's to clean, so message it and ask, rather than
+  cleaning under its feet.
+- **Who:** the main session, never a sub-agent: a clean is a repo-wide command,
+  which the Agents rules keep out of a write agent's brief.
+
+Report what was freed, from the figure the tool prints (`cargo clean` ends with
+`Removed N files, X total`), or from free space read before and after.
