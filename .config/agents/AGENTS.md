@@ -90,7 +90,11 @@ landing on the default branch:
    `docs/backlog.md` entry naming the branch, the state the work is in and what
    is left, so it can be picked up later. This is the one exception to a repo's
    "keep all work on the default branch" rule: the branch is a parking place,
-   not a delivery.
+   not a delivery. **The backlog entry goes where the backlog normally lives,
+   not on the parked branch:** in a repo that works on its default branch,
+   commit and push the entry there, so the next session sees it without knowing
+   the branch exists. Where `docs/backlog.md` is not tracked (most likely
+   gitignored), write the entry into the local copy.
 4. **Then the usual end of session:** record everything raised and not finished
    in the backlog, watch CI for what went to the default branch, sweep every
    repo touched, and clean up build output and temporary files.
