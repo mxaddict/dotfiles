@@ -223,6 +223,12 @@ notification, Wi-Fi, audio and Bluetooth binds and the `krypt menu` commands run
   and how Claude Code spells a Windows path as its key in `.claude.json` (the
   stub writes `(Get-Location).Path`). Covering them needs a credential in CI,
   which is the owner's call.
+- **Step 1's other existing-session branches are not tested.** The `session`
+  workflow covers an existing session idle at the shell (`start_claude` in
+  `.github/scripts/test-session.sh`), but not "Claude already running there" or
+  "anything else, ask". The first can't be told apart there on Windows: the stub
+  runs under `pwsh`, the same `#{pane_current_command}` as the shell. What real
+  Claude Code shows there is unverified on Windows; on Linux it is `claude`.
 - **Only the `core` group is installed in CI**; every other group is resolved
   with `krypt deps --check`, not installed.
 
