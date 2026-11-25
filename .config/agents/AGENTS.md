@@ -95,9 +95,12 @@ landing on the default branch:
    commit and push the entry there, so the next session sees it without knowing
    the branch exists. Where `docs/backlog.md` is not tracked (most likely
    gitignored), write the entry into the local copy.
-4. **Then the usual end of session:** record everything raised and not finished
-   in the backlog, watch CI for what went to the default branch, sweep every
-   repo touched, and clean up build output and temporary files.
+4. **Do not wait on CI for what was just pushed.** A wrap-up means the user is
+   leaving: say which runs are still owed a verdict, note them in the backlog,
+   and go straight on.
+5. **Then the usual end of session:** record everything raised and not finished
+   in the backlog, sweep every repo touched, and clean up build output and
+   temporary files.
 
 ## Dotfiles
 
