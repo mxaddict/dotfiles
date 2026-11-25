@@ -75,6 +75,26 @@ reported with the reason it was not.
 Pushing still follows the other rules: run the attribution check first, never
 force-push, and tags, releases and PRs still wait until they are asked for.
 
+## Wrapping up
+
+User says "**wrap up**" → stop without losing work and without unverified code
+landing on the default branch:
+
+1. **Start nothing new.** Let running sub-agents finish or stop them, so the
+   tree is stable before anything is committed.
+2. **A slice in final verification before a push gets finished:** complete the
+   verification, then push it. Never push it before the verification is done,
+   and never abandon it.
+3. **A slice still in progress is parked, not finished and not discarded:**
+   commit it to a temporary branch, push that branch, and add a
+   `docs/backlog.md` entry naming the branch, the state the work is in and what
+   is left, so it can be picked up later. This is the one exception to a repo's
+   "keep all work on the default branch" rule: the branch is a parking place,
+   not a delivery.
+4. **Then the usual end of session:** record everything raised and not finished
+   in the backlog, watch CI for what went to the default branch, sweep every
+   repo touched, and clean up build output and temporary files.
+
 ## Dotfiles
 
 **The config files in `$HOME` are copies, deployed from the
