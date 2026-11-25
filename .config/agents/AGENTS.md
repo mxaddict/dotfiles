@@ -816,9 +816,10 @@ Whether one or several are running:
 
 **When the user says `start a new session in <dir>`** (or a Claude session for a
 project), follow this flow and start it: a tmxr session made with the user's `t`
-alias in that directory, and Claude started in it with the user's `c` alias. Use
-the aliases, not a hand-built `tmxr new-session` or a bare `claude`: `t` gives
-the session the user's naming, and `c` gives Claude the user's flags.
+alias in that directory (or the one already there), and Claude started in it
+with the user's `c` alias. Use the aliases, not a hand-built `tmxr new-session`
+or a bare `claude`: `t` gives the session the user's naming, and `c` gives
+Claude the user's flags.
 
 - **`t`** is bare `tmxr`, which runs `new-session -A -s <directory name>` (a `:`
   in the name becomes `_`), so the session is named after the directory it is
@@ -834,14 +835,19 @@ and macOS, in the PowerShell profile on Windows. They are shell functions, not
 programs, so an agent runs `t` through the shell that defines it, and types `c`
 into the session's own shell: tmxr panes start `$SHELL` on Unix, and `pwsh`
 (else Windows PowerShell) on Windows, which loads the profile. The dotfiles'
-`session` workflow runs this flow on Linux, macOS and Windows, with a stub in
-place of claude.
+`session` workflow runs this flow on Linux, macOS and Windows, for an existing
+session and a new one, with a stub in place of claude.
 
-1. **Check the name is free.** The session will be named after the directory's
-   last component (`ce.sickw` for `~/Projects/mxaddict/ce.sickw`).
-   `tmxr has-session -t <name>` exits 0 when one exists; that one may be
-   someone's running work, and keys sent to it land in their pane, so never
-   reuse or kill it: ask.
+1. **Use the session if it already exists.** It is named after the directory's
+   last component (`ce.sickw` for `~/Projects/mxaddict/ce.sickw`), and
+   `tmxr has-session -t <name>` exits 0 when one exists. Use that one rather
+   than making another, and never kill it. Check its pane first, with
+   `tmxr display-message -p -t <name> '#{pane_current_path} #{pane_current_command}'`:
+   - **At the shell (`fish`, or `pwsh` on Windows) in the directory:** skip step
+     2 and type `c` into it (step 3).
+   - **Claude already running there:** start nothing; report it (step 6).
+   - **Anything else**, another program or another directory: ask, since keys
+     sent to it land in whatever is running there.
 2. **Create it with `t` in the directory, and confirm where it landed:**
 
    ```bash

@@ -34,17 +34,15 @@ $expected = @(
     , ($flags + '--continue')
     , $flags
 )
-$calls = @(Get-Content -LiteralPath $Log | ForEach-Object { $_ | ConvertFrom-Json })
+# The log is shared by every session the test starts; these are this directory's.
+$calls = @(Get-Content -LiteralPath $Log | ForEach-Object { $_ | ConvertFrom-Json } | Where-Object { Test-SamePath $_.cwd $Directory })
 if ($calls.Count -ne $expected.Count) {
-    $failures.Add("claude ran $($calls.Count) times, expected $($expected.Count): --continue, then fresh")
+    $failures.Add("claude ran $($calls.Count) times in $Directory, expected $($expected.Count): --continue, then fresh")
 } else {
     for ($i = 0; $i -lt $calls.Count; $i++) {
         $got = @($calls[$i].args) -join ' '
         $want = $expected[$i] -join ' '
         if ($got -ne $want) { $failures.Add("claude call $($i + 1) had args '$got', expected '$want'") }
-        if (-not (Test-SamePath $calls[$i].cwd $Directory)) {
-            $failures.Add("claude call $($i + 1) ran in $($calls[$i].cwd), not $Directory")
-        }
     }
 }
 
