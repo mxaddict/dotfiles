@@ -153,6 +153,44 @@ jobs:
       - name: Check workflows
         run: actionlint
 
+  python:
+    name: ruff / pyright
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+      - name: Install ruff and pyright
+        env:
+          RUFF_VERSION: 0.15.11
+          PYRIGHT_VERSION: 1.1.409
+        run: |
+          pipx install "ruff==$RUFF_VERSION"
+          npm install --global "pyright@$PYRIGHT_VERSION"
+      # Tracked .py files, plus scripts that are Python only by their shebang
+      # (md2adf): both tools check a file passed by name whatever its
+      # extension.
+      - name: Find Python files
+        run: |
+          : > "$RUNNER_TEMP/python-files"
+          while IFS= read -r f; do
+            [ -f "$f" ] || continue
+            case "$f" in
+              *.py) ;;
+              *) head -n1 "$f" | grep -qE '^#!.*python' || continue ;;
+            esac
+            echo "$f" >> "$RUNNER_TEMP/python-files"
+          done < <(git ls-files)
+          cat "$RUNNER_TEMP/python-files"
+          [ -s "$RUNNER_TEMP/python-files" ] || { echo "no Python files found"; exit 1; }
+      - name: ruff check
+        run: xargs -a "$RUNNER_TEMP/python-files" -d '\n' ruff check
+      - name: ruff format
+        run: xargs -a "$RUNNER_TEMP/python-files" -d '\n' ruff format --check
+      - name: pyright
+        run: xargs -a "$RUNNER_TEMP/python-files" -d '\n' pyright
+
   psscriptanalyzer:
     name: PSScriptAnalyzer
     runs-on: ubuntu-latest

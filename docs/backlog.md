@@ -189,11 +189,6 @@ notification, Wi-Fi, audio and Bluetooth binds and the `krypt menu` commands run
   `psscriptanalyzer` job in `lint.yml`). Warning-level rules are not enforced;
   how many warnings the existing `.ps1` files raise has not been measured, so
   turning them on may need fixes or per-rule suppressions first.
-- **No CI job lints the Python files** (`.local/bin/md2adf` and
-  `.github/scripts/test_md2adf.py`); CI runs md2adf's tests, but `shellcheck`
-  skips both by their shebang. Both passed `ruff check`, `ruff format --check`
-  and `pyright` locally on 2026-11-11. A lint job would need ruff and pyright on
-  the runner (via pipx or npm).
 
 ## Coverage gaps
 
