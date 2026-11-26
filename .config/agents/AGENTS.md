@@ -72,6 +72,10 @@ checkout.
 `git status -sb`. Anything ahead of its upstream or dirty gets pushed, or
 reported with the reason it was not.
 
+**Watch CI for the exact sha that went out**, read after the push succeeds
+(`git rev-parse @{u}`), never a `HEAD` captured before it: a commit made or
+pulled in between leaves you watching the run for different code.
+
 Pushing still follows the other rules: run the attribution check first, never
 force-push, and tags, releases and PRs still wait until they are asked for.
 
@@ -276,6 +280,25 @@ Literal `backticks` and $(command) and $vars, no escaping.
 EOF
 ```
 
+## Waiting on background work
+
+**Wait on the process, never on a pattern that names it.**
+`until ! pgrep -f "<pattern>"; do sleep N; done` (or `while pgrep -f …`) never
+exits: the shell running the loop has the pattern in its own command line, so
+`pgrep -f` matches the waiter itself. `pkill -f <pattern>` kills the shell that
+runs it, for the same reason. Keep the PID of what you start; wait on it
+(`tail --pid=<pid> -f /dev/null`), poll the job's own log or result file for a
+line, or run the job in the foreground under `timeout`; stop it with
+`kill <pid>`.
+
+**A pipeline that ends in `grep` exits 1 when the grep finds nothing**, so a run
+filtered for errors that had none reads as a failed run. Judge a run by the
+tool's own summary line, not by the exit code of a pipeline that ends in grep.
+
+**A background shell that has outlived its job is suspect.** Read its command
+line (`tr '\0' ' ' < /proc/<pid>/cmdline`); if it is a waiter that cannot exit,
+kill it by PID and tell the agent that owns it.
+
 ## Searching
 
 **A search hit is a location, not an answer.** Grep tells you WHERE something
@@ -319,6 +342,9 @@ of the columns. Done that way the assertion keeps its teeth: it still fails on a
 real wording change, and stops failing on reformats. Verify both halves before
 believing it.
 
+**A scripted edit anchored on exact prose breaks the same way** once prettier
+rewraps the paragraph: match the whitespace between words loosely (`\s+`).
+
 ## Scope
 
 **Change what the task needs and nothing else.** No drive-by refactors, no
@@ -351,6 +377,9 @@ command.
 If the task is ambiguous in a way that changes what you would build, ask before
 building it. If it's ambiguous in a way that doesn't, pick the obvious option
 and say which you picked.
+
+**An investigation leaves things behind.** Before committing after one, read
+`git status` and grep for the probe files and symbol names it added.
 
 **A question for the user does not stop the work.** When something comes up that
 needs the user's feedback, ask it, then keep going on whatever else is
@@ -820,9 +849,35 @@ Whether one or several are running:
   recoverable. Scope the formatter to that task's own files.
 - **Commit each cluster before briefing the next.** Work left uncommitted while
   the next task runs is work the next task can walk over.
+- **Don't send fixes to a write agent while your own verification run is using
+  the tree:** its edits change the files under test. Wait for the run, or stop
+  it by PID and re-run after the fixes.
+- **Tell a read-only agent what it must not run** beside a verification run or a
+  write agent: GPU work, the workspace-wide suite, anything that rewrites files.
+  "Read-only" alone does not stop it competing for the machine or the build
+  directory.
+
+Briefing them and reading what comes back:
+
+- **The brief can be wrong** — a wrong term, a defect that does not reproduce. A
+  brief that lists defects says to confirm each on the tree first, and to report
+  the ones that are not real instead of changing code for them.
+- **A change that flips a default breaks the tests pinning the old behaviour**,
+  and the write agent will edit them, possibly outside its file list. Say so in
+  the brief: such tests may be changed assertion by assertion, each change
+  reported, and the reviewer compares old and new assertions line by line.
+- **Tell a reviewer which failure modes matter, never what to conclude.** When
+  the stakes are high, add a second reviewer who has not seen the first review:
+  second looks keep finding real defects the first missed.
+- **"Completed" is not a report.** A sub-agent often stops while its own
+  background job runs, and notifies again when that ends. Only a message with
+  results is a report; if one shows completed and none arrived, ask it for the
+  report and change nothing.
 - **A sub-agent's report is a claim, not evidence.** Read the diff and re-run
   the verification yourself — a task whose own checks failed can still report
-  success, and reading its report is not checking its work.
+  success, and reading its report is not checking its work. Its "all checks
+  green" can also predate its last edit: verify the final tree, and ask for each
+  check's summary line, never a bare "passed".
 
 ## Starting a Claude session
 
@@ -915,6 +970,10 @@ Before taking numbers:
 
 A number taken without a quiet window is labelled with its load wherever it is
 written, or retaken in one; never compare figures from different windows.
+
+**When you are the one asked to pause**, your sub-agents hear it only at their
+next tool round: say so to whoever asked, and confirm with `ps` that nothing of
+yours is running before replying "paused".
 
 ## Disk space
 
