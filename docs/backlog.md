@@ -94,6 +94,20 @@
   a non-admin account (the copy is skipped), the hooks through a real
   `krypt setup`/`krypt update`, or the versioned shell path being repointed
   after a pwsh update. CI does not run it.
+- **SSH logins are elevated, and that is kept for now.** Windows OpenSSH gives
+  an admin account its full token, with no setting to log in filtered, so
+  starship's `username` module shows `Administrator` (its label for an elevated
+  session; `whoami` is still the user). Deferred by the owner on 2026-11-27: a
+  normal-user shell with a `sudo`, built on gsudo (scoop `main`): the profile of
+  the elevated login starts `gsudo --integrity Medium pwsh`, authorizes it with
+  `gsudo cache on --pid <pid>` (no UAC needed from an elevated parent, which
+  matters as no UAC prompt can show over SSH), and aliases `sudo` to `gsudo`.
+  Equivalent to NOPASSWD sudo: guards against accidents, not a security
+  boundary. Unverified: whether gsudo's Medium token drops Administrators or
+  only lowers the integrity level, and whether it can cross scoop's junctions
+  (which would make `shims-elevated` unneeded over SSH). The other option, a
+  separate standard account for SSH, cannot elevate at all over SSH (UAC needs
+  the desktop).
 - **fnm's profile branches have not run anywhere.** fnm is in no deps group. The
   other tools' branches do run: `deps.yml` dot-sources the profile after
   installing the scoop `core` group (checking only the coreutils aliases), and
