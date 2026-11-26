@@ -81,6 +81,15 @@ prompt, only when it is off). Git for Windows also writes
 `core.symlinks = false` into the `.git/config` of each repo it clones where
 symlinks were not allowed, which overrides the global setting there.
 
+`krypt setup` and `krypt update` also install Windows' OpenSSH Server, start it
+on boot and make scoop's `pwsh` the login shell (`krypt system sshd`, one UAC
+prompt, only when something is off). Authorized keys are per machine and not
+part of this repo: keep them by hand in `~\.ssh\authorized_keys`. sshd ignores
+that file for an account in Administrators and reads only
+`C:\ProgramData\ssh\administrators_authorized_keys`, so for such an account the
+same command copies yours there, readable by Administrators and SYSTEM alone.
+Rerun `krypt system sshd` (or `krypt update`) after editing your keys.
+
 Verify: `krypt --version` should report the `krypt_min` in `.krypt.toml` or
 newer.
 
@@ -119,6 +128,7 @@ Hooks declared in `.krypt.toml` (`[[hook]] when = "post-update"`) cover:
 - `hyprctl reload` (gated on hyprland running)
 - Windows Developer Mode (`krypt system devmode`), which `krypt setup` also runs
   as a `post-setup` hook
+- Windows OpenSSH Server (`krypt system sshd`), also a `post-setup` hook
 - the kryptic-sh tools (`krypt deps --group kryptic`: hjkl, hrdr, gpur, ...),
   also a `post-setup` hook; every other deps group is installed only by running
   `krypt deps`

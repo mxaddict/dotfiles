@@ -67,6 +67,26 @@
     `Default=` for the install in `profiles.ini` and `installs.ini` at the
     existing profile (the install's hash only appears after one start, so start
     once, close, fix, start again).
+- **Scoop's `current` junctions are unusable over SSH.** Processes `sshd` starts
+  refuse to cross a junction a non-admin created ("The path cannot be traversed
+  because it contains an untrusted mount point"; seen 2026-11-27 on Windows 11
+  Pro 26300 with scoop 0.6.0). Every `scoop\apps\<app>\current` is one, so in an
+  SSH session every scoop shim fails ("Shim: Could not create process") and the
+  PowerShell profile errors on its `current` paths (doctl, gh, glab completions;
+  zoxide). `krypt system sshd` sidesteps it only for the login shell, by setting
+  `DefaultShell` to pwsh's versioned dir. Options, untried:
+  `scoop config no_junction true` then `scoop reset *` (shims and shortcuts
+  point at versioned dirs; the profile's `current` paths would need changing
+  too), or recreating the junctions elevated, which scoop undoes on each update.
+  Needs the owner's call.
+- **`krypt system sshd` is verified on one machine only.** On the first Windows
+  machine it installed the OpenSSH Server capability (one UAC prompt), the
+  second run did nothing without a prompt, and a newer `~\.ssh\authorized_keys`
+  timestamp made the next run copy it to `administrators_authorized_keys` (one
+  prompt); a key login to `localhost` then worked. Not tried: a declined prompt,
+  a non-admin account (the copy is skipped), the hooks through a real
+  `krypt setup`/`krypt update`, or the versioned shell path being repointed
+  after a pwsh update. CI does not run it.
 - **fnm's profile branches have not run anywhere.** fnm is in no deps group. The
   other tools' branches do run: `deps.yml` dot-sources the profile after
   installing the scoop `core` group (checking only the coreutils aliases), and

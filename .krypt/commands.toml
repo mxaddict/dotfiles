@@ -279,6 +279,83 @@ steps = [
     { run = ["pwsh", "-NoProfile", "-Command", '''$ErrorActionPreference = 'Stop'; $key = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock'; $name = 'AllowDevelopmentWithoutDevLicense'; function Test-DevMode {{ (Get-ItemProperty $key -ErrorAction Ignore).$name -eq 1 }}; if (Test-DevMode) {{ exit 0 }}; Start-Process reg -Verb RunAs -Wait -WindowStyle Hidden -ArgumentList 'add', ($key -replace ':', ''), '/v', $name, '/t', 'REG_DWORD', '/d', '1', '/f'; if (-not (Test-DevMode)) {{ throw 'Developer Mode is still off' }}'''] },
 ]
 
+# Windows' own OpenSSH Server: installed, started on boot, and logging in to
+# scoop's pwsh. The shell is set by its versioned dir, not `current`: sshd
+# refuses a junction a non-admin made ("untrusted mount point", seen on Windows
+# 11 with scoop's junctions), so after a pwsh update the path differs and the
+# next run repoints it. The firewall rule is the one the install creates, left
+# as Windows makes it.
+#
+# Keys come from ~/.ssh/authorized_keys, kept by hand on each machine and never
+# in this repo. sshd reads that file itself, except for a member of
+# Administrators: then only administrators_authorized_keys, and only while
+# Administrators and SYSTEM alone can access it. For such an account the file
+# is copied there with that ACL. Membership is read from `whoami /groups`,
+# which lists the group by SID even while UAC holds it as deny-only.
+#
+# Like devmode, it checks without elevation and asks for one UAC prompt only
+# when something is off. The copy cannot be read unelevated, so it counts as
+# current when its size and timestamp match the source's (Copy-Item keeps the
+# timestamp). The script is inline because `krypt setup` runs its hooks before
+# anything is linked into ~/.local/bin. Run by the openssh-server hooks in
+# .krypt.toml on `krypt setup` and `krypt update`.
+[[command]]
+group       = "system"
+name        = "sshd"
+description = "Install and configure OpenSSH Server (asks for elevation only if something is off)"
+platform    = "windows"
+steps = [
+    { run = ["pwsh", "-NoProfile", "-Command", '''
+$ErrorActionPreference = 'Stop'
+$pwshDir = scoop prefix pwsh
+$target = (Get-Item -LiteralPath $pwshDir).Target
+if ($target) {{ $pwshDir = $target }}
+$shell = Join-Path $pwshDir 'pwsh.exe'
+if (-not (Test-Path -LiteralPath $shell)) {{ throw "pwsh is not at $shell; run krypt deps" }}
+$keys = Join-Path $HOME '.ssh\authorized_keys'
+$adminKeys = Join-Path $env:ProgramData 'ssh\administrators_authorized_keys'
+$syncKeys = (Test-Path -LiteralPath $keys) -and (whoami /groups /fo csv /nh | Select-String -SimpleMatch '"S-1-5-32-544"')
+
+function Get-Drift {{
+    $sshd = Get-Service sshd -ErrorAction Ignore
+    if (-not $sshd) {{ 'sshd is not installed' }}
+    elseif ($sshd.StartType -ne 'Automatic' -or $sshd.Status -ne 'Running') {{ "sshd is $($sshd.Status), $($sshd.StartType)" }}
+    if ((Get-ItemProperty HKLM:\SOFTWARE\OpenSSH -ErrorAction Ignore).DefaultShell -ne $shell) {{ "the login shell is not $shell" }}
+    if ($syncKeys) {{
+        $src = Get-Item -LiteralPath $keys
+        $dst = Get-Item -LiteralPath $adminKeys -Force -ErrorAction Ignore
+        if (-not $dst -or $dst.Length -ne $src.Length -or $dst.LastWriteTimeUtc -ne $src.LastWriteTimeUtc) {{ "$adminKeys differs from $keys" }}
+    }}
+}}
+
+$drift = @(Get-Drift)
+if (-not $drift) {{ exit 0 }}
+$drift | ForEach-Object {{ Write-Host "sshd: $_" }}
+
+$apply = @"
+`$ErrorActionPreference = 'Stop'
+if ((Get-WindowsCapability -Online -Name 'OpenSSH.Server~~~~0.0.1.0').State -ne 'Installed') {{
+    Add-WindowsCapability -Online -Name 'OpenSSH.Server~~~~0.0.1.0' | Out-Null
+}}
+Set-Service sshd -StartupType Automatic
+Start-Service sshd
+New-Item HKLM:\SOFTWARE\OpenSSH -Force -ErrorAction Ignore | Out-Null
+New-ItemProperty HKLM:\SOFTWARE\OpenSSH -Name DefaultShell -PropertyType String -Value '$($shell -replace "'", "''")' -Force | Out-Null
+"@
+if ($syncKeys) {{
+    $apply += "`n" + @"
+Copy-Item -LiteralPath '$($keys -replace "'", "''")' -Destination '$($adminKeys -replace "'", "''")' -Force
+icacls '$($adminKeys -replace "'", "''")' /inheritance:r /grant '*S-1-5-32-544:F' /grant '*S-1-5-18:F' | Out-Null
+"@
+}}
+$encoded = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($apply))
+Start-Process $shell -Verb RunAs -Wait -ArgumentList '-NoProfile', '-EncodedCommand', $encoded
+
+$drift = @(Get-Drift)
+if ($drift) {{ throw "sshd is still not set up: $($drift -join '; ')" }}
+'''] },
+]
+
 # The claude, codex and opencode CLIs, each from its own install script so it
 # can update itself in userspace. A CLI already installed is left to its own
 # updater. Run by the agent-clis hooks in .krypt.toml on `krypt setup` and

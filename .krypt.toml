@@ -139,6 +139,21 @@ if             = "platform:windows"
 run            = ["krypt", "system", "devmode"]
 ignore_failure = true
 
+# OpenSSH Server (see `krypt system sshd` in .krypt/commands.toml), wired up
+# the same way as developer-mode above.
+[[hook]]
+name = "openssh-server"
+when = "post-setup"
+if   = "platform:windows"
+run  = ["krypt", "system", "sshd"]
+
+[[hook]]
+name           = "openssh-server"
+when           = "post-update"
+if             = "platform:windows"
+run            = ["krypt", "system", "sshd"]
+ignore_failure = true
+
 [[hook]]
 name           = "ensure-user-dirs"
 when           = "post-update"
