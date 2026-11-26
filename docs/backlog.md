@@ -331,6 +331,14 @@ audit raised and did not settle:
   `; signingkey = ...` and `; gpgsign = true` lines; the explanatory comments
   and the `; [commit]` header above `gpgsign` are gone. Cosmetic here; belongs
   in krypt's own backlog (the `gitconfig` writer).
+- **Declined for AGENTS.md: a rule against
+  `git fetch origin "pull/N/head:refs/remotes/pr/N"`.** It was reported as
+  failing silently in kryptic-sh/infr, but it did not reproduce: in a fresh
+  repo, `git fetch -q origin "pull/38/head:refs/remotes/pr/38"` on
+  kryptic-sh/krypt exited 0 and created the ref (checked 2026-11-26). The likely
+  cause was an existing `refs/remotes/pr/N` that a contributor's force-push made
+  non-fast-forward, which a refspec without `+` refuses. That was not recorded
+  at the time, so it is a guess. Add the rule only with a case that reproduces.
 
 ## Root configs (`krypt system root`)
 
