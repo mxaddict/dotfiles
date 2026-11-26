@@ -176,6 +176,15 @@ User says "**BCTP**", execute in order:
 
 2. **Update CHANGELOG** before committing. If `CHANGELOG.md` (or equivalent:
    `CHANGES.md`, `HISTORY.md`, `RELEASES.md`) exists in the repo:
+   - **Audit `## [Unreleased]`, don't just move it.** Entries written as you go
+     can contradict each other: one says request bodies may be compressed, a
+     later change refuses them; a `Fixed` entry says responses are not
+     compressed yet, a later `Changed` entry turns compression on. Read every
+     entry against the others and against the code at the commit being tagged,
+     and rewrite each to say what THIS release does compared with the previous
+     one. Something added and removed within the cycle gets no entry; an entry a
+     later change superseded is rewritten or deleted; a cross-reference
+     ("replaced by X (above)") must still point at something true.
    - Move entries under `## [Unreleased]` to a new `## [X.Y.Z] - YYYY-MM-DD`
      heading, keeping `## [Unreleased]` empty above it.
    - **Update the link block at the bottom** — the half that gets forgotten.
@@ -690,6 +699,9 @@ intent from commit subjects, which is where entries get vague or missed.
   with no outward effect, a test-only or docs-only change, a fix to unreleased
   code (fold that into the entry for the feature itself, which has not shipped
   yet either).
+- **Fix the entry a change supersedes, don't argue with it.** When a change
+  undoes or alters something already under `## [Unreleased]`, rewrite that entry
+  in the same commit rather than adding a second one that contradicts it.
 - **Start one if the project has none** and it ships something a user consumes:
   `CHANGELOG.md` in Keep-a-Changelog form with `## [Unreleased]` at the top. Say
   in your summary that you created it. A project that was always going to want a
