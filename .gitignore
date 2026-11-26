@@ -38,6 +38,7 @@
 .local/bin/codex
 .local/bin/dxc
 .local/bin/slangc
+/.ssh/
 butler
 compile_commands.json
 history.txt
