@@ -67,18 +67,25 @@
     `Default=` for the install in `profiles.ini` and `installs.ini` at the
     existing profile (the install's hash only appears after one start, so start
     once, close, fix, start again).
-- **Scoop's `current` junctions are unusable over SSH.** Processes `sshd` starts
-  refuse to cross a junction a non-admin created ("The path cannot be traversed
-  because it contains an untrusted mount point"; seen 2026-11-27 on Windows 11
-  Pro 26300 with scoop 0.6.0). Every `scoop\apps\<app>\current` is one, so in an
-  SSH session every scoop shim fails ("Shim: Could not create process") and the
-  PowerShell profile errors on its `current` paths (doctl, gh, glab completions;
-  zoxide). `krypt system sshd` sidesteps it only for the login shell, by setting
-  `DefaultShell` to pwsh's versioned dir. Options, untried:
-  `scoop config no_junction true` then `scoop reset *` (shims and shortcuts
-  point at versioned dirs; the profile's `current` paths would need changing
-  too), or recreating the junctions elevated, which scoop undoes on each update.
-  Needs the owner's call.
+- **Elevated sessions cannot cross most of scoop's `current` junctions.** An SSH
+  login (always elevated) is refused "The path cannot be traversed because it
+  contains an untrusted mount point" (seen 2026-11-27 on Windows 11 Pro 26300
+  with scoop 0.6.0). Which junctions fail is not predictable from their owner:
+  `scoop`'s own, owned by the user, passed while 48 others owned by the user
+  failed, and the elevated install's `tailscale` passed. The PowerShell profile
+  works around it in elevated sessions (env vars rewritten to the versioned
+  dirs, `~\scoop\shims-elevated` replacing `shims` on PATH); `krypt system sshd`
+  sets `DefaultShell` to pwsh's versioned dir because sshd checks that path
+  before any profile runs. What is not covered: programs started in an elevated
+  session without the profile (`pwsh -NoProfile`, Windows PowerShell, cmd from
+  Explorer's "Run as administrator"), and an elevated session that outlives a
+  `scoop update` keeps the old versioned paths until its next start. Verified:
+  an SSH login loads the profile with no errors and runs zoxide, rg, git, scoop
+  and the uutils aliases; an unelevated pwsh keeps `shims` and `current`. Not
+  tried: an elevated Windows Terminal tab. Considered and not used:
+  `scoop config no_junction`, which would leave the Tailscale service, its tray
+  startup entry and `CLAUDE_CODE_GIT_BASH_PATH` pointing at a removed version
+  after each update.
 - **`krypt system sshd` is verified on one machine only.** On the first Windows
   machine it installed the OpenSSH Server capability (one UAC prompt), the
   second run did nothing without a prompt, and a newer `~\.ssh\authorized_keys`

@@ -33,6 +33,63 @@ function Resolve-ShimTarget([string]$Path) {
     if ($target) { $target.Matches[0].Groups[1].Value }
 }
 
+# An elevated session (an SSH login always is one) runs with the full admin
+# token, and Windows refuses such a process most of the junctions a non-admin
+# made ("The path cannot be traversed because it contains an untrusted mount
+# point"; which ones pass is not predictable from their owner). scoop links
+# each app's apps\<app>\current to its versioned folder with such a junction,
+# so there its shims, and the PATH entries and variables naming `current`,
+# fail. The junction's target can still be read, so an elevated session names
+# the versioned folder instead: in every environment variable, and through
+# shims-elevated, a copy of the shims folder beside it that replaces it on
+# PATH. Its exes are hard links to scoop's (the shim exe reads the .shim named
+# after itself); its other files are scoop's with `current` replaced, and the
+# .ps1 shims' relative paths still resolve because it sits beside shims.
+$scoopRoot = $env:SCOOP ?? (Join-Path $HOME 'scoop')
+$elevated = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
+    [Security.Principal.WindowsBuiltInRole]::Administrator)
+if ($elevated -and (Test-Path -LiteralPath (Join-Path $scoopRoot 'shims'))) {
+    $scoopVersions = @{}
+    function Set-ScoopVersionPath([string]$Text) {
+        $Text -replace '(?i)([\\/]apps[\\/]([^\\/";]+)[\\/])current(?=[\\/";]|$)', {
+            $app = $_.Groups[2].Value
+            if (-not $scoopVersions.ContainsKey($app)) {
+                $target = (Get-Item -LiteralPath (Join-Path $scoopRoot "apps\$app\current") -ErrorAction Ignore).Target
+                $scoopVersions[$app] = if ($target) { Split-Path -Leaf $target } else { 'current' }
+            }
+            $_.Groups[1].Value + $scoopVersions[$app]
+        }
+    }
+
+    foreach ($var in Get-ChildItem Env:) {
+        $pinned = Set-ScoopVersionPath $var.Value
+        if ($pinned -ne $var.Value) { Set-Item -LiteralPath "Env:$($var.Name)" -Value $pinned }
+    }
+
+    $shims = Join-Path $scoopRoot 'shims'
+    $pinnedShims = Join-Path $scoopRoot 'shims-elevated'
+    New-Item -ItemType Directory -Force $pinnedShims | Out-Null
+    $sources = Get-ChildItem -LiteralPath $shims -File
+    foreach ($src in $sources) {
+        $dst = Join-Path $pinnedShims $src.Name
+        if ($src.Extension -eq '.exe') {
+            if (-not (Test-Path -LiteralPath $dst)) { New-Item -ItemType HardLink -Path $dst -Target $src.FullName | Out-Null }
+        } else {
+            $text = Set-ScoopVersionPath ([IO.File]::ReadAllText($src.FullName))
+            if (-not (Test-Path -LiteralPath $dst) -or [IO.File]::ReadAllText($dst) -ne $text) {
+                [IO.File]::WriteAllText($dst, $text)
+            }
+        }
+    }
+    # Shims of apps uninstalled since the last such session.
+    Get-ChildItem -LiteralPath $pinnedShims -File | Where-Object Name -notin $sources.Name | Remove-Item
+    $env:PATH = ($env:PATH -split ';' | ForEach-Object { if ($_.TrimEnd('\') -eq $shims) { $pinnedShims } else { $_ } }) -join ';'
+
+    Remove-Item Function:Set-ScoopVersionPath
+    Remove-Variable scoopVersions, var, pinned, shims, pinnedShims, sources, src, dst, text -ErrorAction Ignore
+}
+Remove-Variable scoopRoot, elevated
+
 # uutils coreutils: make every coreutils command win over PowerShell's
 # built-in aliases/functions (ls, rm, cp, mkdir, ...) and over same-named
 # System32 programs (sort.exe, more.com, timeout.exe, ...).
