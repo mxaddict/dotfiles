@@ -211,7 +211,8 @@ notification, Wi-Fi, audio and Bluetooth binds and the `krypt menu` commands run
   swaync, which keeps the name, and lyr leaves notifications to it. Removing it
   takes `sudo pacman -Rns swaync`, then `systemctl --user stop swaync` if it is
   running, then restarting lyr so it claims the name. Done on `slowassdell`
-  (2026-10-26) and `mxaddict-pc` (2026-11-02).
+  (2026-10-26) and `mxaddict-pc` (2026-11-02). Not yet on `mxaddict-x13`, which
+  still had waybar and swaync installed and running on 2026-11-27.
 - **lyr is off by default on macOS and Windows**, by the owner's choice on
   2026-10-26: the `kryptic` group installs it there (`kryptic-sh/tap/lyr`,
   `kryptic-sh/lyr`), but nothing starts it, since only `hyprland.lua` runs it.
@@ -239,6 +240,13 @@ notification, Wi-Fi, audio and Bluetooth binds and the `krypt menu` commands run
   outside `~/.files` and is not listed; deleting the clone then breaks it. No
   such link existed on `slowassdell`, so the snippet stayed simple. Fix if one
   turns up: resolve one hop (`readlink`, made absolute) instead of the chain.
+  The same scan also misses absolute links stored _inside_ a directory that step
+  4 moves out of the clone, since step 3 prunes `~/.files`: on `mxaddict-x13`
+  (2026-11-27) four links in the Claude plugin cache
+  (`~/.claude/plugins/cache/caveman/…/compress/{scripts,SKILL.md}`) pointed at
+  `/home/mxaddict/.files/.claude/…` and dangled after the move; they were
+  repointed at `~/.claude/…` by hand. A one-hop scan of `$HOME` for targets
+  containing `/.files` after step 4 finds these.
 - **Post-update hooks are not run anywhere in CI**: `krypt update` needs a repo
   it can pull, and `test-setup.ps1` uses `krypt link`.
 - **Alacritty's macOS shell entry is unverified on a Mac.**
@@ -443,4 +451,10 @@ audit raised and did not settle:
   `.cache`, ...). It needs its own global excludes file, or the setting dropped.
   A machine that still has a `~/.files` clone needs the same treatment before
   the clone goes: `~/.claude`, `~/.claude-work` and `~/.codex` were symlinks
-  into it holding credentials and session state.
+  into it holding credentials and session state. The README migration leaves
+  `~/.krypt.toml` behind as a real file, and `krypt link` / `update` read
+  `.krypt.toml` from the current directory first, so run from `~` they treat
+  `$HOME` itself as the repo (a dry run there planned 899 writes instead of 92).
+  The README should delete the repo-meta copies in its step 6. On `mxaddict-x13`
+  the clone was retired on 2026-11-27 and `~/.krypt.toml`, `~/.krypt` and
+  `~/.deps.lock` deleted with it.
