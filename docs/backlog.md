@@ -289,6 +289,17 @@ Homebrew/scoop catalogs, with no fix available inside the manifest:
   assets, which neither `krypt deps` nor apt/dnf can install by name. Options: a
   kryptic-sh apt/rpm repository, an npm source in krypt, or leaving them to the
   Arch/Homebrew lists.
+- **Tailscale is installed on Arch and macOS only** (2026-11-27). Debian and
+  Fedora ship no `tailscale` package; it comes from Tailscale's own apt/rpm
+  repository, which krypt cannot add. scoop's `extras/tailscale` has a
+  `pre_install` that errors unless the shell is elevated, while `krypt deps`
+  runs scoop as the user, so listing it would fail every Windows install. The
+  Windows machine has it from an elevated `scoop install`. Options: a
+  `krypt system` step that adds the repository or elevates for this one package,
+  or installing it by hand (`curl -fsSL https://tailscale.com/install.sh | sh`
+  on Linux, an elevated `scoop install extras/tailscale` on Windows). Not
+  verified: that `krypt deps --check` resolves the `tailscale-app` cask in the
+  apps group; CI's macOS job runs it.
 - **`cargo:` entries need a default Rust toolchain.** On apt, dnf and scoop,
   `cargo:hjkl` and friends (and `cargo:starship` and `cargo:dysk` on dnf) build
   with `cargo`, which Debian's and Fedora's `rustup` packages leave without a

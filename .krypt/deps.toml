@@ -152,7 +152,10 @@ pacman = [
 ]
 apt = ["duf", "dysk"]
 dnf = ["cargo:dysk", "duf", "firefox", "thunderbird"]
-brew = ["duf", "dysk", "firefox", "thunderbird"]
+# Tailscale: Arch installs it in the system group. macOS takes the standalone
+# app. scoop's extras/tailscale refuses to install without admin rights, and
+# Debian and Fedora need Tailscale's own repository; see docs/backlog.md.
+brew = ["duf", "dysk", "firefox", "tailscale-app", "thunderbird"]
 scoop = ["duf", "extras/firefox", "extras/thunderbird"]
 
 # kryptic-sh tools. Arch uses the AUR -bin packages (via paru), macOS the
