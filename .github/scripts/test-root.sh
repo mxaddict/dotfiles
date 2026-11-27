@@ -42,7 +42,8 @@ checked=${#installed[@]}
 [[ -x /usr/bin/auto-power-profile ]] || failures+=("not executable: /usr/bin/auto-power-profile")
 [[ -f /boot/EFI/Linux/arch-linux.efi ]] || failures+=("no UKI at /boot/EFI/Linux/arch-linux.efi")
 for unit in ly@tty2.service kanata.service power-check.timer power-profiles-daemon.service \
-    NetworkManager.service avahi-daemon.service bluetooth.service cups.service ufw.service; do
+    NetworkManager.service avahi-daemon.service bluetooth.service cups.service \
+    tailscaled.service ufw.service; do
     [[ $(systemctl is-enabled "$unit" 2>&1) == enabled ]] || failures+=("not enabled: $unit")
 done
 

@@ -206,8 +206,9 @@ runs paru under sudo, and paru refuses to build AUR packages as root.
 3. rebuilds the UKI when `mkinitcpio.conf`, the preset or `vconsole.conf`
    changed;
 4. enables ly on tty2 (replacing any other display manager), kanata,
-   NetworkManager, bluetooth, cups, avahi, ufw, power-profiles-daemon and the
-   `power-check` timer that picks a power profile from the battery level;
+   NetworkManager, bluetooth, cups, avahi, tailscale, ufw, power-profiles-daemon
+   and the `power-check` timer that picks a power profile from the battery
+   level;
 5. turns the firewall on: ufw drops incoming traffic except SSH (`22/tcp`) and
    allows outgoing. Rules a machine already has stay, so on a fresh install SSH
    is the only open port.

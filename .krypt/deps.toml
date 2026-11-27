@@ -120,8 +120,8 @@ pacman = [
     "avahi", "bind", "bluez", "bluez-utils", "bluetui", "cronie", "cups",
     "cups-pdf", "ethtool", "fprintd", "fwupd", "ghostscript", "kanata", "ly",
     "man-db", "mtr", "networkmanager", "nmap", "nss-mdns", "power-profiles-daemon",
-    "reflector", "rsync", "sbctl", "speedtest-cli", "traceroute", "ufw",
-    "usbutils", "wireless-regdb", "zerotier-one",
+    "reflector", "rsync", "sbctl", "speedtest-cli", "tailscale", "traceroute",
+    "ufw", "usbutils", "wireless-regdb",
 ]
 apt = []
 dnf = []
@@ -137,7 +137,7 @@ required_platforms = ["linux"]
 pacman = [
     "avahi", "binutils", "bluez", "brightnessctl", "cups", "fwupd", "kanata",
     "linux", "ly", "mkinitcpio", "networkmanager", "power-profiles-daemon",
-    "terminus-font", "ufw",
+    "tailscale", "terminus-font", "ufw",
 ]
 apt = []
 dnf = []

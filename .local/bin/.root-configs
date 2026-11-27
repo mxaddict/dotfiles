@@ -89,6 +89,7 @@ systemctl enable \
     avahi-daemon.service \
     bluetooth.service \
     cups.service \
+    tailscaled.service \
     ufw.service
 
 # Firewall: incoming traffic is dropped except SSH, outgoing is allowed, and
