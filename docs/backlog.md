@@ -402,6 +402,21 @@ audit raised and did not settle:
 
 ## Root configs (`krypt system root`)
 
+- **systemd 262 breaks TPM2 LUKS unlock sealed under older systemd.** It adds
+  `systemd-pcrosseparator.service`, which runs in the initrd before
+  `cryptsetup.target` and extends PCRs 0-7, 9 and 12-14 with `os-separator`. A
+  `systemd-tpm2` token sealed to PCR 7 before the upgrade no longer matches, so
+  `systemd-cryptsetup` logs "TPM policy does not match current system state" and
+  falls back to the passphrase. Seen on `mxaddict-x13` on the first boot after
+  upgrading systemd 261.2 to 262.2 (2026-11-27). The fix is to re-enroll from
+  the running system, whose PCR 7 already includes the separator:
+  `sudo systemd-cryptenroll --wipe-slot=tpm2 --tpm2-device=auto --tpm2-pcrs=7 <luks partition>`.
+  Any other machine unlocking through the TPM needs the same after its upgrade.
+  Nothing in this repo sets up TPM unlock; it is enrolled by hand per machine.
+  Considered and not done: binding to a signed PCR 11 policy (a `ukify`-signed
+  UKI), which would survive such changes but needs signing keys in the
+  mkinitcpio preset.
+
 - **Not carried over from the old `.local/bin/.deps`** (deleted in dfe7f99),
   which applied `.root/` before krypt did:
   - Signing fwupd's EFI binary with `sbctl sign` for Secure Boot, which
