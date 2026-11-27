@@ -297,9 +297,7 @@ Homebrew/scoop catalogs, with no fix available inside the manifest:
   Windows machine has it from an elevated `scoop install`. Options: a
   `krypt system` step that adds the repository or elevates for this one package,
   or installing it by hand (`curl -fsSL https://tailscale.com/install.sh | sh`
-  on Linux, an elevated `scoop install extras/tailscale` on Windows). Not
-  verified: that `krypt deps --check` resolves the `tailscale-app` cask in the
-  apps group; CI's macOS job runs it.
+  on Linux, an elevated `scoop install extras/tailscale` on Windows).
 - **`cargo:` entries need a default Rust toolchain.** On apt, dnf and scoop,
   `cargo:hjkl` and friends (and `cargo:starship` and `cargo:dysk` on dnf) build
   with `cargo`, which Debian's and Fedora's `rustup` packages leave without a
