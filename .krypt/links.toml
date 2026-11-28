@@ -434,6 +434,18 @@ src = ".local/bin/md2adf.ps1"
 dst = "${LOCAL_BIN}/md2adf.ps1"
 platform = "windows"
 
+# The lock between heavy jobs and performance measurements, shared by every
+# agent under this home: `agent-lock job -- cargo test`, `agent-lock perf -- bench`. A
+# bash script (Git Bash on Windows); PowerShell runs it through agent-lock.ps1.
+[[link]]
+src = ".local/bin/agent-lock"
+dst = "${LOCAL_BIN}/agent-lock"
+
+[[link]]
+src = ".local/bin/agent-lock.ps1"
+dst = "${LOCAL_BIN}/agent-lock.ps1"
+platform = "windows"
+
 [[link]]
 src = ".local/bin/grimblast"
 dst = "${LOCAL_BIN}/grimblast"

@@ -225,6 +225,58 @@ notification, Wi-Fi, audio and Bluetooth binds and the `krypt menu` commands run
   machines set up before keep the line. Nothing reads it any more; delete it by
   hand if wanted.
 
+## agent-lock (`.local/bin/agent-lock`)
+
+- **Stale-mutex removal races.** `mutex_lock` removes a mutex older than
+  `MUTEX_STALE_MIN` with a check, then an `rmdir`. Two waiters that both see a
+  dead mutex can end with one removing the fresh mutex the other just took, and
+  both inside. It needs a holder to die inside the mutex, or to be suspended for
+  longer than the limit; the `mkdir perf` step still keeps two acquirers apart.
+  Not fixed: a rename-based takeover has the same window.
+- **A SIGKILLed or TerminateProcess'd wrapper frees its entry while its command
+  runs on.** The job's file names the wrapper's pid, not the command's, so the
+  next measurement can start beside an orphaned build. Fixing it means recording
+  the child (or its process group) and checking that too.
+- **Liveness that cannot be told counts as alive.** A failing `ps`, or no
+  recorded start time, keeps an entry. A reused pid with no start time can then
+  hold back measurements until that process exits; `agent-lock status` shows it.
+  On Windows `ps -W` STIME is a time of day under a day old and a date after,
+  and a time compared with a date has to count as the same process (or a job
+  running past midnight would read as dead), so reuse is caught only within the
+  UTC day the job started.
+- **PowerShell changes some arguments before `agent-lock.ps1` sees them:** bare
+  numbers lose their spelling, a leading `--` is eaten, an array variable is
+  comma-joined. The wrapper's header lists them; quoting avoids each.
+- **A call costs seconds on Windows, where every fork is slow.** Measured
+  2026-11-28 on the dev machine, at about 20% CPU with other sessions running:
+  `agent-lock job -- true` took 5.4 to 13.1 s over five runs,
+  `agent-lock status` 0.7 to 1.3 s, a bare `sed` 0.18 to 0.28 s. A `bash -x`
+  profile of one 7.6 s job put 2.1 s in `proc_start` (`ps -W`), 1.0 s in
+  `repo_name` (git), and 1.6 s in `kv` and `iso` writing the entry. Fewer forks
+  (one `ps -W` per call, the entry's fields from one `date`) would cut it;
+  antivirus as a cause is not checked. It is also why the suite's 30 s waits
+  flake on a loaded machine.
+- **One lock per home, not per machine:** WSL, containers and other users have
+  their own `~/.cache/agent-locks` and do not see it. A state dir shared with
+  another pid namespace (a container with `$HOME` bind-mounted, a network home
+  used from two machines) is worse: liveness is judged against this process
+  table, so the other side's live jobs read as dead.
+- **Verified locally on Windows only** (Git Bash, PowerShell 7 and 5.1); Linux,
+  macOS and macOS's `/bin/bash` 3.2 by the `setup` workflow. PSScriptAnalyzer
+  and actionlint were not run locally. The skip for a job file that vanishes
+  while a drain logs it has no deterministic test. How Claude Code, Codex and
+  opencode actually kill a timed-out command was not tested.
+- **The suite's 30-second waits flake under load:** two local runs on the final
+  round-3 code failed one or two cases each while another session ran a release
+  `cargo nextest`, with one job taking 18 s to start, and a later run of mine
+  failed `case_lost_lock_is_reported` and `case_drain_limit` the same way (a
+  process still running after 30 s). The timeout has to stay under
+  `MUTEX_STALE_MIN`; raise it if CI's Windows runner shows the same.
+- **A live holder that stops mid-drain is never freed:** while it drains, only a
+  dead pid frees the perf lock, and the `--drain` bound is enforced by the
+  holder itself, so a suspended (SIGSTOP'd) holder blocks new jobs until it is
+  resumed or killed.
+
 ## CI
 
 - **PSScriptAnalyzer enforces only `ParseError` and `Error` severity** (the

@@ -78,6 +78,7 @@ try {
     }
     Assert-Deployed '.config/opencode/AGENTS.md' '.config/agents/AGENTS.md'
     Assert-Deployed '.local/bin/md2adf' '.local/bin/md2adf'
+    Assert-Deployed '.local/bin/agent-lock' '.local/bin/agent-lock'
     if (-not (Test-Path (Join-Path $sandbox '.gitconfig.local'))) { $failures.Add('missing: .gitconfig.local') }
 
     $windowsOnly = [ordered]@{
@@ -90,6 +91,7 @@ try {
         'Documents/PowerShell/Microsoft.PowerShell_profile.ps1'   = 'Documents/PowerShell/Microsoft.PowerShell_profile.ps1'
         '.local/bin/.envup.ps1'                                   = '.local/bin/.envup.ps1'
         '.local/bin/md2adf.ps1'                                   = '.local/bin/md2adf.ps1'
+        '.local/bin/agent-lock.ps1'                               = '.local/bin/agent-lock.ps1'
     }
     # ~/.config copies of tools that read a native folder on Windows, and
     # shell tooling Windows has no use for.
@@ -143,6 +145,23 @@ try {
             if ($types -ne 'heading,bulletList') {
                 $failures.Add("deployed md2adf exited $exit with top-level nodes '$types'")
             }
+        }
+
+        # agent-lock the same way (agent-lock.ps1 on Windows), on a lock of its
+        # own in the sandbox.
+        $command = Get-Command agent-lock -ErrorAction Ignore
+        $expectedName = if ($os -eq 'windows') { 'agent-lock.ps1' } else { 'agent-lock' }
+        if (-not $command -or $command.Source -ne (Join-Path $bin $expectedName)) {
+            $failures.Add("agent-lock resolves to '$($command.Source)', not the deployed $expectedName")
+        } else {
+            $env:AGENT_LOCK_DIR = Join-Path $sandbox 'agent-locks'
+            $status = & agent-lock status
+            $exit = $LASTEXITCODE
+            $status
+            if ($exit -ne 0 -or -not ($status -match '^perf: free$')) {
+                $failures.Add("deployed agent-lock status exited $exit with: $status")
+            }
+            Remove-Item Env:AGENT_LOCK_DIR
         }
     } finally {
         $env:PATH = $savedPath

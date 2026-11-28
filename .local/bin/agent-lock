@@ -1,0 +1,756 @@
+#!/usr/bin/env bash
+# vi: ft=bash
+#
+# agent-lock: one machine-wide readers/writer lock between heavy work and
+# performance measurements, for every agent and harness on the machine.
+#
+#   agent-lock job  [--what TEXT] [--expires MIN] [--] COMMAND...
+#   agent-lock perf [--what TEXT] [--expires MIN] [--drain MIN] [--] COMMAND...
+#   agent-lock perf-acquire [--what TEXT] [--expires MIN] [--drain MIN]   (prints the id)
+#   agent-lock perf-extend ID [--expires MIN]
+#   agent-lock perf-release ID
+#   agent-lock status
+#   agent-lock clean
+#
+# Heavy jobs (builds, test suites, fuzzers, GPU work, ...) share the machine:
+# any number run at once, each registered as a file in jobs/ while it runs. A
+# measurement is exclusive: it takes perf/, which stops new jobs from starting,
+# waits until the registered jobs have drained, measures, and releases.
+#
+# Why a job and a measurement never both run:
+#   a job   writes jobs/<id> FIRST, then looks for perf/;
+#   perf    creates perf/   FIRST, then looks at jobs/.
+# Suppose both went ahead. The job saw no perf/, so its look came before perf/
+# was created; the measurer saw no jobs/<id>, so its look came before the file
+# was written. Then: job writes file < job looks < perf/ created < measurer
+# looks < job writes file, a cycle, so it cannot happen. A job that does see
+# perf/ removes its file before waiting, so it never holds up a measurement it
+# is itself waiting on.
+#
+# Entries left by a process that died are removed by whoever next looks at
+# them. Each records its process's pid and start time, so a pid the system has
+# since given to another process reads as dead; when liveness cannot be told
+# (ps failing, no start time), the entry counts as alive. A job whose process
+# is alive is never removed, however long it runs past --expires: a long build
+# must not be dropped mid-run, and a hung one only delays a measurement, which
+# lists it while it waits. Its expiry counts only when it recorded no pid. The
+# perf lock is freed by a dead process too, and also once it is past its expiry
+# by the margin even with its process alive, so a hung measurement cannot hold
+# every build on the machine forever. That clock starts when the measurement
+# has finished waiting for the jobs to drain: until then only a dead process
+# frees it. The measurer bounds the drain itself, as new jobs wait all through
+# it: after --drain minutes (DRAIN_MIN by default) with jobs still running (a
+# watcher, a dev server or a fuzzer never ends), it lists them, releases the
+# lock and gives up.
+#
+# Exit status: the command's own for `job` and `perf`; 2 for a usage error or
+# an agent-lock failure; LOST_EXIT (below) when a measurement's perf lock was
+# taken from it before it released it (expired and removed by another), so its
+# numbers may come from a busy machine, and from perf-extend and perf-release
+# for an id that no longer holds the lock; DRAIN_EXIT when `perf` or
+# `perf-acquire` gave up waiting for the jobs to drain, having measured
+# nothing.
+#
+# Inside `perf`, nested `agent-lock job` calls run their command directly; to
+# get the same inside a perf-acquire, export AGENT_LOCK_PERF_ID=<the id>.
+#
+# The state lives in $AGENT_LOCK_DIR (default ~/.cache/agent-locks; from Git
+# Bash on Windows that is under %USERPROFILE%). Each entry is key=value lines.
+# On Windows, agent-lock.ps1 runs this script with Git for Windows' bash for
+# agents whose shell is PowerShell, so both reach the same files.
+#
+# Verified on Windows (Git Bash, and through agent-lock.ps1) locally; Linux and
+# macOS by the setup workflow's agent-lock tests.
+
+set -u
+
+STATE=${AGENT_LOCK_DIR:-$HOME/.cache/agent-locks}
+JOBS=$STATE/jobs
+PERF=$STATE/perf
+OWNER=$PERF/owner
+# Serializes everything that creates, rewrites or removes perf/ (acquire,
+# extend, release, stale removal), so a stale-lock cleaner that read an old
+# owner can never remove a lock someone took after it looked. Jobs never take
+# it.
+MUTEX=$STATE/mutex
+POLL=${AGENT_LOCK_POLL:-15}
+
+# Minutes an entry may outlive its `expires` before anyone may remove it.
+STALE_MARGIN_MIN=30
+JOB_EXPIRES_MIN=120
+PERF_EXPIRES_MIN=60
+# The mutex is held for a few file operations; one older than this was left by
+# a process that died inside them.
+MUTEX_STALE_MIN=1
+# Minutes a measurement waits for running jobs before it gives up. New jobs
+# wait all through the drain, so it is short against a measurement's own
+# PERF_EXPIRES_MIN, while still outlasting a typical build or test run.
+DRAIN_MIN=30
+LOST_EXIT=3
+DRAIN_EXIT=4
+
+log() { printf 'agent-lock: %s\n' "$*" >&2; }
+die() {
+    log "$*"
+    exit 2
+}
+
+usage() {
+    sed -n '/^#   agent-lock/s/^#   //p' "$0" >&2
+    exit 2
+}
+
+windows=false
+[ -r "/proc/$$/winpid" ] && windows=true
+
+# The pid recorded for a liveness check: this process's own, which lives for
+# the whole job. On Windows it is the Windows pid, which means the same thing
+# to every MSYS runtime on the machine, not only the one that wrote it.
+if $windows; then
+    read -r SELF_PID <"/proc/$$/winpid"
+else
+    SELF_PID=$$
+fi
+
+# proc_start PID: returns 0 when PID is running, printing its start time (empty
+# when that cannot be read), 1 when it is not, 2 when that cannot be told. The
+# start time reads the same to every caller whatever its locale or time zone,
+# so two readings of one process compare equal.
+proc_start() {
+    local out stat f
+    if $windows; then
+        # `kill -0` (with or without -W) cannot see non-MSYS processes (pwsh),
+        # so look the Windows pid up in ps -W: the fourth numeric column (a
+        # status letter can lead), then STIME after TTY and UID.
+        out=$(LC_ALL=C TZ=UTC0 ps -W 2>/dev/null) || return 2
+        case $out in *WINPID*) ;; *) return 2 ;; esac
+        printf '%s\n' "$out" | awk -v p="$1" '
+            NR > 1 {
+                n = 0
+                for (i = 1; i <= NF; i++) if ($i ~ /^[0-9]+$/ && ++n == 4) break
+                if (n == 4 && $i == p) {
+                    s = $(i + 3)
+                    if (s !~ /:/) s = s " " $(i + 4)
+                    print s
+                    found = 1
+                    exit
+                }
+            }
+            END { exit !found }'
+        return
+    fi
+    if ! kill -0 "$1" 2>/dev/null; then
+        # Refused for another user's process, which ps still lists.
+        out=$(ps -p "$1" -o pid= 2>/dev/null)
+        [ -n "$out" ] || return 1
+    fi
+    # Silenced before the redirection, which fails if the process just exited.
+    if [ -r "/proc/$1/stat" ] && IFS= read -r stat 2>/dev/null <"/proc/$1/stat"; then
+        # Field 22, starttime in clock ticks since boot, counted after the
+        # command name (which may hold spaces) closes.
+        read -r -a f <<<"${stat##*) }"
+        printf '%s\n' "${f[19]:-}"
+    else
+        LC_ALL=C TZ=UTC0 ps -o lstart= -p "$1" 2>/dev/null
+    fi
+    return 0
+}
+
+# Whether two readings of a start time can be one process: equal, or either
+# unknown, or (Windows) a time of day against a date, as ps -W shows a start
+# more than a day old.
+same_start() {
+    { [ -z "$1" ] || [ -z "$2" ] || [ "$1" = "$2" ]; } && return 0
+    $windows && [ "${1//[!:]/}" != "${2//[!:]/}" ] && return 0
+    return 1
+}
+
+host_name() { hostname 2>/dev/null || uname -n; }
+HOST=$(host_name)
+
+# Each $(...) forks, which costs tens of milliseconds on Windows: the helpers
+# called on every poll avoid it.
+now() { NOW=${EPOCHSECONDS:-$(date +%s)}; }
+
+# ISO-8601 local time with a colon in the offset (+08:00), from epoch seconds.
+iso() {
+    local s
+    s=$(date -d "@$1" +%Y-%m-%dT%H:%M:%S%z 2>/dev/null || date -r "$1" +%Y-%m-%dT%H:%M:%S%z)
+    printf '%s:%s\n' "${s%??}" "${s#"${s%??}"}"
+}
+
+# Prints the value of KEY in FILE (nothing when either is missing).
+field() {
+    local line
+    while IFS= read -r line || [ -n "$line" ]; do
+        line=${line%$'\r'}
+        case $line in "$2="*)
+            printf '%s\n' "${line#"$2="}"
+            return 0
+            ;;
+        esac
+    done 2>/dev/null <"$1"
+}
+
+agent_name() {
+    if [ -n "${AGENT_LOCK_AGENT:-}" ]; then
+        printf '%s\n' "$AGENT_LOCK_AGENT"
+    elif [ -n "${CLAUDECODE:-}" ]; then
+        echo claude
+    else
+        printf '%s\n' "${USER:-${USERNAME:-unknown}}"
+    fi
+}
+
+session_name() { printf '%s\n' "${AGENT_LOCK_SESSION:-${CLAUDE_CODE_SESSION_ID:--}}"; }
+
+repo_name() {
+    local url top
+    if url=$(git remote get-url origin 2>/dev/null); then
+        printf '%s\n' "$url" | sed -E 's#\.git$##; s#^.*[:/]([^/:]+/[^/:]+)$#\1#'
+    elif top=$(git rev-parse --show-toplevel 2>/dev/null); then
+        basename "$top"
+    else
+        basename "$PWD"
+    fi
+}
+
+new_id() {
+    printf '%s-%s-%s-%s\n' "$(date +%Y%m%dT%H%M%S)" "$HOST" "$SELF_PID" "$RANDOM" |
+        tr -c 'A-Za-z0-9._\n-' _
+}
+
+# One key=value line. A value is flattened to one line, so a newline in it
+# (--what, a directory name) cannot add a line that reads as another key.
+kv() {
+    local v=${2//$'\n'/ }
+    printf '%s=%s\n' "$1" "${v//$'\r'/ }"
+}
+
+expiry_lines() {
+    kv expires "$(iso "$1")"
+    kv expires_epoch "$1"
+}
+
+# write_entry FILE WHAT EXPIRES_MIN COMMAND [draining]: this process's entry
+# for LOCK_ID, written to a temporary file and renamed into place, so a reader
+# never sees half an entry. `draining` marks a perf lock still waiting for the
+# jobs, with the time it gives up (DRAIN minutes on), also kept in DRAIN_UNTIL.
+write_entry() {
+    local file=$1 what=$2 minutes=$3 command=$4 t tmp
+    [ -n "${SELF_START+set}" ] || SELF_START=$(proc_start "$SELF_PID")
+    now
+    t=$NOW
+    tmp=$STATE/tmp.$LOCK_ID
+    {
+        kv id "$LOCK_ID"
+        kv agent "$(agent_name)"
+        kv session "$(session_name)"
+        kv host "$HOST"
+        kv repo "$(repo_name)"
+        kv cwd "$PWD"
+        kv what "$what"
+        kv command "$command"
+        kv pid "$SELF_PID"
+        kv pid_start "$SELF_START"
+        kv started "$(iso "$t")"
+        if [ "${5:-}" = draining ]; then
+            DRAIN_UNTIL=$((t + DRAIN * 60))
+            kv draining 1
+            kv drain_until "$(iso "$DRAIN_UNTIL")"
+        fi
+        expiry_lines $((t + minutes * 60))
+    } >"$tmp" && mv -f "$tmp" "$file"
+}
+
+# Sets STALE_REASON and returns 0 when FILE is past its expiry by the margin.
+# An entry with no readable expiry counts as expired: entries are renamed into
+# place whole, so that only happens to a damaged one.
+past_expiry() {
+    local exp
+    exp=$(field "$1" expires_epoch)
+    case $exp in
+    '' | *[!0-9]*)
+        STALE_REASON="no expiry recorded"
+        return 0
+        ;;
+    esac
+    now
+    if [ "$NOW" -gt $((exp + STALE_MARGIN_MIN * 60)) ]; then
+        STALE_REASON="expired at $(field "$1" expires)"
+        return 0
+    fi
+    return 1
+}
+
+# Sets STALE_REASON and returns 0 when FILE's process is gone: not running, or
+# its pid now another process's. Returns 1 while it may be alive, and for an
+# entry that recorded no pid.
+entry_dead() {
+    local pid start current
+    pid=$(field "$1" pid)
+    [ -n "$pid" ] || return 1
+    current=$(proc_start "$pid")
+    case $? in
+    1)
+        STALE_REASON="pid $pid is gone"
+        return 0
+        ;;
+    2) return 1 ;;
+    esac
+    start=$(field "$1" pid_start)
+    same_start "$start" "$current" && return 1
+    STALE_REASON="pid $pid is now another process (started $current, not $start)"
+    return 0
+}
+
+# Each sets STALE_REASON and returns 0 when the entry may be removed; the
+# header comment says why the two differ.
+job_stale() {
+    if [ -n "$(field "$1" pid)" ]; then
+        entry_dead "$1"
+        return
+    fi
+    past_expiry "$1"
+}
+
+perf_stale() {
+    entry_dead "$1" && return 0
+    [ "$(field "$1" draining)" = 1 ] && [ -n "$(field "$1" pid)" ] && return 1
+    past_expiry "$1"
+}
+
+describe() {
+    local file=$1
+    printf '%s (%s, session %s) in %s on %s: %s' \
+        "$(field "$file" agent)" "$(field "$file" id)" "$(field "$file" session)" \
+        "$(field "$file" repo)" "$(field "$file" host)" "$(field "$file" what)"
+}
+
+# How long a perf lock holds: while it drains, until the jobs are done or its
+# holder gives up; after that until its expiry, and past the margin anyone may
+# take it back.
+held_until() {
+    local exp
+    if [ "$(field "$1" draining)" = 1 ]; then
+        echo "while it waits for its jobs to drain (it gives up at $(field "$1" drain_until))"
+        return
+    fi
+    exp=$(field "$1" expires_epoch)
+    case $exp in
+    '' | *[!0-9]*) echo "with no expiry recorded" ;;
+    *) echo "until $(field "$1" expires) (taken back after $(iso $((exp + STALE_MARGIN_MIN * 60))))" ;;
+    esac
+}
+
+held_mutex=false
+mutex_lock() {
+    while ! mkdir "$MUTEX" 2>/dev/null; do
+        # Not there, so not held: it cannot be created at all. Asked twice, as
+        # its holder may have removed it between the two looks.
+        if [ ! -d "$MUTEX" ]; then
+            mkdir "$MUTEX" 2>/dev/null && break
+            [ -d "$MUTEX" ] || die "cannot create $MUTEX"
+        fi
+        if [ -n "$(find "$MUTEX" -maxdepth 0 -mmin +"$MUTEX_STALE_MIN" 2>/dev/null)" ]; then
+            log "removing a mutex left by a dead process"
+            rmdir "$MUTEX" 2>/dev/null
+        fi
+        sleep 0.1
+    done
+    held_mutex=true
+}
+mutex_unlock() {
+    rmdir "$MUTEX" 2>/dev/null
+    held_mutex=false
+}
+
+# Under the mutex: remove perf/ when it is stale. An empty perf/ is stale,
+# since its creator writes the owner before releasing the mutex.
+remove_perf_if_stale_locked() {
+    [ -d "$PERF" ] || return 1
+    if [ -f "$OWNER" ]; then
+        perf_stale "$OWNER" || return 1
+        log "removing stale perf lock of $(describe "$OWNER"): $STALE_REASON"
+    else
+        log "removing a perf lock with no owner"
+    fi
+    rm -f "$OWNER"
+    rmdir "$PERF" 2>/dev/null
+}
+
+remove_perf_if_stale() {
+    local r
+    mutex_lock
+    remove_perf_if_stale_locked
+    r=$?
+    mutex_unlock
+    return $r
+}
+
+# Removes stale job files; prints the live ones. A file that vanished while it
+# was read was its job ending, not a stale entry.
+live_jobs() {
+    local f
+    for f in "$JOBS"/*; do
+        [ -f "$f" ] || continue
+        if job_stale "$f"; then
+            [ -f "$f" ] || continue
+            log "removing stale job $(describe "$f"): $STALE_REASON"
+            rm -f "$f"
+        else
+            printf '%s\n' "$f"
+        fi
+    done
+}
+
+ensure_dirs() { mkdir -p "$JOBS" || die "cannot create $JOBS"; }
+
+# parse_opts DEFAULT_EXPIRES_MIN TAKES_DRAIN ARGS...: sets WHAT, EXPIRES, DRAIN
+# (only a measurement takes --drain) and ARGS, the command.
+parse_opts() {
+    local takes_drain=$2
+    WHAT=
+    EXPIRES=$1
+    DRAIN=$DRAIN_MIN
+    shift 2
+    ARGS=()
+    while [ $# -gt 0 ]; do
+        case $1 in
+        --drain)
+            $takes_drain || die "unknown option $1"
+            [ $# -ge 2 ] || usage
+            case $2 in '' | *[!0-9]*) die "--drain takes whole minutes" ;; esac
+            DRAIN=$2
+            shift 2
+            ;;
+        --what)
+            [ $# -ge 2 ] || usage
+            WHAT=$2
+            shift 2
+            ;;
+        --expires)
+            [ $# -ge 2 ] || usage
+            case $2 in '' | *[!0-9]*) die "--expires takes whole minutes" ;; esac
+            EXPIRES=$2
+            shift 2
+            ;;
+        --)
+            shift
+            ARGS+=("$@")
+            break
+            ;;
+        -*) die "unknown option $1" ;;
+        *)
+            ARGS+=("$@")
+            break
+            ;;
+        esac
+    done
+}
+
+quote_command() { printf '%q ' "$@" | sed 's/ $//'; }
+
+# lost ID WHEN: says loudly that ID no longer holds the perf lock, and exits.
+lost() {
+    local now_held=free
+    [ -f "$OWNER" ] && now_held="held by $(describe "$OWNER")"
+    log "LOST: perf lock $1 was taken from its holder $2 (the lock is now $now_held)"
+    exit "$LOST_EXIT"
+}
+
+# What the exit trap undoes, set as each is taken. They are globals because the
+# trap runs after the function that took them has returned.
+LOCK_ID=
+JOB_FILE=
+PERF_ID=
+on_exit() {
+    [ -n "$LOCK_ID" ] && rm -f "$STATE/tmp.$LOCK_ID"
+    [ -n "$JOB_FILE" ] && rm -f "$JOB_FILE"
+    $held_mutex && mutex_unlock
+    if [ -n "$PERF_ID" ] && ! release_perf "$PERF_ID"; then
+        PERF_ID=
+        lost "$LOCK_ID" "while it measured: its numbers may come from a busy machine"
+    fi
+}
+
+# Bash runs a trap only once the foreground command returns, so a signal sent
+# to this process alone releases the lock when the command ends; a terminal's
+# Ctrl+C reaches the command too, which ends it.
+trap_exits() {
+    trap on_exit EXIT
+    trap 'exit 130' INT
+    trap 'exit 143' TERM
+    trap 'exit 129' HUP
+}
+
+# Already covered: inside a registered job (a build script that wraps its own
+# steps), or inside the measurement that holds perf/.
+inside_job() { [ -n "${AGENT_LOCK_JOB_ID:-}" ] && [ -f "$JOBS/$AGENT_LOCK_JOB_ID" ]; }
+inside_perf() { [ -n "${AGENT_LOCK_PERF_ID:-}" ] && [ "$(field "$OWNER" id)" = "$AGENT_LOCK_PERF_ID" ]; }
+
+# A measurement started from inside a job would wait for that job to drain,
+# which never happens while it waits.
+refuse_inside_job() {
+    inside_job && die "a measurement inside job $AGENT_LOCK_JOB_ID would wait for that job forever"
+}
+
+cmd_job() {
+    parse_opts "$JOB_EXPIRES_MIN" false "$@"
+    [ ${#ARGS[@]} -gt 0 ] || usage
+    set -- "${ARGS[@]}"
+    # Registering again would deadlock against a measurement waiting on the
+    # outer entry.
+    if inside_job || inside_perf; then
+        exec "$@"
+    fi
+    local waiting=
+    LOCK_ID=$(new_id)
+    JOB_FILE=$JOBS/$LOCK_ID
+    trap_exits
+    while :; do
+        write_entry "$JOB_FILE" "$WHAT" "$EXPIRES" "$(quote_command "$@")" ||
+            die "cannot write $JOB_FILE"
+        [ -d "$PERF" ] || break
+        rm -f "$JOB_FILE"
+        remove_perf_if_stale && continue
+        if [ "$waiting" != "$(field "$OWNER" id)" ]; then
+            waiting=$(field "$OWNER" id)
+            log "waiting: perf lock held by $(describe "$OWNER") $(held_until "$OWNER")"
+        fi
+        sleep "$POLL"
+    done
+    export AGENT_LOCK_JOB_ID=$LOCK_ID
+    "$@"
+}
+
+# Takes perf/ for LOCK_ID, marked as draining, waiting while someone else
+# holds it. PERF_ID is set once it is ours, for the exit trap to release.
+take_perf() {
+    local command=$1 waiting=
+    while :; do
+        mutex_lock
+        remove_perf_if_stale_locked
+        if mkdir "$PERF" 2>/dev/null; then
+            if write_entry "$OWNER" "$WHAT" "$EXPIRES" "$command" draining; then
+                PERF_ID=$LOCK_ID
+                mutex_unlock
+                return 0
+            fi
+            rmdir "$PERF"
+            mutex_unlock
+            die "cannot write $OWNER"
+        fi
+        mutex_unlock
+        if [ "$waiting" != "$(field "$OWNER" id)" ]; then
+            waiting=$(field "$OWNER" id)
+            log "waiting: perf lock held by $(describe "$OWNER") $(held_until "$OWNER")"
+        fi
+        sleep "$POLL"
+    done
+}
+
+log_jobs() {
+    local f
+    while IFS= read -r f; do
+        [ -f "$f" ] || continue
+        log "  $(describe "$f") [pid $(field "$f" pid)]"
+    done <<<"$1"
+}
+
+# Waits until no job runs; returns 1 when DRAIN_UNTIL passes first.
+drain_jobs() {
+    local jobs last=
+    while :; do
+        jobs=$(live_jobs)
+        [ -n "$jobs" ] || return 0
+        now
+        if [ "$NOW" -ge "$DRAIN_UNTIL" ]; then
+            log "giving up: the jobs did not drain in $DRAIN min; still running:"
+            log_jobs "$jobs"
+            return 1
+        fi
+        if [ "$jobs" != "$last" ]; then
+            last=$jobs
+            log "perf lock held; waiting for $(printf '%s\n' "$jobs" | wc -l | tr -d ' ') running job(s), until $(iso "$DRAIN_UNTIL") at most:"
+            log_jobs "$jobs"
+        fi
+        sleep "$POLL"
+    done
+}
+
+# Under the mutex, while ID still owns perf/: replaces the owner's expiry with
+# one MINUTES from now and drops its lines matching DROP (an ERE). Returns 1
+# when ID no longer owns it, 2 when the owner could not be rewritten.
+restamp_owner() {
+    local id=$1 minutes=$2 drop=$3 tmp expires
+    [ "$(field "$OWNER" id)" = "$id" ] || return 1
+    now
+    expires=$((NOW + minutes * 60))
+    tmp=$STATE/tmp.$id
+    if { grep -Ev "$drop" "$OWNER" && expiry_lines "$expires"; } >"$tmp" && mv -f "$tmp" "$OWNER"; then
+        return 0
+    fi
+    rm -f "$tmp" 2>/dev/null
+    return 2
+}
+
+# restamp_own DROP WHEN: restamps this process's lock (see restamp_owner),
+# which must still be ours: if it is not, it was lost WHEN.
+restamp_own() {
+    local r
+    mutex_lock
+    restamp_owner "$LOCK_ID" "$EXPIRES" "$1"
+    r=$?
+    mutex_unlock
+    case $r in
+    0) ;;
+    1)
+        PERF_ID=
+        lost "$LOCK_ID" "$2"
+        ;;
+    *) die "cannot rewrite $OWNER" ;;
+    esac
+}
+
+# Waits for the jobs to drain, then starts the lock's expiry and drops what
+# only a draining lock has. Past the drain limit it gives up instead, and the
+# exit trap releases the lock.
+drain_then_measure() {
+    drain_jobs || exit "$DRAIN_EXIT"
+    restamp_own '^(expires|draining|drain_until)' "while it waited for the jobs to drain; nothing was measured"
+}
+
+# Releases perf/ only if ID still owns it.
+release_perf() {
+    local id=$1
+    mutex_lock
+    if [ "$(field "$OWNER" id)" = "$id" ]; then
+        rm -f "$OWNER"
+        rmdir "$PERF" 2>/dev/null
+        mutex_unlock
+        return 0
+    fi
+    mutex_unlock
+    return 1
+}
+
+cmd_perf() {
+    parse_opts "$PERF_EXPIRES_MIN" true "$@"
+    [ ${#ARGS[@]} -gt 0 ] || usage
+    set -- "${ARGS[@]}"
+    inside_perf && exec "$@"
+    refuse_inside_job
+    LOCK_ID=$(new_id)
+    trap_exits
+    take_perf "$(quote_command "$@")"
+    drain_then_measure
+    export AGENT_LOCK_PERF_ID=$LOCK_ID
+    "$@"
+}
+
+# For a measurement spanning several commands. Until its id is handed over the
+# lock carries this process's pid, so killing it frees the lock; after that
+# the pid is dropped (this process exits), and only its expiry protects others
+# from a holder that never releases: extend it before it runs out, release
+# when done.
+cmd_perf_acquire() {
+    parse_opts "$PERF_EXPIRES_MIN" true "$@"
+    [ ${#ARGS[@]} -eq 0 ] || usage
+    inside_perf && die "already inside perf lock $AGENT_LOCK_PERF_ID"
+    refuse_inside_job
+    LOCK_ID=$(new_id)
+    trap_exits
+    take_perf "perf-acquire"
+    drain_then_measure
+    # An id nobody received would hold the lock with no pid to free it: the
+    # exit releases it instead.
+    printf '%s\n' "$LOCK_ID" || die "cannot print the perf lock id; releasing the lock"
+    restamp_own '^(expires|pid)' "before its id was handed over"
+    # Held from here on: the exit must not release it.
+    PERF_ID=
+}
+
+# Rewrites only the expiry, so the owner's pid, command and start stay as they
+# were taken.
+cmd_perf_extend() {
+    [ $# -ge 1 ] || usage
+    local id=$1 r
+    shift
+    parse_opts "$PERF_EXPIRES_MIN" false "$@"
+    [ ${#ARGS[@]} -eq 0 ] || usage
+    mutex_lock
+    restamp_owner "$id" "$EXPIRES" '^expires'
+    r=$?
+    mutex_unlock
+    case $r in
+    0) log "perf lock $id now expires at $(field "$OWNER" expires)" ;;
+    1) lost "$id" "before this extension: what it measured may come from a busy machine" ;;
+    *) die "cannot rewrite $OWNER" ;;
+    esac
+}
+
+cmd_perf_release() {
+    [ $# -eq 1 ] || usage
+    release_perf "$1" ||
+        lost "$1" "before this release (or never held it): what it measured may come from a busy machine"
+}
+
+cmd_status() {
+    local f n=0 stale=0 tag lines=
+    if [ -f "$OWNER" ]; then
+        tag=
+        perf_stale "$OWNER" && tag=" [STALE: $STALE_REASON]"
+        echo "perf: held by $(describe "$OWNER")$tag"
+        echo "  since $(field "$OWNER" started), $(held_until "$OWNER"), pid $(field "$OWNER" pid)"
+    elif [ -d "$PERF" ]; then
+        echo "perf: being taken (no owner yet)"
+    else
+        echo "perf: free"
+    fi
+    for f in "$JOBS"/*; do
+        [ -f "$f" ] || continue
+        tag=
+        if job_stale "$f"; then
+            tag=" [STALE: $STALE_REASON]"
+            stale=$((stale + 1))
+        else
+            n=$((n + 1))
+        fi
+        lines+="  - $(describe "$f")$tag
+    since $(field "$f" started), expires $(field "$f" expires), pid $(field "$f" pid)
+    \$ $(field "$f" command)
+"
+    done
+    echo "jobs: $n running, $stale stale"
+    printf '%s' "$lines"
+}
+
+cmd_clean() {
+    local f
+    remove_perf_if_stale
+    live_jobs >/dev/null
+    # Temporary files a writer left when it was killed between write and rename.
+    for f in "$STATE"/tmp.*; do
+        [ -f "$f" ] || continue
+        [ -n "$(find "$f" -mmin +1 2>/dev/null)" ] && rm -f "$f"
+    done
+    return 0
+}
+
+[ $# -gt 0 ] || usage
+sub=$1
+shift
+case $sub in
+job | perf | perf-acquire | perf-extend | perf-release | clean) ensure_dirs ;;
+esac
+case $sub in
+job) cmd_job "$@" ;;
+perf) cmd_perf "$@" ;;
+perf-acquire) cmd_perf_acquire "$@" ;;
+perf-extend) cmd_perf_extend "$@" ;;
+perf-release) cmd_perf_release "$@" ;;
+status) cmd_status ;;
+clean) cmd_clean ;;
+*) usage ;;
+esac

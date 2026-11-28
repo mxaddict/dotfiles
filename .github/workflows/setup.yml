@@ -40,6 +40,25 @@ jobs:
           & $python -I .github/scripts/test_md2adf.py
           if ($LASTEXITCODE -ne 0) { throw "md2adf tests failed on $python" }
 
+      # The perf lock's protocol, in the bash every agent's commands reach it
+      # through (Git Bash on Windows). On macOS that is /bin/bash, the 3.2 a
+      # user's `env bash` finds, not the runner's newer Homebrew bash.
+      - name: agent-lock tests
+        shell: bash
+        env:
+          AGENT_LOCK_BASH: ${{ runner.os == 'macOS' && '/bin/bash' || '' }}
+        run: ./.github/scripts/test-agent-lock.sh
+
+      # The same lock from PowerShell, through agent-lock.ps1 and Git's bash,
+      # under both PowerShells an agent may run.
+      - name: agent-lock.ps1 tests
+        if: runner.os == 'Windows'
+        run: |
+          ./.github/scripts/test-agent-lock.ps1
+          if ($LASTEXITCODE -ne 0) { throw 'agent-lock.ps1 tests failed under PowerShell 7' }
+          powershell -NoProfile -ExecutionPolicy Bypass -File ./.github/scripts/test-agent-lock.ps1
+          if ($LASTEXITCODE -ne 0) { throw 'agent-lock.ps1 tests failed under Windows PowerShell 5.1' }
+
       - name: Deploy and verify
         run: ./.github/scripts/test-setup.ps1
 

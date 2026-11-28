@@ -943,37 +943,84 @@ session and a new one, with a stub in place of claude.
 
 ## Performance measurements
 
-**Other agents share the machine, so coordinate a quiet window before any perf
-or profiling run.** A timing taken while another session runs a test suite, a
+**Other agents share the machine, so every heavy task and every measurement runs
+under `agent-lock`.** A timing taken while another session runs a test suite, a
 fuzzer, a bench or a release build measures that session as much as yours: one
 GPU device creation went from 0.3 s to 14.6 s that way, and a startup profile
 taken at load average 15 is not one taken at 2. Nothing in the numbers says
 which they were.
 
-Before taking numbers:
+`agent-lock` (in `~/.local/bin`; `agent-lock.ps1` runs it from PowerShell on
+Windows) is one readers/writer lock for everything running under this user's
+home, kept as files under `~/.cache/agent-locks`, so every harness (Claude,
+Codex, opencode, ...) shares it; WSL and containers have homes of their own and
+do not. Heavy jobs register while they run and share the machine freely, any
+number at once. A measurement takes the perf lock, which stops new jobs from
+starting, and waits until the running ones have finished. The lock is the whole
+protocol: sessions do not message each other to pause, to reply "paused" or to
+say "done".
 
-1. **Build first.** Your own release build is heavy work too; have every binary
-   you will compare on disk before the window opens.
-2. **Ask every local session to pause.** `ListAgents`, then message each
-   interactive session on this machine — Remote Control rows on other machines
-   do not share its CPU — asking it to pause builds, test suites, fuzzers,
-   benches and GPU work for a stated window (about 20 minutes), to reply
-   "paused", and to wait for your "done". Say who asked for the measurement.
-3. **Confirm it, don't trust it.** A reply is a claim. Sample per-process CPU
-   over a few seconds (`top -b -n 2 -d 3`) and read what is actually running;
-   desktop apps you cannot stop are fine to note and measure around.
-4. **Measure inside the window**, interleaving the builds you compare (A, B, A,
-   B, …) so drift lands on both, and record the load average beside the numbers.
-5. **Send "done" to every session you paused**, as soon as you finish — also
-   when you abort. A session left waiting on a "done" that never comes is work
-   stalled for nothing.
+**Heavy work runs under `agent-lock job`:**
 
-A number taken without a quiet window is labelled with its load wherever it is
-written, or retaken in one; never compare figures from different windows.
+```bash
+agent-lock job --what "clippy, krypt workspace" -- cargo clippy --all-targets -- -D warnings
+```
 
-**When you are the one asked to pause**, your sub-agents hear it only at their
-next tool round: say so to whoever asked, and confirm with `ps` that nothing of
-yours is running before replying "paused".
+Heavy means a build, a test suite, a workspace-wide linter, a fuzzer, a bench
+that is not itself the measurement, GPU work, a large download or unpack.
+Reading, editing, git, a formatter over a few files and other small commands are
+not, and run bare. While a measurement holds the lock, the job waits, saying
+whom it is waiting on, and starts once the lock is released; carry on with the
+work that is not heavy meanwhile. That wait can outlast a tool call's timeout,
+so give the call a long one or run it in the background. A job started in the
+background runs under `agent-lock` too, so it stays registered until it ends.
+
+From PowerShell the command runs in Git's bash, so a cmdlet or a pipeline goes
+in as `pwsh -c '…'`; `agent-lock.ps1`'s header lists what else PowerShell
+changes on the way (a leading `'--'` and bare numbers need quoting).
+
+**A measurement runs under `agent-lock perf`:**
+
+1. **Build first,** under `agent-lock job`: have every binary you will compare
+   on disk before you take the lock.
+2. **Run the measurement as one command**, interleaving the builds you compare
+   (A, B, A, B, …) so drift lands on both:
+   `agent-lock perf --what "startup, A vs B" --expires 30 -- ./bench.sh`. It
+   takes the lock, waits for the running jobs to drain, runs the command, and
+   releases the lock when it exits, fails or is interrupted. `--expires` counts
+   from the end of the drain, not from when you asked. New jobs wait all through
+   the drain, so it is bounded: past `--drain MIN` (the default is `DRAIN_MIN`
+   in the script) with jobs still running, it gives up without measuring, names
+   those jobs, releases the lock and exits with status 4. Try again later, or
+   ask the session that owns the job.
+3. **A measurement that spans several commands** takes the lock with
+   `agent-lock perf-acquire --what "…" --expires MIN`, which prints the lock's
+   id. Each tool call is a new shell, so keep that id and write it into every
+   later command: heavy commands inside the measurement run with
+   `AGENT_LOCK_PERF_ID=<id>` set (without it they wait for your own lock),
+   `agent-lock perf-extend <id> --expires MIN` extends it before it runs out,
+   and `agent-lock perf-release <id>` releases it as soon as you are done, also
+   when you abort. Only its expiry frees a lock taken this way, so take it just
+   for the measurement.
+4. **Record the load beside the numbers.** The lock holds back other agents, not
+   desktop apps or the OS; note what was running.
+
+**A lock held well past its expiry is taken back** (the margin is
+`STALE_MARGIN_MIN` in the script), so that a hung measurement cannot stop every
+build on the machine. The measurement that lost it exits with status 3 and says
+so, as do `perf-extend` and `perf-release` for its id: its numbers may come from
+a busy machine, so discard them and measure again.
+
+**Let `agent-lock` do the waiting**, never a loop over a process name.
+`agent-lock status` shows who holds the perf lock and which jobs are registered.
+Entries left by a dead process are cleared by the next measurement or by
+`agent-lock clean`; never delete files under `~/.cache/agent-locks` by hand. A
+sub-agent's brief that has it build or test says to run that under
+`agent-lock job`.
+
+A number taken without the perf lock is labelled with its load wherever it is
+written, or retaken under it; never compare figures from different measurement
+runs.
 
 ## Disk space
 
