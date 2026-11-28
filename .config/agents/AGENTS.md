@@ -953,12 +953,13 @@ which they were.
 `agent-lock` (in `~/.local/bin`; `agent-lock.ps1` runs it from PowerShell on
 Windows) is one readers/writer lock for everything running under this user's
 home, kept as files under `~/.cache/agent-locks`, so every harness (Claude,
-Codex, opencode, ...) shares it; WSL and containers have homes of their own and
-do not. Heavy jobs register while they run and share the machine freely, any
-number at once. A measurement takes the perf lock, which stops new jobs from
-starting, and waits until the running ones have finished. The lock is the whole
-protocol: sessions do not message each other to pause, to reply "paused" or to
-say "done".
+Codex, opencode, ...) shares it. A shell inside WSL, a VM or a container has a
+home and a lock of its own, which the host's never sees, so work there is
+launched from the host (below). Heavy jobs register while they run and share the
+machine freely, any number at once. A measurement takes the perf lock, which
+stops new jobs from starting, and waits until the running ones have finished.
+The lock is the whole protocol: sessions do not message each other to pause, to
+reply "paused" or to say "done".
 
 **Heavy work runs under `agent-lock job`:**
 
@@ -973,11 +974,29 @@ not, and run bare. While a measurement holds the lock, the job waits, saying
 whom it is waiting on, and starts once the lock is released; carry on with the
 work that is not heavy meanwhile. That wait can outlast a tool call's timeout,
 so give the call a long one or run it in the background. A job started in the
-background runs under `agent-lock` too, so it stays registered until it ends.
+background runs under `agent-lock` too, so it stays registered until it ends. A
+job is listed once its entry is written, which takes several seconds on Windows:
+`agent-lock status` run straight after starting one may not show it yet.
 
 From PowerShell the command runs in Git's bash, so a cmdlet or a pipeline goes
 in as `pwsh -c '…'`; `agent-lock.ps1`'s header lists what else PowerShell
 changes on the way (a leading `'--'` and bare numbers need quoting).
+
+**Heavy work in WSL, a VM or a container is launched from the host, wrapped in
+the host's `agent-lock`.** The guest shares the host's CPUs, so its build loads
+the machine a host measurement runs on; wrapped, it is registered in the host's
+lock for its whole run, and a measurement waits for it like any other job:
+
+```bash
+# From Git Bash: MSYS_NO_PATHCONV keeps /mnt/c/... from being rewritten into a
+# Windows path on its way to wsl.exe (agent-lock.ps1 already turns that off).
+MSYS_NO_PATHCONV=1 agent-lock job --what "navio build (wsl)" -- wsl -d Ubuntu-26.04 -- bash /mnt/c/Users/me/Projects/navio/build.sh
+```
+
+A command started from a shell inside the guest, or by a daemon there, does not
+register with the host at all, so heavy guest work never starts that way. Load a
+guest runs outside the wrapper is like a desktop app's: note it beside the
+numbers.
 
 **A measurement runs under `agent-lock perf`:**
 
