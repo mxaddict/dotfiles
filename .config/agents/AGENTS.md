@@ -62,8 +62,9 @@ everything.
 ## Pushing
 
 **Push each finished slice of work as soon as it is done.** A slice is finished
-when it is committed and its gate is green — the formatter, linter and tests the
-rules here call for. Push it then, before starting the next slice, in every repo
+when it is committed, its gate is green — the formatter, linter and tests the
+rules here call for — and, for code, its last review found nothing (Coder and
+reviewer, below). Push it then, before starting the next slice, in every repo
 the session touches. Finished work left as a local-only commit or as uncommitted
 changes is invisible to CI and to every other machine, and dies with the
 checkout.
@@ -878,6 +879,46 @@ Briefing them and reading what comes back:
   success, and reading its report is not checking its work. Its "all checks
   green" can also predate its last edit: verify the final tree, and ask for each
   check's summary line, never a bare "passed".
+
+## Coder and reviewer
+
+**Every code change goes through a coder–reviewer loop**: a feature, a fix, a
+refactor, a test, a script, a CI workflow. The coder writes the change, a
+reviewer that did not write it reads it, the coder fixes everything the review
+found, and the reviewer reads it again. **The code is done only when a review
+finds no more blockers and no more nits.** Until then it is not pushed and not
+reported as done.
+
+- **The coder** is the write agent, or the main session when it writes the
+  change itself. **The reviewer** is a read-only sub-agent, within the caps in
+  Agents. Give it the brief and the diff, not your verdict on them, and name the
+  failure modes that matter.
+- **Blockers and nits both go back to the coder.** A blocker makes the change
+  wrong or unshippable: a bug, a failing or missing check, a test that cannot
+  fail, a broken rule from this file. A nit is anything smaller: a name, a
+  comment, a stale number, a duplicate, a simpler form. Nits are not optional: a
+  review with only nits in it still sends the change back.
+- **The loop is scoped to the current task.** A finding about code the change
+  did not write or alter, and does not depend on, is not a blocker or a nit of
+  this change: it goes in the backlog, as anything else raised and not finished
+  does, and the loop goes on without it.
+- **Confirm each finding on the tree before passing it on**: a review is a
+  claim, like any other report. A finding that does not hold goes back to the
+  reviewer with the evidence, and is closed when the reviewer agrees or the user
+  decides; it is never dropped silently. One the user declines goes in the
+  backlog, under considered and declined.
+- **Every round, the coder runs the gate** (formatter, linter, tests) before the
+  change goes back, and **the reviewer reads the whole change again**, not just
+  the fixes: it checks that each earlier finding was fixed and looks for what
+  the fixes broke.
+- **A loop that stops converging goes to the user.** The same finding coming
+  back, or each round turning up as much as the last, says the approach is
+  wrong, not the details: stop and say what keeps recurring.
+- **Where the harness cannot start a sub-agent**, reviewing your own diff is not
+  the loop. Say plainly that the change was not independently reviewed.
+
+Report how it ended: that the last review found nothing, and anything the user
+declined.
 
 ## Starting a Claude session
 
