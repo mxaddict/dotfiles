@@ -460,10 +460,18 @@ case_drain_limit() {
 
 # perf-acquire whose id cannot be handed over releases the lock: no pid-less
 # lock is left that nobody knows the id of.
+# A stdout that refuses writes: /dev/full where there is one (Linux, Git Bash).
+# A closed stdout does not serve on Linux: WSL starts a shebang script with it
+# reopened on /dev/null, where the write succeeds and the id is lost unseen,
+# and on the ubuntu runner the write succeeded too. macOS keeps it closed.
 case_perf_acquire_unprinted_id() {
-    "$lock" perf-acquire >&- 2>"$M/a.log"
+    if [ -w /dev/full ]; then
+        "$lock" perf-acquire >/dev/full 2>"$M/a.log"
+    else
+        "$lock" perf-acquire >&- 2>"$M/a.log"
+    fi
     STATUS=$?
-    [ "$STATUS" != 0 ] || fail "perf-acquire with a closed stdout exited 0" || return
+    [ "$STATUS" != 0 ] || fail "perf-acquire with an unwritable stdout exited 0" || return
     ! perf_held || fail "perf-acquire kept a lock whose id it could not print: $(cat "$AGENT_LOCK_DIR/$owner")"
 }
 

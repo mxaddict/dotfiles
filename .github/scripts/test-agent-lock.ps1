@@ -126,3 +126,6 @@ if ($madeHere) {
     Write-Host "not removing ${work}: not the work dir this run made"
 }
 Write-Host "agent-lock.ps1 tests under PowerShell ${version}: 0 failed"
+# Explicitly, or a caller reading $LASTEXITCODE sees the last native command's,
+# which the checks above leave non-zero.
+exit 0
